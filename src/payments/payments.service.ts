@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/services/prisma.service';
-import { Prisma, PaymentStatus } from '../generated/prisma/client';
+import { PaymentStatus, Prisma } from '../generated/prisma/client';
 import { CreatePaymentDto, UpdatePaymentDto } from './payments.validation';
 
 @Injectable()
@@ -101,7 +101,7 @@ export class PaymentsService {
 
     const sortFieldMap: Record<
       string,
-      keyof Prisma.PaymentsOrderByWithRelationInput
+      keyof Prisma.PaymentOrderByWithRelationInput
     > = {
       payment_id: 'id',
       id: 'id',
@@ -120,7 +120,7 @@ export class PaymentsService {
       throw new BadRequestException('Invalid sort_by');
     }
 
-    const AND: Prisma.PaymentsWhereInput[] = [];
+    const AND: Prisma.PaymentWhereInput[] = [];
 
     if (paymentStatus) {
       AND.push({ payment_status: paymentStatus });
@@ -139,15 +139,14 @@ export class PaymentsService {
       });
     }
 
-    const where: Prisma.PaymentsWhereInput =
-      AND.length > 0 ? { AND } : {};
+    const where: Prisma.PaymentWhereInput = AND.length > 0 ? { AND } : {};
 
-    const orderBy: Prisma.PaymentsOrderByWithRelationInput = {
+    const orderBy: Prisma.PaymentOrderByWithRelationInput = {
       [sortField]: sortOrder,
     };
 
     const [items, total] = await this.prismaService.$transaction([
-      this.prismaService.payments.findMany({
+      this.prismaService.payment.findMany({
         where,
         orderBy,
         skip: (page - 1) * limit,
@@ -161,7 +160,7 @@ export class PaymentsService {
           },
         },
       }),
-      this.prismaService.payments.count({ where }),
+      this.prismaService.payment.count({ where }),
     ]);
 
     return {
@@ -172,7 +171,7 @@ export class PaymentsService {
   }
 
   async getPayment(id: string) {
-    const payment = await this.prismaService.payments.findFirst({
+    const payment = await this.prismaService.payment.findFirst({
       where: { id },
       include: {
         voucher: {
@@ -214,7 +213,7 @@ export class PaymentsService {
     const prefix = `PAY-${datePart}-`;
 
     const payment = await this.prismaService.$transaction(async (prisma) => {
-      const latest = await prisma.payments.findFirst({
+      const latest = await prisma.payment.findFirst({
         where: {
           id: {
             startsWith: prefix,
@@ -237,7 +236,7 @@ export class PaymentsService {
           : 1;
       const paymentId = `${prefix}${String(nextSequence).padStart(3, '0')}`;
 
-      const create = await prisma.payments.create({
+      const create = await prisma.payment.create({
         data: {
           id: paymentId,
           voucher_id: body.voucher_id,
@@ -274,7 +273,7 @@ export class PaymentsService {
     fullname: string,
     user_id: string,
   ) {
-    const existing = await this.prismaService.payments.findFirst({
+    const existing = await this.prismaService.payment.findFirst({
       where: { id },
     });
 
@@ -299,7 +298,7 @@ export class PaymentsService {
     }
 
     const payment = await this.prismaService.$transaction(async (prisma) => {
-      const update = await prisma.payments.update({
+      const update = await prisma.payment.update({
         where: { id },
         data: {
           voucher_id: body.voucher_id,
@@ -330,7 +329,6 @@ export class PaymentsService {
               paid_amount: existing.paid_amount,
               remaining_amount: existing.remaining_amount,
               payment_status: existing.payment_status,
-              payment_proof: existing.payment_proof,
               remarks: existing.remarks,
             },
             after: {
@@ -341,7 +339,6 @@ export class PaymentsService {
               paid_amount: update.paid_amount,
               remaining_amount: update.remaining_amount,
               payment_status: update.payment_status,
-              payment_proof: update.payment_proof,
               remarks: update.remarks,
             },
           }),
@@ -355,7 +352,7 @@ export class PaymentsService {
   }
 
   async deletePayment(id: string, fullname: string, user_id: string) {
-    const existing = await this.prismaService.payments.findFirst({
+    const existing = await this.prismaService.payment.findFirst({
       where: { id },
     });
 
@@ -364,7 +361,7 @@ export class PaymentsService {
     }
 
     const payment = await this.prismaService.$transaction(async (prisma) => {
-      const deleted = await prisma.payments.delete({
+      const deleted = await prisma.payment.delete({
         where: { id },
       });
 
@@ -384,7 +381,6 @@ export class PaymentsService {
               paid_amount: existing.paid_amount,
               remaining_amount: existing.remaining_amount,
               payment_status: existing.payment_status,
-              payment_proof: existing.payment_proof,
               remarks: existing.remarks,
             },
           }),

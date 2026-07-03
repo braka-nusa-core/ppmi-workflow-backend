@@ -7,7 +7,7 @@ import { PaymentsService } from './payments.service';
 describe('PaymentsService', () => {
   let service: PaymentsService;
   const prismaMock = {
-    payments: {
+    payment: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
       count: vi.fn(),
@@ -59,10 +59,10 @@ describe('PaymentsService', () => {
   });
 
   it('lists payments with filters, pagination, and sorting', async () => {
-    prismaMock.payments.findMany.mockResolvedValue([
+    prismaMock.payment.findMany.mockResolvedValue([
       { id: 'pay-1', installment_number: 1 },
     ]);
-    prismaMock.payments.count.mockResolvedValue(11);
+    prismaMock.payment.count.mockResolvedValue(11);
 
     const result = await service.listPayments({
       voucher_id: 'vch-1',
@@ -74,7 +74,7 @@ describe('PaymentsService', () => {
       sort_order: 'asc',
     });
 
-    expect(prismaMock.payments.findMany).toHaveBeenCalledWith({
+    expect(prismaMock.payment.findMany).toHaveBeenCalledWith({
       where: {
         AND: [
           { payment_status: 'UNPAID' },
@@ -113,14 +113,14 @@ describe('PaymentsService', () => {
   });
 
   it('gets payment detail when found', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue({
+    prismaMock.payment.findFirst.mockResolvedValue({
       id: 'pay-1',
       installment_number: 1,
     });
 
     const result = await service.getPayment('pay-1');
 
-    expect(prismaMock.payments.findFirst).toHaveBeenCalledWith({
+    expect(prismaMock.payment.findFirst).toHaveBeenCalledWith({
       where: { id: 'pay-1' },
       include: {
         voucher: {
@@ -135,7 +135,7 @@ describe('PaymentsService', () => {
   });
 
   it('rejects get when payment missing', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue(null);
+    prismaMock.payment.findFirst.mockResolvedValue(null);
 
     await expect(service.getPayment('pay-1')).rejects.toThrow(
       NotFoundException,
@@ -152,8 +152,8 @@ describe('PaymentsService', () => {
 
   it('creates payment and writes log when valid', async () => {
     prismaMock.voucher.findFirst.mockResolvedValue({ id: 'vch-1' });
-    prismaMock.payments.findFirst.mockResolvedValue(null);
-    prismaMock.payments.create.mockResolvedValue({ id: 'pay-1' });
+    prismaMock.payment.findFirst.mockResolvedValue(null);
+    prismaMock.payment.create.mockResolvedValue({ id: 'pay-1' });
     prismaMock.log.create.mockResolvedValue({ id: 'log-1' });
 
     const result = await service.createPayment(
@@ -162,7 +162,7 @@ describe('PaymentsService', () => {
       'admin-1',
     );
 
-    expect(prismaMock.payments.create).toHaveBeenCalledWith({
+    expect(prismaMock.payment.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         id: expect.stringMatching(/^PAY-\d{8}-\d{3}$/),
         voucher_id: 'vch-1',
@@ -183,7 +183,7 @@ describe('PaymentsService', () => {
   });
 
   it('rejects update when payment missing', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue(null);
+    prismaMock.payment.findFirst.mockResolvedValue(null);
 
     await expect(
       service.updatePayment(
@@ -196,7 +196,7 @@ describe('PaymentsService', () => {
   });
 
   it('rejects update when voucher missing', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue({
+    prismaMock.payment.findFirst.mockResolvedValue({
       id: 'pay-1',
       voucher_id: 'vch-1',
       installment_number: 1,
@@ -229,12 +229,11 @@ describe('PaymentsService', () => {
       paid_amount: 500,
       remaining_amount: 1000,
       payment_status: 'UNPAID',
-      payment_proof: null,
       remarks: 'First installment',
     };
 
-    prismaMock.payments.findFirst.mockResolvedValueOnce(existing);
-    prismaMock.payments.update.mockResolvedValue({
+    prismaMock.payment.findFirst.mockResolvedValueOnce(existing);
+    prismaMock.payment.update.mockResolvedValue({
       ...existing,
       remarks: 'Updated payment',
     });
@@ -247,7 +246,7 @@ describe('PaymentsService', () => {
       'admin-1',
     );
 
-    expect(prismaMock.payments.update).toHaveBeenCalledWith({
+    expect(prismaMock.payment.update).toHaveBeenCalledWith({
       where: { id: 'pay-1' },
       data: expect.objectContaining({
         remarks: 'Updated payment',
@@ -268,15 +267,15 @@ describe('PaymentsService', () => {
   });
 
   it('rejects delete when payment missing', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue(null);
+    prismaMock.payment.findFirst.mockResolvedValue(null);
 
-    await expect(
-      service.deletePayment('pay-1', 'Admin', '1'),
-    ).rejects.toThrow(NotFoundException);
+    await expect(service.deletePayment('pay-1', 'Admin', '1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('hard deletes payment and writes log when valid', async () => {
-    prismaMock.payments.findFirst.mockResolvedValue({
+    prismaMock.payment.findFirst.mockResolvedValue({
       id: 'pay-1',
       voucher_id: 'vch-1',
       installment_number: 1,
@@ -285,10 +284,9 @@ describe('PaymentsService', () => {
       paid_amount: 500,
       remaining_amount: 1000,
       payment_status: 'UNPAID',
-      payment_proof: null,
       remarks: 'First installment',
     });
-    prismaMock.payments.delete.mockResolvedValue({ id: 'pay-1' });
+    prismaMock.payment.delete.mockResolvedValue({ id: 'pay-1' });
     prismaMock.log.create.mockResolvedValue({ id: 'log-1' });
 
     const result = await service.deletePayment(
@@ -297,7 +295,7 @@ describe('PaymentsService', () => {
       'admin-1',
     );
 
-    expect(prismaMock.payments.delete).toHaveBeenCalledWith({
+    expect(prismaMock.payment.delete).toHaveBeenCalledWith({
       where: { id: 'pay-1' },
     });
     expect(prismaMock.log.create).toHaveBeenCalledWith({

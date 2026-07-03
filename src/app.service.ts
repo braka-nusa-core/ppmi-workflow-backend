@@ -17,12 +17,17 @@ import {
   WorkflowStageResult,
 } from './app.validation';
 import { PrismaService } from './common/services/prisma.service';
+import {
+  InvoiceStatus,
+  PaymentStatus,
+  QSSTATUS,
+  VoucherStatus,
+} from './generated/prisma/enums';
 import { hashPassword } from './utils/bcrypt.util';
-import { InvoiceStatus, PaymentStatus, QSSTATUS, VoucherStatus } from './generated/prisma/enums';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService) {}
 
   listDivisions() {
     return this.prismaService.division.findMany({
@@ -388,27 +393,27 @@ export class AppService {
 
       const changeInfo = body.name
         ? {
-          label: 'bank name',
-          before: existing.name,
-          after: update.name,
-        }
+            label: 'bank name',
+            before: existing.name,
+            after: update.name,
+          }
         : body.account_number
           ? {
-            label: 'bank account number',
-            before: existing.account_number,
-            after: update.account_number,
-          }
+              label: 'bank account number',
+              before: existing.account_number,
+              after: update.account_number,
+            }
           : body.account_name
             ? {
-              label: 'bank account name',
-              before: existing.account_name,
-              after: update.account_name,
-            }
+                label: 'bank account name',
+                before: existing.account_name,
+                after: update.account_name,
+              }
             : {
-              label: 'bank details',
-              before: existing.name,
-              after: update.name,
-            };
+                label: 'bank details',
+                before: existing.name,
+                after: update.name,
+              };
 
       await prisma.log.create({
         data: {
@@ -810,7 +815,9 @@ export class AppService {
 
       this.prismaService.payment.findMany({
         where: {
-          payment_status: { in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT] },
+          payment_status: {
+            in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT],
+          },
         },
         select: {
           paid_amount: true,
@@ -826,14 +833,18 @@ export class AppService {
 
       this.prismaService.payment.count({
         where: {
-          payment_status: { in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT] },
+          payment_status: {
+            in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT],
+          },
           due_date: { lt: now },
         },
       }),
 
       this.prismaService.payment.count({
         where: {
-          payment_status: { in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT] },
+          payment_status: {
+            in: [PaymentStatus.UNPAID, PaymentStatus.INSTALLMENT],
+          },
           due_date: { lt: startOfToday },
         },
       }),
@@ -864,7 +875,7 @@ export class AppService {
 
     const pendingPaymentsTotal = pendingPayments.reduce(
       (sum, p) => sum + p.remaining_amount,
-      0
+      0,
     );
 
     const invoiceTrendThisWeek = invoicesThisWeek - invoicesLastWeek;
@@ -1027,7 +1038,7 @@ export class AppService {
       completed: number,
       pending: number,
       in_progress: number,
-      overdue: number
+      overdue: number,
     ): WorkflowStageResult => ({
       stage,
       total,
@@ -1041,46 +1052,46 @@ export class AppService {
 
     return [
       buildStage(
-        "Quotation Sheet",
+        'Quotation Sheet',
         qsTotal,
         qsCompleted,
         qsPending,
         qsInProgress,
-        0
+        0,
       ),
       buildStage(
-        "Invoice",
+        'Invoice',
         invoiceTotal,
         invoiceCompleted,
         invoicePending,
         invoiceInProgress,
-        invoiceOverdue
+        invoiceOverdue,
       ),
       buildStage(
-        "Voucher",
+        'Voucher',
         voucherTotal,
         voucherCompleted,
         voucherPending,
         voucherInProgress,
-        voucherOverdue
+        voucherOverdue,
       ),
       buildStage(
-        "Payment",
+        'Payment',
         paymentTotal,
         paymentCompleted,
         paymentPending,
         paymentInProgress,
-        paymentOverdue
+        paymentOverdue,
       ),
       buildStage(
-        "Shipment",
+        'Shipment',
         shipmentTotal + shipmentPending,
         shipmentCompleted,
         shipmentPending,
         shipmentInProgress,
-        0
+        0,
       ),
-    ]
+    ];
   }
 
   async getPaymentDashboard() {
@@ -1121,18 +1132,13 @@ export class AppService {
         amount: p.remaining_amount,
         dueDate: p.due_date,
         overdueDays: Math.ceil(
-          (today.getTime() - p.due_date.getTime()) /
-          (1000 * 60 * 60 * 24),
+          (today.getTime() - p.due_date.getTime()) / (1000 * 60 * 60 * 24),
         ),
         paymentStatus: p.payment_status,
       }));
 
     const upcoming = payments
-      .filter(
-        (p) =>
-          p.due_date >= today &&
-          p.due_date <= next7Days,
-      )
+      .filter((p) => p.due_date >= today && p.due_date <= next7Days)
       .map((p) => ({
         paymentId: p.id,
         invoiceId: p.voucher.invoice.id,
@@ -1141,18 +1147,14 @@ export class AppService {
         amount: p.remaining_amount,
         dueDate: p.due_date,
         dueInDays: Math.ceil(
-          (p.due_date.getTime() - today.getTime()) /
-          (1000 * 60 * 60 * 24),
+          (p.due_date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
         ),
         paymentStatus: p.payment_status,
       }));
 
     return {
       overdue_count: overdue.length,
-      overdue_total_amount: overdue.reduce(
-        (sum, item) => sum + item.amount,
-        0,
-      ),
+      overdue_total_amount: overdue.reduce((sum, item) => sum + item.amount, 0),
 
       upcoming_count: upcoming.length,
       upcoming_total_amount: upcoming.reduce(
@@ -1286,7 +1288,8 @@ export class AppService {
     reference_number: string | null;
     title: string | null;
   } {
-    if (!details) return { division_code: null, reference_number: null, title: null };
+    if (!details)
+      return { division_code: null, reference_number: null, title: null };
     try {
       const parsed = JSON.parse(details);
       return {
@@ -1303,7 +1306,7 @@ export class AppService {
     const logs = await this.prismaService.log.findMany({
       where: {
         action: {
-          notIn: ['LOGIN', 'LOGOUT', 'CLICK']
+          notIn: ['LOGIN', 'LOGOUT', 'CLICK'],
         },
         user: {
           divisions: {
@@ -1311,7 +1314,7 @@ export class AppService {
           },
         },
       },
-      orderBy: { created_at: "desc" },
+      orderBy: { created_at: 'desc' },
       take: 10,
       select: {
         id: true,
@@ -1328,7 +1331,9 @@ export class AppService {
     });
 
     return logs.map((log) => {
-      const { division_code, reference_number, title } = this.parseDetails(log.details);
+      const { division_code, reference_number, title } = this.parseDetails(
+        log.details,
+      );
 
       return {
         id: log.id,
