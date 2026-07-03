@@ -26,9 +26,9 @@ import { ShipmentsModule } from './shipments/shipments.module';
     InvoicesModule,
     VouchersModule,
     PaymentsModule,
-    ShipmentsModule
+    ShipmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
-export class AppModule { }
+export class AppModule {}

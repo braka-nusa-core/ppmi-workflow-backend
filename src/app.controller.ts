@@ -41,7 +41,7 @@ import { SuccessResponse } from './common/types/global.type';
 @Controller()
 @UseGuards(UserGuard)
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   @AuthMetaData('SkipAuth')
@@ -76,7 +76,7 @@ export class AppController {
         workflows: await this.appService.getWorkflowPipeline(),
         recents: await this.appService.getRecentActivities(),
         finances: await this.appService.getFinanceMonitor(),
-        payments: await this.appService.getPaymentDashboard()
+        payments: await this.appService.getPaymentDashboard(),
       },
     };
   }

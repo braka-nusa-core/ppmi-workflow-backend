@@ -173,7 +173,8 @@ describe('ShipmentsService', () => {
         reference_id: 'ship-1',
         reference_type: 'INVOICE',
         user_id: 'admin-1',
-        description: 'Super Admin created a new shipment with tracking number TRK-001',
+        description:
+          'Super Admin created a new shipment with tracking number TRK-001',
       },
     });
     expect(prismaMock.invoice.update).toHaveBeenCalledWith({

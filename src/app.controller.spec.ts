@@ -364,7 +364,11 @@ describe('AppController', () => {
         active_invoices: { total: 5, pending_approval: 1, trend_this_week: 1 },
         pending_payments: { total: 3, total_value: 15000 },
         overdue_payments: { total: 1, trend_since_yesterday: 0 },
-        completed_shipments: { total: 8, total_processed: 8, trend_this_week: 2 },
+        completed_shipments: {
+          total: 8,
+          total_processed: 8,
+          trend_this_week: 2,
+        },
       };
       appServiceMock.getDashboardStats.mockResolvedValue(statsMock);
 
@@ -382,10 +386,28 @@ describe('AppController', () => {
   describe('getWorkflowPipeline', () => {
     it('returns workflow workspace response', async () => {
       const pipelineMock = [
-        { stage: 'Quotation Sheet', total: 10, completed: 8, pending: 2, in_progress: 0, overdue: 0, completion_percentage: 80 },
+        {
+          stage: 'Quotation Sheet',
+          total: 10,
+          completed: 8,
+          pending: 2,
+          in_progress: 0,
+          overdue: 0,
+          completion_percentage: 80,
+        },
       ];
       const recentsMock = [
-        { id: 'log-1', title: 'CREATE', division_code: 'DIV', reference_number: '123', description: 'desc', actor: 'User', action: 'CREATE', reference_type: 'QS', created_at: new Date() },
+        {
+          id: 'log-1',
+          title: 'CREATE',
+          division_code: 'DIV',
+          reference_number: '123',
+          description: 'desc',
+          actor: 'User',
+          action: 'CREATE',
+          reference_type: 'QS',
+          created_at: new Date(),
+        },
       ];
       const financesMock = {
         overdue_payments: { count: 1, amount: 5000 },

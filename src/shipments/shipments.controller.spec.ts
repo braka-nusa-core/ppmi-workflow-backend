@@ -18,7 +18,9 @@ describe('ShipmentsController', () => {
   beforeEach(async () => {
     const moduleBuilder = Test.createTestingModule({
       controllers: [ShipmentsController],
-      providers: [{ provide: ShipmentsService, useValue: shipmentsServiceMock }],
+      providers: [
+        { provide: ShipmentsService, useValue: shipmentsServiceMock },
+      ],
     });
 
     const module: TestingModule = await moduleBuilder

@@ -904,8 +904,16 @@ describe('AppService', () => {
         .mockResolvedValueOnce(3) // shipmentsThisWeek
         .mockResolvedValueOnce(1); // shipmentsLastWeek
       prismaMock.payment.findMany.mockResolvedValue([
-        { paid_amount: 1000, remaining_amount: 4000, voucher: { amount: 5000, currency: 'USD' } },
-        { paid_amount: 0, remaining_amount: 2000, voucher: { amount: 2000, currency: 'USD' } },
+        {
+          paid_amount: 1000,
+          remaining_amount: 4000,
+          voucher: { amount: 5000, currency: 'USD' },
+        },
+        {
+          paid_amount: 0,
+          remaining_amount: 2000,
+          voucher: { amount: 2000, currency: 'USD' },
+        },
       ]);
       prismaMock.payment.count
         .mockResolvedValueOnce(2) // overduePayments
@@ -918,7 +926,11 @@ describe('AppService', () => {
         active_invoices: { total: 5, pending_approval: 1, trend_this_week: 2 },
         pending_payments: { total: 2, total_value: 6000 },
         overdue_payments: { total: 2, trend_since_yesterday: 1 },
-        completed_shipments: { total: 8, total_processed: 8, trend_this_week: 2 },
+        completed_shipments: {
+          total: 8,
+          total_processed: 8,
+          trend_this_week: 2,
+        },
       });
     });
   });
@@ -927,30 +939,30 @@ describe('AppService', () => {
     it('should query and return workflow pipeline stages', async () => {
       prismaMock.qS.count
         .mockResolvedValueOnce(10) // total
-        .mockResolvedValueOnce(8)  // completed
-        .mockResolvedValueOnce(1)  // in_progress
+        .mockResolvedValueOnce(8) // completed
+        .mockResolvedValueOnce(1) // in_progress
         .mockResolvedValueOnce(1); // pending
       prismaMock.invoice.count
         .mockResolvedValueOnce(15) // total
         .mockResolvedValueOnce(10) // completed
-        .mockResolvedValueOnce(3)  // in_progress
-        .mockResolvedValueOnce(2)  // pending
+        .mockResolvedValueOnce(3) // in_progress
+        .mockResolvedValueOnce(2) // pending
         .mockResolvedValueOnce(1); // overdue
       prismaMock.voucher.count
-        .mockResolvedValueOnce(5)  // total
-        .mockResolvedValueOnce(3)  // completed
-        .mockResolvedValueOnce(1)  // in_progress
-        .mockResolvedValueOnce(1)  // pending
+        .mockResolvedValueOnce(5) // total
+        .mockResolvedValueOnce(3) // completed
+        .mockResolvedValueOnce(1) // in_progress
+        .mockResolvedValueOnce(1) // pending
         .mockResolvedValueOnce(0); // overdue
       prismaMock.payment.count
-        .mockResolvedValueOnce(8)  // total
-        .mockResolvedValueOnce(4)  // completed
-        .mockResolvedValueOnce(2)  // in_progress
-        .mockResolvedValueOnce(2)  // pending
+        .mockResolvedValueOnce(8) // total
+        .mockResolvedValueOnce(4) // completed
+        .mockResolvedValueOnce(2) // in_progress
+        .mockResolvedValueOnce(2) // pending
         .mockResolvedValueOnce(1); // overdue
       prismaMock.documentShipment.count
-        .mockResolvedValueOnce(6)  // total
-        .mockResolvedValueOnce(4)  // completed
+        .mockResolvedValueOnce(6) // total
+        .mockResolvedValueOnce(4) // completed
         .mockResolvedValueOnce(2); // in_progress
       prismaMock.invoice.count.mockResolvedValueOnce(1); // shipmentPending
 

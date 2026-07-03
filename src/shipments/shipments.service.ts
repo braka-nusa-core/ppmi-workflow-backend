@@ -5,14 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../common/services/prisma.service';
 import { Prisma } from '../generated/prisma/client';
-import {
-  CreateShipmentDto,
-  UpdateShipmentDto,
-} from './shipments.validation';
+import { CreateShipmentDto, UpdateShipmentDto } from './shipments.validation';
 
 @Injectable()
 export class ShipmentsService {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async listShipments(filters: {
     invoice_id?: string | string[];
@@ -174,12 +171,13 @@ export class ShipmentsService {
       throw new NotFoundException('Invoice not found');
     }
 
-    const existingShipment = await this.prismaService.documentShipment.findFirst({
-      where: {
-        invoice_id: body.invoice_id,
-        deleted_at: null,
-      },
-    });
+    const existingShipment =
+      await this.prismaService.documentShipment.findFirst({
+        where: {
+          invoice_id: body.invoice_id,
+          deleted_at: null,
+        },
+      });
 
     if (existingShipment) {
       throw new BadRequestException('Shipment already exists for this invoice');
@@ -257,13 +255,14 @@ export class ShipmentsService {
         throw new NotFoundException('Invoice not found');
       }
 
-      const duplicateInvoice = await this.prismaService.documentShipment.findFirst({
-        where: {
-          id: { not: id },
-          invoice_id: nextInvoiceId,
-          deleted_at: null,
-        },
-      });
+      const duplicateInvoice =
+        await this.prismaService.documentShipment.findFirst({
+          where: {
+            id: { not: id },
+            invoice_id: nextInvoiceId,
+            deleted_at: null,
+          },
+        });
 
       if (duplicateInvoice) {
         throw new BadRequestException(
@@ -288,7 +287,9 @@ export class ShipmentsService {
           invoice_id: body.invoice_id,
           courier: body.courier,
           tracking_number: body.tracking_number,
-          shipping_date: body.shipping_date ? new Date(body.shipping_date) : undefined,
+          shipping_date: body.shipping_date
+            ? new Date(body.shipping_date)
+            : undefined,
           shipping_proof_id: body.shipping_proof_id,
         },
       });
