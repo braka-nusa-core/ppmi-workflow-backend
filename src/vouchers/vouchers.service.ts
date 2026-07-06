@@ -174,6 +174,18 @@ export class VouchersService {
             select: {
               id: true,
               invoice_number: true,
+              insured: true,
+              qs: {
+                select: {
+                  qs_id: true,
+                  insured: true,
+                  division: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
             },
           },
           bank: {
@@ -188,7 +200,27 @@ export class VouchersService {
     ]);
 
     return {
-      items,
+      items: items.map((item) => {
+        const { invoice, ...rest } = item;
+
+        return {
+          ...rest,
+          invoice: invoice
+            ? {
+                id: invoice.id,
+                invoice_number: invoice.invoice_number,
+                insured: invoice.insured,
+              }
+            : null,
+          qs: invoice?.qs
+            ? {
+                qs_id: invoice.qs.qs_id,
+                insured: invoice.qs.insured,
+                division: invoice.qs.division ? invoice.qs.division.name : null,
+              }
+            : null,
+        };
+      }),
       total_pages: Math.ceil(total / limit),
       current_page: page,
     };
@@ -202,6 +234,18 @@ export class VouchersService {
           select: {
             id: true,
             invoice_number: true,
+            insured: true,
+            qs: {
+              select: {
+                qs_id: true,
+                insured: true,
+                division: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
         bank: {
@@ -217,7 +261,25 @@ export class VouchersService {
       throw new NotFoundException('Voucher not found');
     }
 
-    return voucher;
+    const { invoice, ...rest } = voucher;
+
+    return {
+      ...rest,
+      invoice: invoice
+        ? {
+            id: invoice.id,
+            invoice_number: invoice.invoice_number,
+            insured: invoice.insured,
+          }
+        : null,
+      qs: invoice?.qs
+        ? {
+            qs_id: invoice.qs.qs_id,
+            insured: invoice.qs.insured,
+            division: invoice.qs.division ? invoice.qs.division.name : null,
+          }
+        : null,
+    };
   }
 
   async createVoucher(
