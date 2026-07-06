@@ -177,7 +177,7 @@ export class VouchersService {
               insured: true,
               qs: {
                 select: {
-                  qs_id: true,
+                  id: true,
                   insured: true,
                   division: {
                     select: {
@@ -214,7 +214,7 @@ export class VouchersService {
             : null,
           qs: invoice?.qs
             ? {
-                qs_id: invoice.qs.qs_id,
+                id: invoice.qs.id,
                 insured: invoice.qs.insured,
                 division: invoice.qs.division ? invoice.qs.division.name : null,
               }
@@ -237,7 +237,7 @@ export class VouchersService {
             insured: true,
             qs: {
               select: {
-                qs_id: true,
+                id: true,
                 insured: true,
                 division: {
                   select: {
@@ -274,7 +274,7 @@ export class VouchersService {
         : null,
       qs: invoice?.qs
         ? {
-            qs_id: invoice.qs.qs_id,
+            id: invoice.qs.id,
             insured: invoice.qs.insured,
             division: invoice.qs.division ? invoice.qs.division.name : null,
           }
