@@ -13,6 +13,7 @@ export class ShipmentsService {
 
   async listShipments(filters: {
     invoice_id?: string | string[];
+    payment_id?: string | string[];
     search?: string | string[];
     page?: string | string[];
     limit?: string | string[];
@@ -32,6 +33,7 @@ export class ShipmentsService {
     };
 
     const invoiceId = toSingleValue(filters.invoice_id);
+    const paymentId = toSingleValue(filters.payment_id);
     const searchTerm = toSingleValue(filters.search);
     const pageRaw = toSingleValue(filters.page);
     const limitRaw = toSingleValue(filters.limit);
@@ -78,6 +80,10 @@ export class ShipmentsService {
 
     if (invoiceId) {
       AND.push({ invoice_id: invoiceId });
+    }
+
+    if (paymentId) {
+      AND.push({ payment_id: paymentId });
     }
 
     if (searchTerm && searchTerm.length > 0) {
@@ -192,10 +198,21 @@ export class ShipmentsService {
       }
     }
 
+    if (body.payment_id) {
+      const payment = await this.prismaService.payment.findFirst({
+        where: { id: body.payment_id },
+        select: { id: true },
+      });
+      if (!payment) {
+        throw new NotFoundException('Payment not found');
+      }
+    }
+
     const shipment = await this.prismaService.$transaction(async (prisma) => {
       const create = await prisma.documentShipment.create({
         data: {
           invoice_id: body.invoice_id,
+          payment_id: body.payment_id,
           courier: body.courier,
           tracking_number: body.tracking_number,
           shipping_date: new Date(body.shipping_date),
@@ -280,11 +297,22 @@ export class ShipmentsService {
       }
     }
 
+    if (body.payment_id) {
+      const payment = await this.prismaService.payment.findFirst({
+        where: { id: body.payment_id },
+        select: { id: true },
+      });
+      if (!payment) {
+        throw new NotFoundException('Payment not found');
+      }
+    }
+
     const shipment = await this.prismaService.$transaction(async (prisma) => {
       const update = await prisma.documentShipment.update({
         where: { id },
         data: {
           invoice_id: body.invoice_id,
+          payment_id: body.payment_id,
           courier: body.courier,
           tracking_number: body.tracking_number,
           shipping_date: body.shipping_date
@@ -304,6 +332,7 @@ export class ShipmentsService {
           details: JSON.stringify({
             before: {
               invoice_id: existing.invoice_id,
+              payment_id: existing.payment_id,
               courier: existing.courier,
               tracking_number: existing.tracking_number,
               shipping_date: existing.shipping_date,
@@ -311,6 +340,7 @@ export class ShipmentsService {
             },
             after: {
               invoice_id: update.invoice_id,
+              payment_id: update.payment_id,
               courier: update.courier,
               tracking_number: update.tracking_number,
               shipping_date: update.shipping_date,

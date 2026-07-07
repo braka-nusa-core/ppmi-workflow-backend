@@ -36,6 +36,7 @@ export class ShipmentsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiQuery({ name: 'invoice_id', required: false, type: String })
+  @ApiQuery({ name: 'payment_id', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: String })
@@ -45,6 +46,7 @@ export class ShipmentsController {
     @Query()
     query: {
       invoice_id?: string;
+      payment_id?: string;
       search?: string;
       page?: string;
       limit?: string;

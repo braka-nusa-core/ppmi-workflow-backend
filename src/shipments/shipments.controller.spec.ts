@@ -43,7 +43,7 @@ describe('ShipmentsController', () => {
       current_page: 1,
     });
 
-    const result = await controller.listShipments({
+    await controller.listShipments({
       invoice_id: 'inv-1',
       page: '1',
       limit: '10',
@@ -54,12 +54,32 @@ describe('ShipmentsController', () => {
       page: '1',
       limit: '10',
     });
+  });
+
+  it('passes payment_id to service when provided', async () => {
+    shipmentsServiceMock.listShipments.mockResolvedValue({
+      items: [{ id: 'ship-2', payment_id: 'pay-1' }],
+      total_pages: 1,
+      current_page: 1,
+    });
+
+    const result = await controller.listShipments({
+      payment_id: 'pay-1',
+      page: '1',
+      limit: '10',
+    });
+
+    expect(shipmentsServiceMock.listShipments).toHaveBeenCalledWith({
+      payment_id: 'pay-1',
+      page: '1',
+      limit: '10',
+    });
     expect(result).toEqual({
       success: true,
       status_code: HttpStatus.OK,
       data: {
-        items: [{ id: 'ship-1' }],
-        total_pages: 2,
+        items: [{ id: 'ship-2', payment_id: 'pay-1' }],
+        total_pages: 1,
         current_page: 1,
       },
     });
