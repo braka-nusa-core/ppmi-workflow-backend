@@ -218,13 +218,15 @@ model Invoice {
 
 model DocumentShipment {
   id                String   @id @default(uuid())
-  invoice_id        String   @unique
+  invoice_id        String?  @unique
+  payment_id        String?  
   courier           String
   tracking_number   String
   shipping_date     DateTime
   shipping_proof_id String?  @unique
 
-  invoice        Invoice          @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  invoice        Invoice?         @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  payment        Payment?         @relation(fields: [payment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shipping_proof FileAttachment?  @relation("DocumentShipmentShippingProof", fields: [shipping_proof_id], references: [id])
   receipt        DocumentReceipt? @relation("ShipmentReceipt")
 
@@ -238,6 +240,7 @@ model DocumentShipment {
 model DocumentReceipt {
   id                String   @id @default(uuid())
   invoice_id        String   @unique
+  payment_id        String?  
   shipment_id       String   @unique
   received_date     DateTime
   receiver_name     String
@@ -246,6 +249,7 @@ model DocumentReceipt {
 
   invoice        Invoice          @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shipment       DocumentShipment @relation("ShipmentReceipt", fields: [shipment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  payment        Payment?         @relation(fields: [payment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   received_proof FileAttachment?  @relation("DocumentReceiptReceivedProof", fields: [received_proof_id], references: [id])
 
   created_at DateTime  @default(now())
@@ -335,7 +339,9 @@ model Payment {
   payment_status     PaymentStatus
   remarks            String
 
-  voucher Voucher @relation(fields: [voucher_id], references: [id])
+  voucher            Voucher @relation(fields: [voucher_id], references: [id])
+  shipment           DocumentShipment[]
+  receipt            DocumentReceipt[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
