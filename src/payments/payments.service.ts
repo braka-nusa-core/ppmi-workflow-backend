@@ -156,6 +156,7 @@ export class PaymentsService {
             select: {
               id: true,
               voucher_number: true,
+              invoice_id: true,
             },
           },
         },
@@ -178,6 +179,7 @@ export class PaymentsService {
           select: {
             id: true,
             voucher_number: true,
+            invoice_id: true,
           },
         },
       },
