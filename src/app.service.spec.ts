@@ -115,6 +115,8 @@ describe('AppService', () => {
         email: 'admin@test.com',
         phone: null,
         role: 'SUPERADMIN' as const,
+        created_at: new Date('2025-01-01'),
+        updated_at: new Date('2025-01-01'),
         organization_unit: null,
       };
       prismaMock.user.findUnique.mockResolvedValue(superAdmin);
@@ -127,6 +129,8 @@ describe('AppService', () => {
         email: 'admin@test.com',
         phone: null,
         role: 'SUPERADMIN',
+        created_at: superAdmin.created_at,
+        updated_at: superAdmin.updated_at,
         organization_unit: null,
         permissions: null,
       });
@@ -139,6 +143,8 @@ describe('AppService', () => {
         email: 'user@test.com',
         phone: '08123456789',
         role: 'USER' as const,
+        created_at: new Date('2025-01-01'),
+        updated_at: new Date('2025-01-01'),
         organization_unit: {
           id: 'unit-1',
           name: 'Teknik',
@@ -151,6 +157,7 @@ describe('AppService', () => {
               permission: { resource: 'bank', action: 'create' },
             },
           ],
+          parent: null,
         },
       };
       prismaMock.user.findUnique.mockResolvedValue(regularUser);
@@ -163,7 +170,13 @@ describe('AppService', () => {
         email: 'user@test.com',
         phone: '08123456789',
         role: 'USER',
-        organization_unit: 'Teknik',
+        created_at: regularUser.created_at,
+        updated_at: regularUser.updated_at,
+        organization_unit: {
+          name: 'Teknik',
+          type: 'DIVISION',
+          parent: null,
+        },
         permissions: ['bank:read', 'bank:create'],
       });
     });
@@ -175,6 +188,8 @@ describe('AppService', () => {
         email: 'noorg@test.com',
         phone: null,
         role: 'USER' as const,
+        created_at: new Date('2025-01-01'),
+        updated_at: new Date('2025-01-01'),
         organization_unit: null,
       };
       prismaMock.user.findUnique.mockResolvedValue(userNoOrg);

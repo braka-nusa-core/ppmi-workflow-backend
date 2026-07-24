@@ -68,14 +68,26 @@ export class AppService {
         email: true,
         phone: true,
         role: true,
+        created_at: true,
+        updated_at: true,
         organization_unit: {
           select: {
-            id: true,
             name: true,
             type: true,
             permissions: {
               select: {
                 permission: { select: { resource: true, action: true } },
+              },
+            },
+            parent: {
+              select: {
+                name: true,
+                type: true,
+                permissions: {
+                  select: {
+                    permission: { select: { resource: true, action: true } },
+                  },
+                },
               },
             },
           },
@@ -85,20 +97,25 @@ export class AppService {
 
     if (!user) throw new UnauthorizedException('User not found');
 
-    const isAdmin = user.role === 'SUPERADMIN';
+    const { organization_unit: unit, ...userData } = user;
+    const isAdmin = userData.role === 'SUPERADMIN';
+
+    const permissionSource = unit?.type === 'DEPARTMENT' ? unit.parent : unit;
 
     return {
-      id: user.id,
-      fullname: user.fullname,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      organization_unit: user.organization_unit
-        ? user.organization_unit.name
+      ...userData,
+      organization_unit: unit
+        ? {
+            name: unit.name,
+            type: unit.type,
+            parent: unit.parent
+              ? { name: unit.parent.name, type: unit.parent.type }
+              : null,
+          }
         : null,
       permissions: isAdmin
         ? null
-        : (user.organization_unit?.permissions.map(
+        : (permissionSource?.permissions.map(
             (p) => `${p.permission.resource}:${p.permission.action}`,
           ) ?? []),
     };
