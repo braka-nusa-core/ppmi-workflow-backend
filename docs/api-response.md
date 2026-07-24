@@ -23,11 +23,10 @@ type SuccessResponse = {
 ```json
 {
   "success": true,
-  "message": "Data retrieved",
   "data": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "johndoe@example.com"
+    "id": "clx...abc",
+    "fullname": "Budi Santoso",
+    "email": "budi@mail.com"
   }
 }
 ```
