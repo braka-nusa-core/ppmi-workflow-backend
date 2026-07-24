@@ -3,13 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './common/services/prisma.service';
-import { InvoicesModule } from './invoices/invoices.module';
-import { QsModule } from './qs/qs.module';
-import { VouchersModule } from './vouchers/vouchers.module';
-import { PaymentsModule } from './payments/payments.module';
-import { ShipmentsModule } from './shipments/shipments.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -21,12 +16,7 @@ import { ShipmentsModule } from './shipments/shipments.module';
         expiresIn: '6h',
       },
     }),
-    AuthModule,
-    QsModule,
-    InvoicesModule,
-    VouchersModule,
-    PaymentsModule,
-    ShipmentsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
