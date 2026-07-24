@@ -5,123 +5,77 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ZodError } from 'zod';
 import { Prisma } from '../../generated/prisma/client';
-import { ErrorResponse } from '../types/global.type';
 
 @Catch()
 export class GlobalException implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-  catch(exception: unknown, host: ArgumentsHost) {
+  private reply(
+    ctx: HttpArgumentsHost,
+    statusCode: number,
+    name: string,
+    message: string,
+    details?: unknown,
+  ) {
     const { httpAdapter } = this.httpAdapterHost;
+    httpAdapter.reply(
+      ctx.getResponse(),
+      {
+        success: false,
+        error: { name, message, details },
+      },
+      statusCode,
+    );
+  }
+
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const { INTERNAL_SERVER_ERROR, BAD_REQUEST } = HttpStatus;
 
     if (exception instanceof HttpException) {
       const { name, message } = exception;
-
-      const responseBody: ErrorResponse = {
-        success: false,
-        status_code: exception.getStatus(),
-        error: {
-          name,
-          message,
-          errors: null,
-        },
-      };
-
-      return httpAdapter.reply(
-        ctx.getResponse(),
-        responseBody,
-        exception.getStatus(),
-      );
+      return this.reply(ctx, exception.getStatus(), name, message);
     }
 
     if (exception instanceof ZodError) {
-      const { issues, name } = exception;
-
-      const errors = issues.map((error) => {
-        return {
-          field: error.code == 'unrecognized_keys' ? error.keys : error.path,
-          message: error.message,
-        };
-      });
-
-      const responseBody: ErrorResponse = {
-        success: false,
-        status_code: BAD_REQUEST,
-        error: {
-          name,
-          message: 'Validation failed',
-          errors,
-        },
-      };
-
-      return httpAdapter.reply(ctx.getResponse(), responseBody, BAD_REQUEST);
-    }
-
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      const responseBody: ErrorResponse = {
-        success: false,
-        status_code: INTERNAL_SERVER_ERROR,
-        error: {
-          name: exception.name,
-          message: exception.message,
-          errors: {
-            code: exception.code,
-            meta: exception.meta,
-            stack: exception.stack,
-          },
-        },
-      };
-
-      return httpAdapter.reply(
-        ctx.getResponse(),
-        responseBody,
-        INTERNAL_SERVER_ERROR,
+      return this.reply(
+        ctx,
+        BAD_REQUEST,
+        exception.name,
+        'Validation failed',
+        exception.issues.map(({ path, message, code }) => ({
+          field:
+            code === 'unrecognized_keys'
+              ? exception.issues.find((i) => i.code === 'unrecognized_keys')
+                  ?.keys
+              : path,
+          message,
+        })),
       );
     }
 
-    if (exception instanceof Prisma.PrismaClientUnknownRequestError) {
-      const responseBody: ErrorResponse = {
-        success: false,
-        status_code: INTERNAL_SERVER_ERROR,
-        error: {
-          name: exception.name,
-          message: exception.message,
-          errors: null,
-        },
-      };
-
-      return httpAdapter.reply(
-        ctx.getResponse(),
-        responseBody,
+    if (
+      exception instanceof Prisma.PrismaClientKnownRequestError ||
+      exception instanceof Prisma.PrismaClientUnknownRequestError
+    ) {
+      return this.reply(
+        ctx,
         INTERNAL_SERVER_ERROR,
+        exception.name,
+        exception.message,
       );
     }
 
     if (exception instanceof Error) {
-      const { name, message } = exception as {
-        name: string;
-        message: string;
-      };
-
-      const responseBody: ErrorResponse = {
-        success: false,
-        status_code: INTERNAL_SERVER_ERROR,
-        error: {
-          name,
-          message,
-          errors: null,
-        },
-      };
-
-      return httpAdapter.reply(
-        ctx.getResponse(),
-        responseBody,
+      return this.reply(
+        ctx,
         INTERNAL_SERVER_ERROR,
+        exception.name,
+        exception.message,
       );
     }
   }

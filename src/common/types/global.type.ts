@@ -1,22 +1,14 @@
 export type SuccessResponse = {
-  success: boolean;
-  status_code: number;
+  success: true;
   message?: string;
   data?: unknown;
 };
 
 export type ErrorResponse = {
-  success: boolean;
-  status_code: number;
+  success: false;
   error: {
     name: string;
     message: string;
-    errors?: unknown;
+    details?: unknown;
   };
-};
-
-export type GlobalResponse<T> = {
-  success: boolean;
-  status_code: number;
-  data: T;
 };
