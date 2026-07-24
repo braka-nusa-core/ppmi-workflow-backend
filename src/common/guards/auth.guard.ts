@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 @Injectable()
-export class UserGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
@@ -37,36 +37,23 @@ export class UserGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
 
-      if (authMetaData?.includes('AdminOnly')) {
-        if (payload.is_admin === true) {
-          request['credentials'] = payload;
-          return true;
-        }
+      request['credentials'] = payload;
 
-        return false;
-      }
-
-      if (payload.is_admin === true) {
-        request['credentials'] = payload;
+      if (authMetaData?.includes('SkipAuth')) {
         return true;
       }
 
-      request['credentials'] = payload;
+      if (authMetaData?.includes('AdminOnly')) {
+        return payload.role === 'SUPERADMIN';
+      }
 
       if (!authMetaData || authMetaData.length === 0) {
         return true;
       }
 
-      if (authMetaData.includes('SkipAuth')) {
-        return true;
-      }
-
-      const requiredRoles = authMetaData.map((role) => role.toLowerCase());
-      const userRoles = Array.isArray(payload.roles)
-        ? payload.roles.map((role: string) => role.toLowerCase())
-        : [];
-
-      return requiredRoles.some((role) => userRoles.includes(role));
+      const requiredRoles = authMetaData.map((r) => r.toLowerCase());
+      const userRole = payload.role?.toLowerCase();
+      return requiredRoles.includes(userRole);
     } catch (error) {
       throw new UnauthorizedException();
     }
