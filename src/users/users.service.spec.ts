@@ -230,9 +230,7 @@ describe('UsersService', () => {
           description: 'Admin deleted user User To Delete (delete@test.com)',
         },
       });
-      expect(result).toEqual({
-        message: 'User User To Delete has been deleted',
-      });
+      expect(result).toEqual({ id: 'user-1' });
     });
 
     it('throws NotFoundException when user not found', async () => {

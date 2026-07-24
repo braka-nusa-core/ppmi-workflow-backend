@@ -22,7 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthMetaData } from '../common/decorators/auth.decorator';
-import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod.pipe';
 import { UsersService } from './users.service';
@@ -43,7 +42,6 @@ export class UsersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Users retrieved successfully')
   @ApiOperation({ summary: 'List all users' })
   @ApiQuery({ name: 'organization_unit_id', required: false, type: String })
   list(@Query('organization_unit_id') organization_unit_id?: string) {
@@ -52,7 +50,6 @@ export class UsersController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User retrieved successfully')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', type: String })
   get(@Param('id') id: string) {
@@ -61,7 +58,6 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ResponseMessage('User created successfully')
   @UsePipes(new ZodValidationPipe(createUserSchema))
   @ApiOperation({ summary: 'Create a new user' })
   create(@Body() body: CreateUserDto, @Req() req: Request) {
@@ -74,7 +70,6 @@ export class UsersController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User updated successfully')
   @UsePipes(new ZodValidationPipe(updateUserSchema))
   @ApiOperation({ summary: 'Update a user' })
   @ApiParam({ name: 'id', type: String })
@@ -92,7 +87,6 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User deleted successfully')
   @ApiOperation({ summary: 'Soft delete a user' })
   @ApiParam({ name: 'id', type: String })
   delete(@Param('id') id: string, @Req() req: Request) {

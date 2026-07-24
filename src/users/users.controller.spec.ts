@@ -111,7 +111,7 @@ describe('UsersController', () => {
   describe('delete', () => {
     it('calls service.delete with id and credentials', async () => {
       const req = mockReq();
-      const expected = { message: 'User deleted' };
+      const expected = { id: 'user-1' };
       usersServiceMock.delete.mockResolvedValue(expected);
 
       const result = await controller.delete('user-1', req);

@@ -168,7 +168,7 @@ export class UsersService {
         },
       });
 
-      return { message: `User ${existing.fullname} has been deleted` };
+      return { id };
     });
   }
 }
