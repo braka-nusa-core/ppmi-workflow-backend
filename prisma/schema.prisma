@@ -8,103 +8,24 @@ datasource db {
   provider = "postgresql"
 }
 
-model Division {
-  id          String  @id @default(uuid())
-  code        String  @unique
-  name        String  @unique
-  description String?
-
-  users UserDivision[]
-  qs    QS[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@map("division")
+enum UnitType {
+  DIVISION
+  DEPARTMENT
 }
 
-model User {
-  id       String  @id @default(uuid())
-  fullname String
-  email    String  @unique
-  password String  @db.VarChar(255)
-  phone    String?
-  is_admin Boolean @default(false)
-
-  divisions  UserDivision[]
-  user_roles UserRole[]
-  logs       Log[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@map("user")
+enum UserRole {
+  SUPERADMIN
+  USER
 }
 
-model UserDivision {
-  id          String @id @default(uuid())
-  user_id     String
-  division_id String
-
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  division Division @relation(fields: [division_id], references: [id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@unique([user_id, division_id])
-  @@map("user_division")
-}
-
-model Role {
-  id          String  @id @default(uuid())
-  code        String  @unique
-  name        String  @unique
-  description String?
-
-  user_roles UserRole[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@map("role")
-}
-
-model UserRole {
-  id      String @id @default(uuid())
-  user_id String
-  role_id String
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  role Role @relation(fields: [role_id], references: [id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@unique([user_id, role_id])
-  @@map("user_role")
-}
-
-model Bank {
-  id             String  @id @default(uuid())
-  name           String  @unique
-  account_number String  @unique
-  account_name   String
-  is_deleted     Boolean @default(false)
-
-  vouchers Voucher[]
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@map("bank")
-}
-
-enum Action {
+enum LogAction {
   CREATE
   UPDATE
   DELETE
+  APPROVE
+  REJECT
+  REVISION
+  CANCEL
   LOGIN
   LOGOUT
   VIEW
@@ -112,239 +33,105 @@ enum Action {
   OTHER
 }
 
-enum ReferenceType {
-  USER
-  DIVISION
-  ROLE
-  QS
+enum LogReferenceType {
+  QUOTATION_SLIP
+  POLICY_PLACEMENT
+  REQUEST_FOR_INVOICE
   INVOICE
-  BANK
-  VOUCHER
-  PAYMENT
+  INCOMING_PAYMENT
+  OUTGOING_PAYMENT
   SHIPMENT
-  RECEIPT
+  USER_MANAGEMENT
+  INSURANCE_COMPANY
+  SURVEYOR
+  WARRANTY
+  TERMS_AND_CONDITIONS
+  QS_TEMPLATE
+  BANK
+  INSURANCE_TYPE
+}
+
+model OrganizationUnit {
+  id            String   @id @default(cuid())
+  parent_id     String?
+
+  name          String
+  type          UnitType
+
+  parent        OrganizationUnit?  @relation("UnitHierarchy", fields: [parent_id], references: [id])
+  children      OrganizationUnit[] @relation("UnitHierarchy")
+
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  deleted_at    DateTime? 
+
+  users         User[]
+  permissions   OrganizationUnitPermission[]
+
+  @@unique([name, type])
+  @@map("organization_unit")
+}
+
+model User {
+  id                      String    @id @default(cuid())
+  fullname                String
+  email                   String    @unique
+  phone                   String?   @unique
+  password                String    @db.Text
+  role                    UserRole  @default(USER)
+
+  organization_unit_id    String?
+  organization_unit       OrganizationUnit? @relation(fields: [organization_unit_id], references: [id])
+  logs       Log[]
+
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  deleted_at              DateTime?
+
+  @@map("user")
+}
+
+model Permission {
+  id                      String    @id @default(cuid())
+  resource                String
+  action                  String
+  description             String?
+
+  organizations           OrganizationUnitPermission[]
+
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  deleted_at              DateTime?
+
+  @@unique([resource, action])
+  @@map("permission")
+}
+
+model OrganizationUnitPermission {
+  organization_unit_id    String
+  permission_id           String
+
+  organization_unit       OrganizationUnit  @relation(fields: [organization_unit_id],references: [id])
+  permission              Permission        @relation(fields: [permission_id],references: [id])
+
+  @@id([organization_unit_id, permission_id])
+  @@map("organization_unit_permission")
 }
 
 model Log {
-  id             String         @id @default(uuid())
-  user_id        String
-  action         Action
-  description    String         @db.Text
-  reference_id   String?
-  reference_type ReferenceType?
-  details        String?        @db.Text
+  id                      String         @id @default(uuid())
+  user_id                 String
+  action                  LogAction
+  description             String         @db.Text
+  reference_id            String?
+  reference_type          LogReferenceType?
+  details                 String?        @db.Text
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
 
-  user User @relation(fields: [user_id], references: [id])
-
+  user                    User @relation(fields: [user_id], references: [id])
+  
+  @@index([reference_type, reference_id])
   @@map("log")
-}
-
-enum QSType {
-  NEW
-  RENEWAL
-}
-
-enum QSSTATUS {
-  DRAFT
-  SUBMITTED
-  APPROVED
-  REJECTED
-}
-
-model QS {
-  id             String   @id
-  division_id    String
-  type           QSType
-  status         QSSTATUS
-  insured        String
-  vessel         String
-  insurance      String
-  member         String
-  leader         String
-  policy_number  String
-  period_from    DateTime
-  period_to      DateTime
-  premium_amount Int
-  currency       String
-  remarks        String
-  is_deleted     Boolean  @default(false)
-
-  invoices Invoice[]
-  division Division  @relation(fields: [division_id], references: [id])
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@index([division_id, status, type])
-  @@map("qs")
-}
-
-enum InvoiceStatus {
-  DRAFT
-  PENDING
-  VOUCHER
-  SHIPPED
-  CLOSED
-}
-
-model Invoice {
-  id             String        @id
-  qs_id          String
-  invoice_number String        @unique
-  invoice_date   DateTime
-  due_date       DateTime
-  insured        String
-  amount         Int
-  currency       String
-  status         InvoiceStatus
-  remarks        String
-  is_deleted     Boolean       @default(false)
-
-  qs       QS                @relation(fields: [qs_id], references: [id])
-  voucher  Voucher?
-  shipment DocumentShipment?
-  receipt  DocumentReceipt?
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@map("invoice")
-}
-
-model DocumentShipment {
-  id                String   @id @default(uuid())
-  invoice_id        String?  @unique
-  payment_id        String?  
-  courier           String
-  tracking_number   String
-  shipping_date     DateTime
-  shipping_proof_id String?  @unique
-
-  invoice        Invoice?         @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  payment        Payment?         @relation(fields: [payment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  shipping_proof FileAttachment?  @relation("DocumentShipmentShippingProof", fields: [shipping_proof_id], references: [id])
-  receipt        DocumentReceipt? @relation("ShipmentReceipt")
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@map("document_shipment")
-}
-
-model DocumentReceipt {
-  id                String   @id @default(uuid())
-  invoice_id        String   @unique
-  payment_id        String?  
-  shipment_id       String   @unique
-  received_date     DateTime
-  receiver_name     String
-  receiver_note     String?
-  received_proof_id String?  @unique
-
-  invoice        Invoice          @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  shipment       DocumentShipment @relation("ShipmentReceipt", fields: [shipment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  payment        Payment?         @relation(fields: [payment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  received_proof FileAttachment?  @relation("DocumentReceiptReceivedProof", fields: [received_proof_id], references: [id])
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@map("document_receipt")
-}
-
-enum FileReferenceType {
-  INVOICE
-  SHIPMENT
-  QS
-  PAYMENT
-}
-
-model FileAttachment {
-  id             String            @id @default(uuid())
-  file_name      String
-  file_type      String
-  file_size      Int
-  file_url       String
-  file_key       String
-  reference_type FileReferenceType
-  reference_id   String
-  is_deleted     Boolean           @default(false)
-
-  shipment_shipping_proof DocumentShipment? @relation("DocumentShipmentShippingProof")
-  receipt_received_proof  DocumentReceipt?  @relation("DocumentReceiptReceivedProof")
-
-  uploaded_at DateTime  @default(now())
-  deleted_at  DateTime?
-
-  @@map("file_attachment")
-}
-
-enum VoucherPaymentType {
-  CASH
-  BANK_TRANSFER
-  CHEQUE
-}
-
-enum VoucherStatus {
-  DRAFT
-  PENDING
-  CLOSED
-}
-
-model Voucher {
-  id             String             @id
-  invoice_id     String             @unique
-  voucher_number String             @unique
-  voucher_date   DateTime
-  payment_type   VoucherPaymentType
-  bank_id        String?
-  amount         Int
-  currency       String
-  status         VoucherStatus
-  remarks        String
-  is_deleted     Boolean            @default(false)
-
-  invoice  Invoice   @relation(fields: [invoice_id], references: [id])
-  bank     Bank?     @relation(fields: [bank_id], references: [id])
-  payments Payment[]
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  @@map("voucher")
-}
-
-enum PaymentStatus {
-  UNPAID
-  INSTALLMENT
-  PAID
-}
-
-model Payment {
-  id                 String        @id
-  voucher_id         String
-  installment_number Int
-  payment_date       DateTime
-  due_date           DateTime
-  paid_amount        Int
-  remaining_amount   Int
-  payment_status     PaymentStatus
-  remarks            String
-
-  voucher            Voucher @relation(fields: [voucher_id], references: [id])
-  shipment           DocumentShipment[]
-  receipt            DocumentReceipt[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@map("payment")
 }
