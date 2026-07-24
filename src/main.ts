@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { GlobalException } from './common/exceptions/global.exception';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -13,7 +14,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('PPMI Workflow API Documentation')
     .setDescription('The PPMI Workflow API documentation')
-    .setVersion('1.0')
+    .setVersion('2.0')
     .addTag('PPMI')
     .addBearerAuth()
     .build();
@@ -23,6 +24,7 @@ async function bootstrap() {
 
   app.use(urlencoded({ extended: true, limit: '5mb' }));
   app.useGlobalFilters(new GlobalException(app.get(HttpAdapterHost)));
+  app.useGlobalInterceptors(new ResponseInterceptor());
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
