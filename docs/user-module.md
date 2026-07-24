@@ -526,7 +526,6 @@ Response:
 ```json
 {
   "success": true,
-  "message": "Login successful",
   "data": {
     "id": "clx...admin",
     "fullname": "Super Admin",
