@@ -27,7 +27,7 @@ export class ResponseInterceptor implements NestInterceptor {
       map((data) => {
         const response: Record<string, unknown> = { success: true };
         if (message) response.message = message;
-        response.data = data ?? null;
+        if (data) response.data = data;
         return response;
       }),
     );
