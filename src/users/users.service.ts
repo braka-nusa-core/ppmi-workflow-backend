@@ -11,10 +11,10 @@ import { CreateUserDto, UpdateUserDto } from './users.validation';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(organization_unit_id?: string) {
-    const where: Record<string, unknown> = { deleted_at: null };
-    if (organization_unit_id) {
-      where.organization_unit_id = organization_unit_id;
+  async list(organizationUnitId?: string) {
+    const where: Record<string, unknown> = { deletedAt: null };
+    if (organizationUnitId) {
+      where.organizationUnitId = organizationUnitId;
     }
 
     return this.prisma.user.findMany({
@@ -28,37 +28,37 @@ export class UsersService {
         email: true,
         phone: true,
         role: true,
-        organization_unit: {
+        organizationUnit: {
           select: {
             name: true,
             type: true,
             parent: { select: { name: true, type: true } },
           },
         },
-        created_at: true,
+        createdAt: true,
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async get(id: string) {
     const user = await this.prisma.user.findFirst({
-      where: { id, deleted_at: null },
+      where: { id, deletedAt: null },
       select: {
         id: true,
         fullname: true,
         email: true,
         phone: true,
         role: true,
-        organization_unit: {
+        organizationUnit: {
           select: {
             name: true,
             type: true,
             parent: { select: { name: true, type: true } },
           },
         },
-        created_at: true,
-        updated_at: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -77,7 +77,7 @@ export class UsersService {
           password,
           phone: dto.phone,
           role: dto.role ?? 'USER',
-          organization_unit_id: dto.organization_unit_id,
+          organizationUnitId: dto.organizationUnitId,
         },
         select: { id: true, fullname: true, email: true },
       });
@@ -85,9 +85,9 @@ export class UsersService {
       await tx.log.create({
         data: {
           action: 'CREATE',
-          reference_id: user.id,
-          reference_type: 'USER_MANAGEMENT',
-          user_id: actor.id,
+          referenceId: user.id,
+          referenceType: 'USER_MANAGEMENT',
+          userId: actor.id,
           description: `${actor.fullname} created user ${user.fullname} (${user.email})`,
         },
       });
@@ -102,7 +102,7 @@ export class UsersService {
     actor: { id: string; fullname: string },
   ) {
     const existing = await this.prisma.user.findFirst({
-      where: { id, deleted_at: null },
+      where: { id, deletedAt: null },
     });
 
     if (!existing) throw new NotFoundException('User not found');
@@ -119,8 +119,8 @@ export class UsersService {
     if (dto.email) updateData.email = dto.email;
     if (dto.phone !== undefined) updateData.phone = dto.phone;
     if (dto.role) updateData.role = dto.role;
-    if (dto.organization_unit_id !== undefined)
-      updateData.organization_unit_id = dto.organization_unit_id;
+    if (dto.organizationUnitId !== undefined)
+      updateData.organizationUnitId = dto.organizationUnitId;
     if (dto.password) updateData.password = await hashPassword(dto.password);
 
     return this.prisma.$transaction(async (tx) => {
@@ -133,9 +133,9 @@ export class UsersService {
       await tx.log.create({
         data: {
           action: 'UPDATE',
-          reference_id: id,
-          reference_type: 'USER_MANAGEMENT',
-          user_id: actor.id,
+          referenceId: id,
+          referenceType: 'USER_MANAGEMENT',
+          userId: actor.id,
           description: `${actor.fullname} updated user ${user.fullname}`,
         },
       });
@@ -146,7 +146,7 @@ export class UsersService {
 
   async delete(id: string, actor: { id: string; fullname: string }) {
     const existing = await this.prisma.user.findFirst({
-      where: { id, deleted_at: null },
+      where: { id, deletedAt: null },
       select: { id: true, fullname: true, email: true },
     });
 
@@ -155,15 +155,15 @@ export class UsersService {
     return this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id },
-        data: { deleted_at: new Date() },
+        data: { deletedAt: new Date() },
       });
 
       await tx.log.create({
         data: {
           action: 'DELETE',
-          reference_id: id,
-          reference_type: 'USER_MANAGEMENT',
-          user_id: actor.id,
+          referenceId: id,
+          referenceType: 'USER_MANAGEMENT',
+          userId: actor.id,
           description: `${actor.fullname} deleted user ${existing.fullname} (${existing.email})`,
         },
       });

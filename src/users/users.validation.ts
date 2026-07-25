@@ -7,7 +7,7 @@ export const createUserSchema = z.object({
   password: z.string().min(6),
   phone: z.string().optional(),
   role: z.enum(['SUPERADMIN', 'USER']).optional().default('USER'),
-  organization_unit_id: z.string().optional(),
+  organizationUnitId: z.string().optional(),
 });
 
 export const updateUserSchema = z.object({
@@ -16,7 +16,7 @@ export const updateUserSchema = z.object({
   password: z.string().min(6).optional(),
   phone: z.string().optional(),
   role: z.enum(['SUPERADMIN', 'USER']).optional(),
-  organization_unit_id: z.string().optional(),
+  organizationUnitId: z.string().optional(),
 });
 
 export class CreateUserDto extends createZodDto(createUserSchema) {}

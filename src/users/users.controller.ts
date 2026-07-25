@@ -43,9 +43,9 @@ export class UsersController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List all users' })
-  @ApiQuery({ name: 'organization_unit_id', required: false, type: String })
-  list(@Query('organization_unit_id') organization_unit_id?: string) {
-    return this.usersService.list(organization_unit_id);
+  @ApiQuery({ name: 'organizationUnitId', required: false, type: String })
+  list(@Query('organizationUnitId') organizationUnitId?: string) {
+    return this.usersService.list(organizationUnitId);
   }
 
   @Get(':id')

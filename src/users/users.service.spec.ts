@@ -52,14 +52,14 @@ describe('UsersService', () => {
       const result = await service.list();
 
       expect(prismaMock.user.findMany).toHaveBeenCalledWith({
-        where: { deleted_at: null, role: { not: 'SUPERADMIN' } },
+        where: { deletedAt: null, role: { not: 'SUPERADMIN' } },
         select: expect.any(Object),
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
       });
       expect(result).toEqual(users);
     });
 
-    it('filters by organization_unit_id', async () => {
+    it('filters by organizationUnitId', async () => {
       prismaMock.user.findMany.mockResolvedValue([]);
 
       await service.list('unit-1');
@@ -67,8 +67,8 @@ describe('UsersService', () => {
       expect(prismaMock.user.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            deleted_at: null,
-            organization_unit_id: 'unit-1',
+            deletedAt: null,
+            organizationUnitId: 'unit-1',
             role: { not: 'SUPERADMIN' },
           },
         }),
@@ -121,16 +121,16 @@ describe('UsersService', () => {
           password: 'hashed-password',
           phone: undefined,
           role: 'USER',
-          organization_unit_id: undefined,
+          organizationUnitId: undefined,
         },
         select: expect.any(Object),
       });
       expect(mockTx.log.create).toHaveBeenCalledWith({
         data: {
           action: 'CREATE',
-          reference_id: 'user-1',
-          reference_type: 'USER_MANAGEMENT',
-          user_id: 'admin-1',
+          referenceId: 'user-1',
+          referenceType: 'USER_MANAGEMENT',
+          userId: 'admin-1',
           description: 'Admin created user New User (new@test.com)',
         },
       });
@@ -172,9 +172,9 @@ describe('UsersService', () => {
       expect(mockTx.log.create).toHaveBeenCalledWith({
         data: {
           action: 'UPDATE',
-          reference_id: 'user-1',
-          reference_type: 'USER_MANAGEMENT',
-          user_id: 'admin-1',
+          referenceId: 'user-1',
+          referenceType: 'USER_MANAGEMENT',
+          userId: 'admin-1',
           description: 'Admin updated user New Name',
         },
       });
@@ -219,14 +219,14 @@ describe('UsersService', () => {
 
       expect(mockTx.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        data: { deleted_at: expect.any(Date) },
+        data: { deletedAt: expect.any(Date) },
       });
       expect(mockTx.log.create).toHaveBeenCalledWith({
         data: {
           action: 'DELETE',
-          reference_id: 'user-1',
-          reference_type: 'USER_MANAGEMENT',
-          user_id: 'admin-1',
+          referenceId: 'user-1',
+          referenceType: 'USER_MANAGEMENT',
+          userId: 'admin-1',
           description: 'Admin deleted user User To Delete (delete@test.com)',
         },
       });
