@@ -20,7 +20,7 @@ export class AppService {
         email: true,
         password: true,
         role: true,
-        organization_unit: {
+        organizationUnit: {
           select: {
             name: true,
           },
@@ -39,9 +39,9 @@ export class AppService {
     await this.prisma.log.create({
       data: {
         action: 'LOGIN',
-        reference_id: user.id,
-        reference_type: 'USER_MANAGEMENT',
-        user_id: user.id,
+        referenceId: user.id,
+        referenceType: 'USER_MANAGEMENT',
+        userId: user.id,
         description: `${user.fullname} logged in`,
       },
     });
@@ -50,8 +50,8 @@ export class AppService {
       id: user.id,
       fullname: user.fullname,
       email: user.email,
-      organization_unit: user.organization_unit?.name ?? null,
-      access_token: await this.jwt.signAsync({
+      organizationUnit: user.organizationUnit?.name ?? null,
+      accessToken: await this.jwt.signAsync({
         fullname: user.fullname,
         sub: user.id,
         role: user.role,
@@ -68,9 +68,9 @@ export class AppService {
         email: true,
         phone: true,
         role: true,
-        created_at: true,
-        updated_at: true,
-        organization_unit: {
+        createdAt: true,
+        updatedAt: true,
+        organizationUnit: {
           select: {
             name: true,
             type: true,
@@ -97,14 +97,14 @@ export class AppService {
 
     if (!user) throw new UnauthorizedException('User not found');
 
-    const { organization_unit: unit, ...userData } = user;
+    const { organizationUnit: unit, ...userData } = user;
     const isAdmin = userData.role === 'SUPERADMIN';
 
     const permissionSource = unit?.type === 'DEPARTMENT' ? unit.parent : unit;
 
     return {
       ...userData,
-      organization_unit: unit
+      organizationUnit: unit
         ? {
             name: unit.name,
             type: unit.type,

@@ -42,8 +42,8 @@ describe('AppController', () => {
         id: 'user-1',
         fullname: 'Test',
         email: 'test@test.com',
-        organization_unit: null,
-        access_token: 'token',
+        organizationUnit: null,
+        accessToken: 'token',
       };
       appServiceMock.login.mockResolvedValue(expected);
 
@@ -69,7 +69,7 @@ describe('AppController', () => {
         email: 'admin@test.com',
         phone: null,
         role: 'SUPERADMIN',
-        organization_unit: null,
+        organizationUnit: null,
         permissions: null,
       };
       appServiceMock.profile.mockResolvedValue(expected);

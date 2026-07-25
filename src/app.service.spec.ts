@@ -37,7 +37,7 @@ describe('AppService', () => {
       email: 'user@test.com',
       password: 'hashed-password',
       role: 'USER' as const,
-      organization_unit: { name: 'Teknik' },
+      organizationUnit: { name: 'Teknik' },
     };
 
     it('returns user data and token when credentials are valid', async () => {
@@ -55,7 +55,7 @@ describe('AppService', () => {
           email: true,
           password: true,
           role: true,
-          organization_unit: { select: { name: true } },
+          organizationUnit: { select: { name: true } },
         },
       });
       expect(bcryptUtil.verifyPassword).toHaveBeenCalledWith(
@@ -70,9 +70,9 @@ describe('AppService', () => {
       expect(prismaMock.log.create).toHaveBeenCalledWith({
         data: {
           action: 'LOGIN',
-          reference_id: mockUser.id,
-          reference_type: 'USER_MANAGEMENT',
-          user_id: mockUser.id,
+          referenceId: mockUser.id,
+          referenceType: 'USER_MANAGEMENT',
+          userId: mockUser.id,
           description: `${mockUser.fullname} logged in`,
         },
       });
@@ -80,8 +80,8 @@ describe('AppService', () => {
         id: mockUser.id,
         fullname: mockUser.fullname,
         email: mockUser.email,
-        organization_unit: 'Teknik',
-        access_token: 'mock-jwt-token',
+        organizationUnit: 'Teknik',
+        accessToken: 'mock-jwt-token',
       });
     });
 
@@ -115,9 +115,9 @@ describe('AppService', () => {
         email: 'admin@test.com',
         phone: null,
         role: 'SUPERADMIN' as const,
-        created_at: new Date('2025-01-01'),
-        updated_at: new Date('2025-01-01'),
-        organization_unit: null,
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        organizationUnit: null,
       };
       prismaMock.user.findUnique.mockResolvedValue(superAdmin);
 
@@ -129,9 +129,9 @@ describe('AppService', () => {
         email: 'admin@test.com',
         phone: null,
         role: 'SUPERADMIN',
-        created_at: superAdmin.created_at,
-        updated_at: superAdmin.updated_at,
-        organization_unit: null,
+        createdAt: superAdmin.createdAt,
+        updatedAt: superAdmin.updatedAt,
+        organizationUnit: null,
         permissions: null,
       });
     });
@@ -143,9 +143,9 @@ describe('AppService', () => {
         email: 'user@test.com',
         phone: '08123456789',
         role: 'USER' as const,
-        created_at: new Date('2025-01-01'),
-        updated_at: new Date('2025-01-01'),
-        organization_unit: {
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        organizationUnit: {
           id: 'unit-1',
           name: 'Teknik',
           type: 'DIVISION' as const,
@@ -170,9 +170,9 @@ describe('AppService', () => {
         email: 'user@test.com',
         phone: '08123456789',
         role: 'USER',
-        created_at: regularUser.created_at,
-        updated_at: regularUser.updated_at,
-        organization_unit: {
+        createdAt: regularUser.createdAt,
+        updatedAt: regularUser.updatedAt,
+        organizationUnit: {
           name: 'Teknik',
           type: 'DIVISION',
           parent: null,
@@ -188,16 +188,16 @@ describe('AppService', () => {
         email: 'noorg@test.com',
         phone: null,
         role: 'USER' as const,
-        created_at: new Date('2025-01-01'),
-        updated_at: new Date('2025-01-01'),
-        organization_unit: null,
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        organizationUnit: null,
       };
       prismaMock.user.findUnique.mockResolvedValue(userNoOrg);
 
       const result = await service.profile(userId);
 
       expect(result.permissions).toEqual([]);
-      expect(result.organization_unit).toBeNull();
+      expect(result.organizationUnit).toBeNull();
     });
 
     it('throws UnauthorizedException when user is not found', async () => {
