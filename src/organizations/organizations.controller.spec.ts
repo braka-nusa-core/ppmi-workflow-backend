@@ -31,7 +31,9 @@ describe('OrganizationsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrganizationsController],
-      providers: [{ provide: OrganizationsService, useValue: organizationsServiceMock }],
+      providers: [
+        { provide: OrganizationsService, useValue: organizationsServiceMock },
+      ],
     })
       .overrideGuard(AuthGuard)
       .useValue({ canActivate: vi.fn().mockReturnValue(true) })
@@ -95,10 +97,14 @@ describe('OrganizationsController', () => {
 
       const result = await controller.update('div-1', body, req);
 
-      expect(organizationsServiceMock.update).toHaveBeenCalledWith('div-1', body, {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.update).toHaveBeenCalledWith(
+        'div-1',
+        body,
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -140,27 +146,34 @@ describe('OrganizationsController', () => {
 
       const result = await controller.createPermission(body, req);
 
-      expect(organizationsServiceMock.createPermission).toHaveBeenCalledWith(body, {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.createPermission).toHaveBeenCalledWith(
+        body,
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual(expected);
     });
   });
 
   describe('updatePermission', () => {
     it('calls service.updatePermission with id, body, and credentials', async () => {
-      const body = { action: 'update' };
+      const body = { description: 'Updated description' };
       const req = mockReq();
       const expected = { id: 'perm-1', resource: 'org', action: 'update' };
       organizationsServiceMock.updatePermission.mockResolvedValue(expected);
 
       const result = await controller.updatePermission('perm-1', body, req);
 
-      expect(organizationsServiceMock.updatePermission).toHaveBeenCalledWith('perm-1', body, {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.updatePermission).toHaveBeenCalledWith(
+        'perm-1',
+        body,
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -173,10 +186,13 @@ describe('OrganizationsController', () => {
 
       const result = await controller.deletePermission('perm-1', req);
 
-      expect(organizationsServiceMock.deletePermission).toHaveBeenCalledWith('perm-1', {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.deletePermission).toHaveBeenCalledWith(
+        'perm-1',
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -188,7 +204,9 @@ describe('OrganizationsController', () => {
 
       const result = await controller.getOrgPermissions('org-1');
 
-      expect(organizationsServiceMock.getOrgPermissions).toHaveBeenCalledWith('org-1');
+      expect(organizationsServiceMock.getOrgPermissions).toHaveBeenCalledWith(
+        'org-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -197,14 +215,20 @@ describe('OrganizationsController', () => {
     it('calls service.assignPermissions with org id, body, and credentials', async () => {
       const body = { permissionIds: ['perm-1', 'perm-2'] };
       const req = mockReq();
-      organizationsServiceMock.assignPermissions.mockResolvedValue({ assigned: 2 });
+      organizationsServiceMock.assignPermissions.mockResolvedValue({
+        assigned: 2,
+      });
 
       const result = await controller.assignPermissions('org-1', body, req);
 
-      expect(organizationsServiceMock.assignPermissions).toHaveBeenCalledWith('org-1', body, {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.assignPermissions).toHaveBeenCalledWith(
+        'org-1',
+        body,
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual({ assigned: 2 });
     });
   });
@@ -212,14 +236,20 @@ describe('OrganizationsController', () => {
   describe('removePermission', () => {
     it('calls service.removePermission with org id, perm id, and credentials', async () => {
       const req = mockReq();
-      organizationsServiceMock.removePermission.mockResolvedValue({ id: 'perm-1' });
+      organizationsServiceMock.removePermission.mockResolvedValue({
+        id: 'perm-1',
+      });
 
       const result = await controller.removePermission('org-1', 'perm-1', req);
 
-      expect(organizationsServiceMock.removePermission).toHaveBeenCalledWith('org-1', 'perm-1', {
-        id: 'admin-1',
-        fullname: 'Admin',
-      });
+      expect(organizationsServiceMock.removePermission).toHaveBeenCalledWith(
+        'org-1',
+        'perm-1',
+        {
+          id: 'admin-1',
+          fullname: 'Admin',
+        },
+      );
       expect(result).toEqual({ id: 'perm-1' });
     });
   });
