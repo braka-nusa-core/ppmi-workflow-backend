@@ -11,14 +11,14 @@ Dokumentasi lengkap modul **Users** untuk frontend — manajemen akun internal d
 Organization Unit menggunakan **self-referencing tree** dengan 2 level:
 
 ```
-Level 1 — DIVISION  (parent_id: null)
+Level 1 — DIVISION  (parentId: null)
 │
-└── Level 2 — DEPARTMENT  (parent_id → DIVISION.id)
+└── Level 2 — DEPARTMENT  (parentId → DIVISION._id)
 ```
 
 **Aturan:**
-- `DIVISION` adalah level tertinggi — `parent_id = null`
-- `DEPARTMENT` adalah anak dari `DIVISION` — `parent_id` mengacu ke `DIVISION.id`
+- `DIVISION` adalah level tertinggi — `parentId = null`
+- `DEPARTMENT` adalah anak dari `DIVISION` — `parentId` mengacu ke `DIVISION._id`
 - Hanya ada 2 level. Department tidak bisa punya anak lagi.
 - Setiap user bisa ditempatkan di DIVISION atau DEPARTMENT.
 
@@ -34,9 +34,9 @@ Finance (DIVISION)
 └── Finance (DEPARTMENT)
 ```
 
-### 1.3 Struktur Response `organization_unit`
+### 1.3 Struktur Response `organizationUnit`
 
-Ketika user memiliki `organization_unit`, response yang dikembalikan berbentuk objek bersarang:
+Ketika user memiliki `organizationUnit`, response yang dikembalikan berbentuk objek bersarang:
 
 ```json
 {
@@ -59,7 +59,7 @@ Ketika user memiliki `organization_unit`, response yang dikembalikan berbentuk o
 | `parent.name`         | `string` | Nama parent DIVISION                          |
 | `parent.type`         | `string` | Selalu `"DIVISION"`                           |
 
-> Jika user berada di DIVISION langsung (parent_id = null), maka `parent` akan bernilai `null`.
+> Jika user berada di DIVISION langsung (parentId = null), maka `parent` akan bernilai `null`.
 
 ### 1.4 Penempatan User
 
@@ -67,10 +67,10 @@ User bisa ditempatkan di **DIVISION** atau **DEPARTMENT**. Contoh:
 
 ```json
 {
-  "id": "clx...abc",
+  "_id": "clx...abc",
   "fullname": "Budi Santoso",
   "role": "USER",
-  "organization_unit": {
+  "organizationUnit": {
     "name": "H&M",
     "type": "DEPARTMENT",
     "parent": {
@@ -109,14 +109,14 @@ Contoh response di endpoint `profile`:
 
 ```json
 {
-  "id": "clx...abc",
+  "_id": "clx...abc",
   "fullname": "Budi Santoso",
   "email": "budi@mail.com",
   "phone": "08123456789",
   "role": "USER",
-  "created_at": "2025-01-15T08:30:00.000Z",
-  "updated_at": "2025-03-01T14:20:00.000Z",
-  "organization_unit": {
+  "createdAt": "2025-01-15T08:30:00.000Z",
+  "updatedAt": "2025-03-01T14:20:00.000Z",
+  "organizationUnit": {
     "name": "H&M",
     "type": "DEPARTMENT",
     "parent": {
@@ -155,7 +155,7 @@ Authorization: Bearer <token>
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `organization_unit_id` | `string` | ❌ | Filter user berdasarkan unit organisasi tertentu |
+| `organizationUnitId` | `string` | ❌ | Filter user berdasarkan unit organisasi tertentu |
 
 **Response 200 — Success:**
 
@@ -164,12 +164,12 @@ Authorization: Bearer <token>
   "success": true,
   "data": [
     {
-      "id": "clx...abc",
+      "_id": "clx...abc",
       "fullname": "Budi Santoso",
       "email": "budi@mail.com",
       "phone": "08123456789",
       "role": "USER",
-      "organization_unit": {
+      "organizationUnit": {
         "name": "H&M",
         "type": "DEPARTMENT",
         "parent": {
@@ -177,16 +177,16 @@ Authorization: Bearer <token>
           "type": "DIVISION"
         }
       },
-      "created_at": "2025-01-15T08:30:00.000Z"
+      "createdAt": "2025-01-15T08:30:00.000Z"
     },
     {
-      "id": "clx...def",
+      "_id": "clx...def",
       "fullname": "Siti Nurhaliza",
       "email": "siti@mail.com",
       "phone": null,
       "role": "USER",
-      "organization_unit": null,
-      "created_at": "2025-02-20T10:00:00.000Z"
+      "organizationUnit": null,
+      "createdAt": "2025-02-20T10:00:00.000Z"
     }
   ]
 }
@@ -196,22 +196,22 @@ Authorization: Bearer <token>
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | Unique identifier user (cuid) |
+| `_id` | `string` | Unique identifier user (cuid) |
 | `fullname` | `string` | Nama lengkap user |
 | `email` | `string` | Email user (unique) |
 | `phone` | `string \| null` | Nomor telepon, bisa `null` jika tidak diisi |
 | `role` | `string` | `"USER"` — karena `SUPERADMIN` otomatis difilter |
-| `organization_unit` | `object \| null` | Unit organisasi user. `null` jika tidak punya unit |
-| `organization_unit.name` | `string` | Nama unit (contoh: `"H&M"`) |
-| `organization_unit.type` | `string` | `"DIVISION"` atau `"DEPARTMENT"` |
-| `organization_unit.parent` | `object \| null` | Parent unit. `null` jika unit adalah DIVISION |
-| `organization_unit.parent.name` | `string` | Nama parent DIVISION (contoh: `"Teknik"`) |
-| `organization_unit.parent.type` | `string` | Selalu `"DIVISION"` |
-| `created_at` | `string` (ISO 8601) | Timestamp kapan user dibuat |
+| `organizationUnit` | `object \| null` | Unit organisasi user. `null` jika tidak punya unit |
+| `organizationUnit.name` | `string` | Nama unit (contoh: `"H&M"`) |
+| `organizationUnit.type` | `string` | `"DIVISION"` atau `"DEPARTMENT"` |
+| `organizationUnit.parent` | `object \| null` | Parent unit. `null` jika unit adalah DIVISION |
+| `organizationUnit.parent.name` | `string` | Nama parent DIVISION (contoh: `"Teknik"`) |
+| `organizationUnit.parent.type` | `string` | Selalu `"DIVISION"` |
+| `createdAt` | `string` (ISO 8601) | Timestamp kapan user dibuat |
 
 **Catatan:**
 - `SUPERADMIN` tidak pernah muncul di list ini
-- Urutan berdasarkan `created_at` descending (terbaru di atas)
+- Urutan berdasarkan `createdAt` descending (terbaru di atas)
 - User yang sudah di-soft-delete tidak muncul
 
 **Error Responses:**
@@ -241,12 +241,12 @@ Mengembalikan detail satu user berdasarkan ID. Termasuk user `SUPERADMIN`.
 {
   "success": true,
   "data": {
-    "id": "clx...abc",
+    "_id": "clx...abc",
     "fullname": "Budi Santoso",
     "email": "budi@mail.com",
     "phone": "08123456789",
     "role": "USER",
-    "organization_unit": {
+    "organizationUnit": {
       "name": "H&M",
       "type": "DEPARTMENT",
       "parent": {
@@ -254,8 +254,8 @@ Mengembalikan detail satu user berdasarkan ID. Termasuk user `SUPERADMIN`.
         "type": "DIVISION"
       }
     },
-    "created_at": "2025-01-15T08:30:00.000Z",
-    "updated_at": "2025-03-01T14:20:00.000Z"
+    "createdAt": "2025-01-15T08:30:00.000Z",
+    "updatedAt": "2025-03-01T14:20:00.000Z"
   }
 }
 ```
@@ -264,21 +264,21 @@ Mengembalikan detail satu user berdasarkan ID. Termasuk user `SUPERADMIN`.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | Unique identifier user (cuid) |
+| `_id` | `string` | Unique identifier user (cuid) |
 | `fullname` | `string` | Nama lengkap user |
 | `email` | `string` | Email user (unique) |
 | `phone` | `string \| null` | Nomor telepon, bisa `null` |
 | `role` | `string` | `"SUPERADMIN"` atau `"USER"` |
-| `organization_unit` | `object \| null` | Unit organisasi user |
-| `organization_unit.name` | `string` | Nama unit |
-| `organization_unit.type` | `string` | `"DIVISION"` atau `"DEPARTMENT"` |
-| `organization_unit.parent` | `object \| null` | Parent unit |
-| `organization_unit.parent.name` | `string` | Nama parent DIVISION |
-| `organization_unit.parent.type` | `string` | Selalu `"DIVISION"` |
-| `created_at` | `string` (ISO 8601) | Timestamp dibuat |
-| `updated_at` | `string` (ISO 8601) | Timestamp terakhir diupdate |
+| `organizationUnit` | `object \| null` | Unit organisasi user |
+| `organizationUnit.name` | `string` | Nama unit |
+| `organizationUnit.type` | `string` | `"DIVISION"` atau `"DEPARTMENT"` |
+| `organizationUnit.parent` | `object \| null` | Parent unit |
+| `organizationUnit.parent.name` | `string` | Nama parent DIVISION |
+| `organizationUnit.parent.type` | `string` | Selalu `"DIVISION"` |
+| `createdAt` | `string` (ISO 8601) | Timestamp dibuat |
+| `updatedAt` | `string` (ISO 8601) | Timestamp terakhir diupdate |
 
-> **Perbedaan dengan `list`:** Endpoint ini mengembalikan `updated_at` dan tidak memfilter `SUPERADMIN`.
+> **Perbedaan dengan `list`:** Endpoint ini mengembalikan `updatedAt` dan tidak memfilter `SUPERADMIN`.
 
 **Error Responses:**
 
@@ -305,7 +305,7 @@ Membuat user baru.
 | `password` | `string` | ✅ | — | Password (min 6 karakter) |
 | `phone` | `string` | ❌ | — | Nomor telepon (unique jika diisi) |
 | `role` | `string` | ❌ | `"USER"` | `"SUPERADMIN"` atau `"USER"` |
-| `organization_unit_id` | `string` | ❌ | — | ID OrganizationUnit (cuid) |
+| `organizationUnitId` | `string` | ❌ | — | ID OrganizationUnit (cuid) |
 
 **Contoh Request Body:**
 
@@ -316,7 +316,7 @@ Membuat user baru.
   "password": "rahasia123",
   "phone": "08123456789",
   "role": "USER",
-  "organization_unit_id": "clx...orgunit1"
+  "organizationUnitId": "clx...orgunit1"
 }
 ```
 
@@ -326,7 +326,7 @@ Membuat user baru.
 {
   "success": true,
   "data": {
-    "id": "clx...abc",
+    "_id": "clx...abc",
     "fullname": "Budi Santoso",
     "email": "budi@mail.com"
   }
@@ -337,7 +337,7 @@ Membuat user baru.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | ID user yang baru dibuat |
+| `_id` | `string` | ID user yang baru dibuat |
 | `fullname` | `string` | Nama lengkap user |
 | `email` | `string` | Email user |
 
@@ -374,7 +374,7 @@ Mengupdate data user. Semua field bersifat **opsional** — partial update.
 | `password` | `string` | ❌ | Password baru (min 6 karakter) |
 | `phone` | `string` | ❌ | Nomor telepon baru |
 | `role` | `string` | ❌ | Role baru (`"SUPERADMIN"` / `"USER"`) |
-| `organization_unit_id` | `string` | ❌ | ID OrganizationUnit baru |
+| `organizationUnitId` | `string` | ❌ | ID OrganizationUnit baru |
 
 **Contoh Request Body:**
 
@@ -386,7 +386,7 @@ Mengupdate data user. Semua field bersifat **opsional** — partial update.
 }
 ```
 
-> Kirim hanya field yang ingin diubah. Untuk menghapus `phone` atau `organization_unit_id`, kirim `null`.
+> Kirim hanya field yang ingin diubah. Untuk menghapus `phone` atau `organizationUnitId`, kirim `null`.
 
 **Response 200 — Success:**
 
@@ -394,7 +394,7 @@ Mengupdate data user. Semua field bersifat **opsional** — partial update.
 {
   "success": true,
   "data": {
-    "id": "clx...abc",
+    "_id": "clx...abc",
     "fullname": "Budi Santoso Updated",
     "email": "budi.baru@mail.com"
   }
@@ -405,7 +405,7 @@ Mengupdate data user. Semua field bersifat **opsional** — partial update.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | ID user |
+| `_id` | `string` | ID user |
 | `fullname` | `string` | Nama lengkap (bisa berubah) |
 | `email` | `string` | Email (bisa berubah) |
 
@@ -440,7 +440,7 @@ Menonaktifkan user. Data tetap di database tetapi tidak bisa login dan tidak mun
 {
   "success": true,
   "data": {
-    "id": "clx...budi"
+    "_id": "clx...budi"
   }
 }
 ```
@@ -449,7 +449,7 @@ Menonaktifkan user. Data tetap di database tetapi tidak bisa login dan tidak mun
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | ID user yang dinonaktifkan |
+| `_id` | `string` | ID user yang dinonaktifkan |
 
 **Error Responses:**
 
@@ -527,16 +527,16 @@ Response:
 {
   "success": true,
   "data": {
-    "id": "clx...admin",
+    "_id": "clx...admin",
     "fullname": "Super Admin",
     "email": "superadmin@mail.com",
-    "organization_unit": null,
-    "access_token": "eyJhbGciOiJIUzI1NiIs..."
+    "organizationUnit": null,
+    "accessToken": "eyJhbGciOiJIUzI1NiIs..."
   }
 }
 ```
 
-> Simpan `access_token` untuk dipakai di header Authorization request selanjutnya.
+> Simpan `accessToken` untuk dipakai di header Authorization request selanjutnya.
 
 ---
 
@@ -564,7 +564,7 @@ Content-Type: application/json
   "password": "rahasia123",
   "phone": "08123456789",
   "role": "USER",
-  "organization_unit_id": "clx...hm"
+  "organizationUnitId": "clx...hm"
 }
 ```
 
@@ -574,7 +574,7 @@ Response:
 {
   "success": true,
   "data": {
-    "id": "clx...budi",
+    "_id": "clx...budi",
     "fullname": "Budi Santoso",
     "email": "budi@mail.com"
   }
@@ -590,7 +590,7 @@ GET /users/clx...budi
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
-Response: Detail user + `organization_unit` + `updated_at`.
+Response: Detail user + `organizationUnit` + `updatedAt`.
 
 ---
 
@@ -613,7 +613,7 @@ Response:
 {
   "success": true,
   "data": {
-    "id": "clx...budi",
+    "_id": "clx...budi",
     "fullname": "Budi Santoso Reborn",
     "email": "budi@mail.com"
   }
@@ -635,7 +635,7 @@ Response:
 {
   "success": true,
   "data": {
-    "id": "clx...budi"
+    "_id": "clx...budi"
   }
 }
 ```

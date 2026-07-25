@@ -1,6 +1,6 @@
 # API Response Format
 
-> **Note:** Semua field dalam response API menggunakan **snake_case** dan **lowercase**.
+> **Note:** Semua field dalam response API menggunakan **camelCase**. Primary key `id` dikembalikan sebagai `_id` oleh `TransformIdInterceptor`.
 
 ---
 
@@ -24,7 +24,7 @@ type SuccessResponse = {
 {
   "success": true,
   "data": {
-    "id": "clx...abc",
+    "_id": "clx...abc",
     "fullname": "Budi Santoso",
     "email": "budi@mail.com"
   }
