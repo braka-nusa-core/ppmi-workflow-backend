@@ -34,7 +34,7 @@ export class PermissionGuard implements CanActivate {
         action: permission.action,
         organizations: {
           some: {
-            organization_unit: {
+            organizationUnit: {
               users: { some: { id: user.sub } },
             },
           },
