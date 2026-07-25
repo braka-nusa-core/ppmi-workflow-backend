@@ -5,6 +5,7 @@ import { urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { GlobalException } from './common/exceptions/global.exception';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { TransformIdInterceptor } from './common/interceptors/transform-id.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -24,7 +25,10 @@ async function bootstrap() {
 
   app.use(urlencoded({ extended: true, limit: '5mb' }));
   app.useGlobalFilters(new GlobalException(app.get(HttpAdapterHost)));
-  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalInterceptors(
+    new TransformIdInterceptor(),
+    new ResponseInterceptor(),
+  );
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
