@@ -52,18 +52,18 @@ enum LogReferenceType {
 }
 
 model OrganizationUnit {
-  id            String   @id @default(cuid())
-  parent_id     String?
+  id            String   @id @default(cuid()) @map("_id")
+  parentId      String?
 
   name          String
   type          UnitType
 
-  parent        OrganizationUnit?  @relation("UnitHierarchy", fields: [parent_id], references: [id])
+  parent        OrganizationUnit?  @relation("UnitHierarchy", fields: [parentId], references: [id])
   children      OrganizationUnit[] @relation("UnitHierarchy")
 
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  deleted_at    DateTime? 
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
 
   users         User[]
   permissions   OrganizationUnitPermission[]
@@ -73,65 +73,65 @@ model OrganizationUnit {
 }
 
 model User {
-  id                      String    @id @default(cuid())
-  fullname                String
-  email                   String    @unique
-  phone                   String?   @unique
-  password                String    @db.Text
-  role                    UserRole  @default(USER)
+  id                    String    @id @default(cuid()) @map("_id")
+  fullname              String
+  email                 String    @unique
+  phone                 String?   @unique
+  password              String    @db.Text
+  role                  UserRole  @default(USER)
 
-  organization_unit_id    String?
-  organization_unit       OrganizationUnit? @relation(fields: [organization_unit_id], references: [id])
-  logs       Log[]
+  organizationUnitId    String?
+  organizationUnit      OrganizationUnit? @relation(fields: [organizationUnitId], references: [id])
+  logs                  Log[]
 
-  created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt
-  deleted_at              DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
 
   @@map("user")
 }
 
 model Permission {
-  id                      String    @id @default(cuid())
-  resource                String
-  action                  String
-  description             String?
+  id                    String    @id @default(cuid()) @map("_id")
+  resource              String
+  action                String
+  description           String?
 
-  organizations           OrganizationUnitPermission[]
+  organizations         OrganizationUnitPermission[]
 
-  created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt
-  deleted_at              DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
 
   @@unique([resource, action])
   @@map("permission")
 }
 
 model OrganizationUnitPermission {
-  organization_unit_id    String
-  permission_id           String
+  organizationUnitId    String
+  permissionId          String
 
-  organization_unit       OrganizationUnit  @relation(fields: [organization_unit_id],references: [id])
-  permission              Permission        @relation(fields: [permission_id],references: [id])
+  organizationUnit      OrganizationUnit  @relation(fields: [organizationUnitId], references: [id])
+  permission            Permission        @relation(fields: [permissionId], references: [id])
 
-  @@id([organization_unit_id, permission_id])
+  @@id([organizationUnitId, permissionId])
   @@map("organization_unit_permission")
 }
 
 model Log {
-  id                      String         @id @default(uuid())
-  user_id                 String
-  action                  LogAction
-  description             String         @db.Text
-  reference_id            String?
-  reference_type          LogReferenceType?
-  details                 String?        @db.Text
+  id              String         @id @default(uuid()) @map("_id")
+  userId          String
+  action          LogAction
+  description     String         @db.Text
+  referenceId     String?
+  referenceType   LogReferenceType?
+  details         String?        @db.Text
 
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  user                    User @relation(fields: [user_id], references: [id])
-  
-  @@index([reference_type, reference_id])
+  user            User           @relation(fields: [userId], references: [id])
+
+  @@index([referenceType, referenceId])
   @@map("log")
 }
