@@ -51,87 +51,813 @@ enum LogReferenceType {
   INSURANCE_TYPE
 }
 
+enum QuotationStatus {
+  DRAFT
+  WAITING_APPROVAL
+  APPROVED
+  SENT_TO_INSURANCE
+  REVISION
+  POLICY_ISSUED
+}
+
+enum QuotationApprovalAction {
+  APPROVED
+  REJECTED
+  REVISION
+}
+
+enum ParticipantRole {
+  LEADER
+  MEMBER
+}
+
+enum PolicyStatus {
+  POLICY_ISSUED
+  PLACEMENT_COMPLETED
+}
+
+enum RequestInvoiceStatus {
+  DRAFT
+  RFI_SUBMITTED
+  RETURNED_TO_TECHNICAL
+  READY_FOR_INVOICE
+}
+
+enum RequestInvoiceReviewAction {
+  APPROVED
+  RETURNED
+}
+
+enum RequestInvoiceDocumentType {
+  POLICY_DOCUMENT
+  SIGNED_QS
+  CN_DN
+  RENEWAL_ATTACHMENT
+  OTHER
+}
+
+enum InvoiceDocumentType {
+  INVOICE_PDF
+  VOUCHER
+}
+
+enum InvoiceStatus {
+  INVOICE_ISSUED
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+}
+
+enum IncomingPaymentStatus {
+  PAID
+  REFUNDED
+}
+
+enum OutgoingPaymentStatus {
+  WAITING_PAYMENT
+  PARTIAL_PAYMENT
+  FULLY_PAID
+}
+
+enum ShipmentStatus {
+  SHIPPED
+  DELIVERED
+  COMPLETED
+}
+
 model OrganizationUnit {
-  id            String   @id @default(cuid()) @map("_id")
-  parentId      String?
+  id       String  @id @default(cuid()) @map("_id")
+  parentId String?
 
-  name          String
-  type          UnitType
+  name String
+  type UnitType
 
-  parent        OrganizationUnit?  @relation("UnitHierarchy", fields: [parentId], references: [id])
-  children      OrganizationUnit[] @relation("UnitHierarchy")
+  parent   OrganizationUnit?  @relation("UnitHierarchy", fields: [parentId], references: [id])
+  children OrganizationUnit[] @relation("UnitHierarchy")
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  users         User[]
-  permissions   OrganizationUnitPermission[]
+  users       User[]
+  permissions OrganizationUnitPermission[]
 
   @@unique([name, type])
   @@map("organization_unit")
 }
 
 model User {
-  id                    String    @id @default(cuid()) @map("_id")
-  fullname              String
-  email                 String    @unique
-  phone                 String?   @unique
-  password              String    @db.Text
-  role                  UserRole  @default(USER)
+  id       String   @id @default(cuid()) @map("_id")
+  fullname String
+  email    String   @unique
+  phone    String?  @unique
+  password String   @db.Text
+  role     UserRole @default(USER)
 
-  organizationUnitId    String?
-  organizationUnit      OrganizationUnit? @relation(fields: [organizationUnitId], references: [id])
-  logs                  Log[]
+  organizationUnitId String?
+  organizationUnit   OrganizationUnit? @relation(fields: [organizationUnitId], references: [id])
+  logs               Log[]
 
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  deletedAt             DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("user")
 }
 
 model Permission {
-  id                    String    @id @default(cuid()) @map("_id")
-  resource              String
-  action                String
-  description           String?
+  id          String  @id @default(cuid()) @map("_id")
+  resource    String
+  action      String
+  description String?
 
-  organizations         OrganizationUnitPermission[]
+  organizations OrganizationUnitPermission[]
 
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  deletedAt             DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@unique([resource, action])
   @@map("permission")
 }
 
 model OrganizationUnitPermission {
-  organizationUnitId    String
-  permissionId          String
+  organizationUnitId String
+  permissionId       String
 
-  organizationUnit      OrganizationUnit  @relation(fields: [organizationUnitId], references: [id])
-  permission            Permission        @relation(fields: [permissionId], references: [id])
+  organizationUnit OrganizationUnit @relation(fields: [organizationUnitId], references: [id])
+  permission       Permission       @relation(fields: [permissionId], references: [id])
 
   @@id([organizationUnitId, permissionId])
   @@map("organization_unit_permission")
 }
 
 model Log {
-  id              String         @id @default(uuid()) @map("_id")
-  userId          String
-  action          LogAction
-  description     String         @db.Text
-  referenceId     String?
-  referenceType   LogReferenceType?
-  details         String?        @db.Text
+  id            String            @id @default(cuid()) @map("_id")
+  userId        String
+  action        LogAction
+  description   String            @db.Text
+  referenceId   String?
+  referenceType LogReferenceType?
+  details       String?           @db.Text
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user            User           @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@index([referenceType, referenceId])
   @@map("log")
+}
+
+model InsuranceType {
+  id          String  @id @default(cuid()) @map("_id")
+  code        String  @unique
+  name        String
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotations Quotation[]
+  policies   Policy[]
+
+  @@index([deletedAt])
+  @@map("insurance_type")
+}
+
+model InsuranceCompany {
+  id            String  @id @default(cuid()) @map("_id")
+  code          String  @unique
+  name          String
+  address       String?
+  phone         String?
+  email         String?
+  contactPerson String?
+  status        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  policyParticipants PolicyParticipant[]
+
+  @@index([deletedAt])
+  @@map("insurance_company")
+}
+
+model Bank {
+  id            String  @id @default(cuid()) @map("_id")
+  name          String
+  accountNumber String?
+  accountName   String?
+  branch        String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  incomingPayments IncomingPayment[]
+
+  @@index([deletedAt])
+  @@map("bank")
+}
+
+model QsTemplate {
+  id              String  @id @default(cuid()) @map("_id")
+  name            String
+  templateVersion String?
+  content         Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("qs_template")
+}
+
+model Warranty {
+  id          String  @id @default(cuid()) @map("_id")
+  code        String?
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotationWarranties QuotationWarranty[]
+
+  @@index([deletedAt])
+  @@map("warranty")
+}
+
+model TermsCondition {
+  id          String  @id @default(cuid()) @map("_id")
+  code        String?
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotationTerms QuotationTerm[]
+
+  @@index([deletedAt])
+  @@map("terms_condition")
+}
+
+model Surveyor {
+  id      String  @id @default(cuid()) @map("_id")
+  name    String
+  phone   String?
+  email   String?
+  address String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("surveyor")
+}
+
+model Adjuster {
+  id      String  @id @default(cuid()) @map("_id")
+  name    String
+  phone   String?
+  email   String?
+  address String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("adjuster")
+}
+
+model Client {
+  id            String  @id @default(cuid()) @map("_id")
+  clientCode    String  @unique
+  name          String
+  address       String?
+  phone         String?
+  email         String?
+  contactPerson String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotations Quotation[]
+
+  @@index([deletedAt])
+  @@map("client")
+}
+
+model Quotation {
+  id              String @id @default(cuid()) @map("_id")
+  quotationNumber String @unique
+  clientId        String
+  insuranceTypeId String
+
+  insured String?
+  address String?
+
+  quotationDate DateTime?
+
+  periodStart DateTime?
+  periodEnd   DateTime?
+
+  interest   String?
+  rate       Decimal? @db.Decimal(15, 4)
+  premium    Decimal? @db.Decimal(15, 2)
+  deductible Decimal? @db.Decimal(15, 2)
+  brokerage  Decimal? @db.Decimal(15, 4)
+
+  status QuotationStatus
+
+  createdById  String?
+  approvedById String?
+  approvedAt   DateTime?
+
+  templateVersion String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  client        Client        @relation(fields: [clientId], references: [id])
+  insuranceType InsuranceType @relation(fields: [insuranceTypeId], references: [id])
+
+  objects     QuotationObject[]
+  coverages   QuotationCoverage[]
+  terms       QuotationTerm[]
+  warranties  QuotationWarranty[]
+  attachments QuotationAttachment[]
+  approvals   QuotationApproval[]
+  histories   QuotationHistory[]
+  policy      Policy?
+
+  @@index([clientId])
+  @@index([insuranceTypeId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("quotation")
+}
+
+model QuotationObject {
+  id          String @id @default(cuid()) @map("_id")
+  quotationId String
+  objectType  String
+  data        Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@index([quotationId])
+  @@index([deletedAt])
+  @@map("quotation_object")
+}
+
+model QuotationCoverage {
+  id           String   @id @default(cuid()) @map("_id")
+  quotationId  String
+  coverageType String?
+  description  String?
+  value        Decimal? @db.Decimal(15, 2)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@index([quotationId])
+  @@index([deletedAt])
+  @@map("quotation_coverage")
+}
+
+model QuotationTerm {
+  id               String  @id @default(cuid()) @map("_id")
+  quotationId      String
+  termsConditionId String?
+  description      String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation      Quotation       @relation(fields: [quotationId], references: [id])
+  termsCondition TermsCondition? @relation(fields: [termsConditionId], references: [id])
+
+  @@index([quotationId])
+  @@index([termsConditionId])
+  @@index([deletedAt])
+  @@map("quotation_term")
+}
+
+model QuotationWarranty {
+  id          String  @id @default(cuid()) @map("_id")
+  quotationId String
+  warrantyId  String?
+  description String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+  warranty  Warranty? @relation(fields: [warrantyId], references: [id])
+
+  @@index([quotationId])
+  @@index([warrantyId])
+  @@index([deletedAt])
+  @@map("quotation_warranty")
+}
+
+model QuotationAttachment {
+  id          String  @id @default(cuid()) @map("_id")
+  quotationId String
+  fileName    String?
+  url         String?
+  mimeType    String?
+  fileSize    Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@index([quotationId])
+  @@index([deletedAt])
+  @@map("quotation_attachment")
+}
+
+model QuotationApproval {
+  id          String                  @id @default(cuid()) @map("_id")
+  quotationId String
+  approverId  String?
+  action      QuotationApprovalAction
+  note        String?                 @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@index([quotationId])
+  @@map("quotation_approval")
+}
+
+model QuotationHistory {
+  id          String           @id @default(cuid()) @map("_id")
+  quotationId String
+  fromStatus  QuotationStatus?
+  toStatus    QuotationStatus
+  action      String?
+  actorId     String?
+  note        String?          @db.Text
+
+  createdAt DateTime @default(now())
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@index([quotationId])
+  @@map("quotation_history")
+}
+
+model Policy {
+  id                String       @id @default(cuid()) @map("_id")
+  quotationId       String       @unique
+  policyNumber      String       @unique
+  policyDate        DateTime?
+  insuranceTypeId   String
+  policyDocumentUrl String?
+  status            PolicyStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation     Quotation     @relation(fields: [quotationId], references: [id])
+  insuranceType InsuranceType @relation(fields: [insuranceTypeId], references: [id])
+
+  participants    PolicyParticipant[]
+  histories       PolicyHistory[]
+  requestInvoices RequestInvoice[]
+
+  @@index([quotationId])
+  @@index([insuranceTypeId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("policy")
+}
+
+model PolicyParticipant {
+  id                 String          @id @default(cuid()) @map("_id")
+  policyId           String
+  insuranceCompanyId String
+  role               ParticipantRole
+  share              Decimal         @db.Decimal(5, 2)
+  orderNo            Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  policy           Policy           @relation(fields: [policyId], references: [id])
+  insuranceCompany InsuranceCompany @relation(fields: [insuranceCompanyId], references: [id])
+
+  outgoingPayments OutgoingPayment[]
+
+  @@index([policyId])
+  @@index([insuranceCompanyId])
+  @@index([deletedAt])
+  @@map("policy_participant")
+}
+
+model PolicyHistory {
+  id         String        @id @default(cuid()) @map("_id")
+  policyId   String
+  fromStatus PolicyStatus?
+  toStatus   PolicyStatus
+  action     String?
+  actorId    String?
+  note       String?       @db.Text
+
+  createdAt DateTime @default(now())
+
+  policy Policy @relation(fields: [policyId], references: [id])
+
+  @@index([policyId])
+  @@map("policy_history")
+}
+
+model RequestInvoice {
+  id            String               @id @default(cuid()) @map("_id")
+  requestNumber String               @unique
+  policyId      String
+  status        RequestInvoiceStatus
+  notes         String?              @db.Text
+  submittedById String?
+  submittedAt   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  policy Policy @relation(fields: [policyId], references: [id])
+
+  documents RequestInvoiceDocument[]
+  reviews   RequestInvoiceReview[]
+  invoices  Invoice[]
+
+  @@index([policyId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("request_invoice")
+}
+
+model RequestInvoiceDocument {
+  id               String                     @id @default(cuid()) @map("_id")
+  requestInvoiceId String
+  documentType     RequestInvoiceDocumentType
+  fileName         String?
+  url              String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  requestInvoice RequestInvoice @relation(fields: [requestInvoiceId], references: [id])
+
+  @@index([requestInvoiceId])
+  @@index([deletedAt])
+  @@map("request_invoice_document")
+}
+
+model RequestInvoiceReview {
+  id               String                     @id @default(cuid()) @map("_id")
+  requestInvoiceId String
+  reviewerId       String?
+  action           RequestInvoiceReviewAction
+  notes            String?                    @db.Text
+
+  createdAt DateTime @default(now())
+
+  requestInvoice RequestInvoice @relation(fields: [requestInvoiceId], references: [id])
+
+  @@index([requestInvoiceId])
+  @@map("request_invoice_review")
+}
+
+model Invoice {
+  id               String        @id @default(cuid()) @map("_id")
+  requestInvoiceId String
+  invoiceNumber    String        @unique
+  issueDate        DateTime?
+  dueDate          DateTime?
+  subtotal         Decimal?      @db.Decimal(15, 2)
+  ppn              Decimal?      @db.Decimal(15, 2)
+  grandTotal       Decimal?      @db.Decimal(15, 2)
+  status           InvoiceStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  requestInvoice RequestInvoice @relation(fields: [requestInvoiceId], references: [id])
+
+  documents        InvoiceDocument[]
+  incomingPayments IncomingPayment[]
+  shipments        Shipment[]
+
+  @@index([requestInvoiceId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("invoice")
+}
+
+model InvoiceDocument {
+  id           String              @id @default(cuid()) @map("_id")
+  invoiceId    String
+  documentType InvoiceDocumentType
+  fileName     String?
+  url          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([deletedAt])
+  @@map("invoice_document")
+}
+
+model IncomingPayment {
+  id                String                @id @default(cuid()) @map("_id")
+  invoiceId         String
+  paymentDate       DateTime?
+  amount            Decimal?              @db.Decimal(15, 2)
+  paymentMethod     String?
+  bankId            String?
+  receiptNumber     String?
+  proofOfPaymentUrl String?
+  status            IncomingPaymentStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  bank    Bank?   @relation(fields: [bankId], references: [id])
+
+  installments IncomingPaymentInstallment[]
+
+  @@index([invoiceId])
+  @@index([bankId])
+  @@index([deletedAt])
+  @@map("incoming_payment")
+}
+
+model IncomingPaymentInstallment {
+  id                String    @id @default(cuid()) @map("_id")
+  incomingPaymentId String
+  installmentOrder  Int?
+  amount            Decimal?  @db.Decimal(15, 2)
+  dueDate           DateTime?
+  paymentDate       DateTime?
+  proofOfPaymentUrl String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  incomingPayment IncomingPayment @relation(fields: [incomingPaymentId], references: [id])
+
+  @@index([incomingPaymentId])
+  @@index([deletedAt])
+  @@map("incoming_payment_installment")
+}
+
+model OutgoingPayment {
+  id                  String                @id @default(cuid()) @map("_id")
+  policyParticipantId String
+  amount              Decimal?              @db.Decimal(15, 2)
+  paymentDate         DateTime?
+  status              OutgoingPaymentStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  policyParticipant PolicyParticipant @relation(fields: [policyParticipantId], references: [id])
+
+  installments OutgoingInstallment[]
+
+  @@index([policyParticipantId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("outgoing_payment")
+}
+
+model OutgoingInstallment {
+  id                String    @id @default(cuid()) @map("_id")
+  outgoingPaymentId String
+  installmentOrder  Int?
+  amount            Decimal?  @db.Decimal(15, 2)
+  paymentDate       DateTime?
+  proofOfPaymentUrl String?
+  notes             String?   @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  outgoingPayment OutgoingPayment @relation(fields: [outgoingPaymentId], references: [id])
+
+  @@index([outgoingPaymentId])
+  @@index([deletedAt])
+  @@map("outgoing_installment")
+}
+
+model Shipment {
+  id             String         @id @default(cuid()) @map("_id")
+  invoiceId      String
+  courier        String?
+  trackingNumber String?
+  shipmentDate   DateTime?
+  receiver       String?
+  status         ShipmentStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  documents ShipmentDocument[]
+
+  @@index([invoiceId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("shipment")
+}
+
+model ShipmentDocument {
+  id           String  @id @default(cuid()) @map("_id")
+  shipmentId   String
+  documentType String?
+  fileName     String?
+  url          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id])
+
+  @@index([shipmentId])
+  @@index([deletedAt])
+  @@map("shipment_document")
+}
+
+model Notification {
+  id          String  @id @default(cuid()) @map("_id")
+  recipientId String
+  title       String?
+  message     String? @db.Text
+  isRead      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipientId])
+  @@map("notification")
+}
+
+model FileUpload {
+  id           String  @id @default(cuid()) @map("_id")
+  module       String?
+  referenceId  String?
+  fileName     String?
+  url          String?
+  uploadedById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([module, referenceId])
+  @@index([deletedAt])
+  @@map("file_upload")
 }
