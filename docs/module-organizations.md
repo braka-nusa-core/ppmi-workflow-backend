@@ -581,7 +581,7 @@ Menghapus assignment permission dari suatu organization.
 
 ### 5.2 Format Response
 
-Mengikuti standar global — lihat `docs/api-response.md` untuk detail format sukses dan error.
+Mengikuti standar global — lihat `api-response.md` untuk detail format sukses dan error.
 
 ---
 
