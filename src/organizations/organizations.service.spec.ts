@@ -71,7 +71,12 @@ describe('OrganizationsService', () => {
           name: 'Teknik',
           type: 'DIVISION',
           children: [
-            { id: 'dept-1', name: 'H&M', type: 'DEPARTMENT', _count: { users: 5 } },
+            {
+              id: 'dept-1',
+              name: 'H&M',
+              type: 'DEPARTMENT',
+              _count: { users: 5 },
+            },
           ],
         },
       ];
@@ -107,7 +112,9 @@ describe('OrganizationsService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.organizationUnit.findFirst.mockResolvedValue(null);
 
-      await expect(service.get('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.get('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -116,7 +123,12 @@ describe('OrganizationsService', () => {
 
     it('creates a DIVISION', async () => {
       const dto = { name: 'New Division', type: 'DIVISION' as const };
-      const created = { id: 'div-1', name: 'New Division', type: 'DIVISION', parentId: null };
+      const created = {
+        id: 'div-1',
+        name: 'New Division',
+        type: 'DIVISION',
+        parentId: null,
+      };
       mockTx.organizationUnit.create.mockResolvedValue(created);
 
       const result = await service.create(dto, actor);
@@ -138,9 +150,21 @@ describe('OrganizationsService', () => {
     });
 
     it('creates a DEPARTMENT with valid parent', async () => {
-      const dto = { name: 'New Dept', type: 'DEPARTMENT' as const, parentId: 'div-1' };
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'div-1', type: 'DIVISION' });
-      const created = { id: 'dept-1', name: 'New Dept', type: 'DEPARTMENT', parentId: 'div-1' };
+      const dto = {
+        name: 'New Dept',
+        type: 'DEPARTMENT' as const,
+        parentId: 'div-1',
+      };
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'div-1',
+        type: 'DIVISION',
+      });
+      const created = {
+        id: 'dept-1',
+        name: 'New Dept',
+        type: 'DEPARTMENT',
+        parentId: 'div-1',
+      };
       mockTx.organizationUnit.create.mockResolvedValue(created);
 
       const result = await service.create(dto, actor);
@@ -151,20 +175,34 @@ describe('OrganizationsService', () => {
     it('throws when DEPARTMENT has no parentId', async () => {
       const dto = { name: 'Orphan Dept', type: 'DEPARTMENT' as const };
 
-      await expect(service.create(dto, actor)).rejects.toThrow(BadRequestException);
+      await expect(service.create(dto, actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('throws when parent DIVISION does not exist', async () => {
-      const dto = { name: 'Orphan Dept', type: 'DEPARTMENT' as const, parentId: 'nonexistent' };
+      const dto = {
+        name: 'Orphan Dept',
+        type: 'DEPARTMENT' as const,
+        parentId: 'nonexistent',
+      };
       prismaMock.organizationUnit.findFirst.mockResolvedValue(null);
 
-      await expect(service.create(dto, actor)).rejects.toThrow(BadRequestException);
+      await expect(service.create(dto, actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('throws when DIVISION has parentId', async () => {
-      const dto = { name: 'Bad Div', type: 'DIVISION' as const, parentId: 'some-parent' };
+      const dto = {
+        name: 'Bad Div',
+        type: 'DIVISION' as const,
+        parentId: 'some-parent',
+      };
 
-      await expect(service.create(dto, actor)).rejects.toThrow(BadRequestException);
+      await expect(service.create(dto, actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -178,7 +216,12 @@ describe('OrganizationsService', () => {
         type: 'DIVISION',
         parentId: null,
       });
-      const updated = { id: 'org-1', name: 'New Name', type: 'DIVISION', parentId: null };
+      const updated = {
+        id: 'org-1',
+        name: 'New Name',
+        type: 'DIVISION',
+        parentId: null,
+      };
       mockTx.organizationUnit.update.mockResolvedValue(updated);
 
       const result = await service.update('org-1', { name: 'New Name' }, actor);
@@ -203,7 +246,9 @@ describe('OrganizationsService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.organizationUnit.findFirst.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { name: 'X' }, actor)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { name: 'X' }, actor),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('throws when DEPARTMENT lacks parentId', async () => {
@@ -268,22 +313,34 @@ describe('OrganizationsService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.organizationUnit.findFirst.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent', actor)).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent', actor)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('throws when organization has active children', async () => {
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'div-1', name: 'Div' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'div-1',
+        name: 'Div',
+      });
       prismaMock.organizationUnit.count.mockResolvedValue(2);
 
-      await expect(service.delete('div-1', actor)).rejects.toThrow(BadRequestException);
+      await expect(service.delete('div-1', actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('throws when organization has active users', async () => {
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'div-1', name: 'Div' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'div-1',
+        name: 'Div',
+      });
       prismaMock.organizationUnit.count.mockResolvedValue(0);
       prismaMock.user.count.mockResolvedValue(3);
 
-      await expect(service.delete('div-1', actor)).rejects.toThrow(BadRequestException);
+      await expect(service.delete('div-1', actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -312,14 +369,18 @@ describe('OrganizationsService', () => {
 
       const result = await service.getPermission('perm-1');
 
-      expect(prismaMock.permission.findFirst).toHaveBeenCalledWith({ where: { id: 'perm-1', deletedAt: null } });
+      expect(prismaMock.permission.findFirst).toHaveBeenCalledWith({
+        where: { id: 'perm-1', deletedAt: null },
+      });
       expect(result).toEqual(perm);
     });
 
     it('throws NotFoundException when not found', async () => {
       prismaMock.permission.findFirst.mockResolvedValue(null);
 
-      await expect(service.getPermission('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.getPermission('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -354,11 +415,24 @@ describe('OrganizationsService', () => {
     const actor = { id: 'admin-1', fullname: 'Admin' };
 
     it('updates a permission', async () => {
-      prismaMock.permission.findFirst.mockResolvedValue({ id: 'perm-1', resource: 'org', action: 'create' });
-      const updated = { id: 'perm-1', resource: 'org', action: 'create', description: 'Updated desc' };
+      prismaMock.permission.findFirst.mockResolvedValue({
+        id: 'perm-1',
+        resource: 'org',
+        action: 'create',
+      });
+      const updated = {
+        id: 'perm-1',
+        resource: 'org',
+        action: 'create',
+        description: 'Updated desc',
+      };
       mockTx.permission.update.mockResolvedValue(updated);
 
-      const result = await service.updatePermission('perm-1', { description: 'Updated desc' }, actor);
+      const result = await service.updatePermission(
+        'perm-1',
+        { description: 'Updated desc' },
+        actor,
+      );
 
       expect(mockTx.permission.update).toHaveBeenCalledWith({
         where: { id: 'perm-1' },
@@ -380,7 +454,9 @@ describe('OrganizationsService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.permission.findFirst.mockResolvedValue(null);
 
-      await expect(service.updatePermission('nonexistent', { description: 'desc' }, actor)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updatePermission('nonexistent', { description: 'desc' }, actor),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -388,7 +464,11 @@ describe('OrganizationsService', () => {
     const actor = { id: 'admin-1', fullname: 'Admin' };
 
     it('deletes a permission', async () => {
-      prismaMock.permission.findFirst.mockResolvedValue({ id: 'perm-1', resource: 'org', action: 'create' });
+      prismaMock.permission.findFirst.mockResolvedValue({
+        id: 'perm-1',
+        resource: 'org',
+        action: 'create',
+      });
       prismaMock.organizationUnitPermission.findMany.mockResolvedValue([]);
 
       const result = await service.deletePermission('perm-1', actor);
@@ -412,20 +492,33 @@ describe('OrganizationsService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.permission.findFirst.mockResolvedValue(null);
 
-      await expect(service.deletePermission('nonexistent', actor)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.deletePermission('nonexistent', actor),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('throws when permission is assigned to organizations', async () => {
-      prismaMock.permission.findFirst.mockResolvedValue({ id: 'perm-1', resource: 'org', action: 'create' });
-      prismaMock.organizationUnitPermission.findMany.mockResolvedValue([{ organizationUnitId: 'org-1' }]);
+      prismaMock.permission.findFirst.mockResolvedValue({
+        id: 'perm-1',
+        resource: 'org',
+        action: 'create',
+      });
+      prismaMock.organizationUnitPermission.findMany.mockResolvedValue([
+        { organizationUnitId: 'org-1' },
+      ]);
 
-      await expect(service.deletePermission('perm-1', actor)).rejects.toThrow(BadRequestException);
+      await expect(service.deletePermission('perm-1', actor)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('getOrgPermissions', () => {
     it('returns flattened permissions for an org', async () => {
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'org-1', name: 'Teknik' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'org-1',
+        name: 'Teknik',
+      });
       const assignments = [
         {
           permission: { id: 'perm-1', resource: 'org', action: 'create' },
@@ -434,11 +527,15 @@ describe('OrganizationsService', () => {
           permission: { id: 'perm-2', resource: 'org', action: 'read' },
         },
       ];
-      prismaMock.organizationUnitPermission.findMany.mockResolvedValue(assignments);
+      prismaMock.organizationUnitPermission.findMany.mockResolvedValue(
+        assignments,
+      );
 
       const result = await service.getOrgPermissions('org-1');
 
-      expect(prismaMock.organizationUnitPermission.findMany).toHaveBeenCalledWith({
+      expect(
+        prismaMock.organizationUnitPermission.findMany,
+      ).toHaveBeenCalledWith({
         where: { organizationUnitId: 'org-1' },
         select: {
           permission: {
@@ -456,12 +553,20 @@ describe('OrganizationsService', () => {
   describe('assignPermissions', () => {
     it('assigns permissions to an org', async () => {
       const dto = { permissionIds: ['perm-1', 'perm-2'] };
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'org-1', name: 'Teknik' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'org-1',
+        name: 'Teknik',
+      });
       prismaMock.organizationUnitPermission.findMany.mockResolvedValue([]);
 
-      const result = await service.assignPermissions('org-1', dto, { id: 'admin-1', fullname: 'Admin' });
+      const result = await service.assignPermissions('org-1', dto, {
+        id: 'admin-1',
+        fullname: 'Admin',
+      });
 
-      expect(prismaMock.organizationUnitPermission.createMany).toHaveBeenCalledWith({
+      expect(
+        prismaMock.organizationUnitPermission.createMany,
+      ).toHaveBeenCalledWith({
         data: [
           { organizationUnitId: 'org-1', permissionId: 'perm-1' },
           { organizationUnitId: 'org-1', permissionId: 'perm-2' },
@@ -475,34 +580,58 @@ describe('OrganizationsService', () => {
 
   describe('removePermission', () => {
     it('removes a permission assignment', async () => {
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'org-1', name: 'Teknik' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'org-1',
+        name: 'Teknik',
+      });
       prismaMock.organizationUnitPermission.findUnique.mockResolvedValue({
         organizationUnitId: 'org-1',
         permissionId: 'perm-1',
       });
 
-      const result = await service.removePermission('org-1', 'perm-1', { id: 'admin-1', fullname: 'Admin' });
-
-      expect(prismaMock.organizationUnitPermission.delete).toHaveBeenCalledWith({
-        where: {
-          organizationUnitId_permissionId: { organizationUnitId: 'org-1', permissionId: 'perm-1' },
-        },
+      const result = await service.removePermission('org-1', 'perm-1', {
+        id: 'admin-1',
+        fullname: 'Admin',
       });
+
+      expect(prismaMock.organizationUnitPermission.delete).toHaveBeenCalledWith(
+        {
+          where: {
+            organizationUnitId_permissionId: {
+              organizationUnitId: 'org-1',
+              permissionId: 'perm-1',
+            },
+          },
+        },
+      );
       expect(prismaMock.log.create).toHaveBeenCalled();
       expect(result).toEqual({ id: 'perm-1' });
     });
 
     it('throws NotFoundException when assignment not found', async () => {
-      prismaMock.organizationUnit.findFirst.mockResolvedValue({ id: 'org-1', name: 'Teknik' });
+      prismaMock.organizationUnit.findFirst.mockResolvedValue({
+        id: 'org-1',
+        name: 'Teknik',
+      });
       prismaMock.organizationUnitPermission.findUnique.mockResolvedValue(null);
 
-      await expect(service.removePermission('org-1', 'nonexistent', { id: 'admin-1', fullname: 'Admin' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.removePermission('org-1', 'nonexistent', {
+          id: 'admin-1',
+          fullname: 'Admin',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('throws NotFoundException when org not found', async () => {
       prismaMock.organizationUnit.findFirst.mockResolvedValue(null);
 
-      await expect(service.removePermission('org-1', 'perm-1', { id: 'admin-1', fullname: 'Admin' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.removePermission('org-1', 'perm-1', {
+          id: 'admin-1',
+          fullname: 'Admin',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

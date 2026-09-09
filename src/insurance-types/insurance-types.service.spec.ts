@@ -33,9 +33,7 @@ describe('InsuranceTypesService', () => {
 
   describe('list', () => {
     it('returns insurance types excluding soft-deleted ones', async () => {
-      const expected = [
-        { id: 'type-1', code: 'HM', name: 'Hull & Machinery' },
-      ];
+      const expected = [{ id: 'type-1', code: 'HM', name: 'Hull & Machinery' }];
       prismaMock.insuranceType.findMany.mockResolvedValue(expected);
 
       const result = await service.list();
@@ -73,9 +71,14 @@ describe('InsuranceTypesService', () => {
   describe('create', () => {
     it('creates an insurance type and audit log', async () => {
       const dto = { code: 'HM', name: 'Hull & Machinery' };
-      const created = { id: 'type-1', code: 'HM', name: 'Hull & Machinery', description: null };
+      const created = {
+        id: 'type-1',
+        code: 'HM',
+        name: 'Hull & Machinery',
+        description: null,
+      };
 
-      prismaMock.$transaction.mockImplementation(async (cb: Function) => {
+      prismaMock.$transaction.mockImplementation(async (cb) => {
         return cb(prismaMock);
       });
       prismaMock.insuranceType.create.mockResolvedValue(created);
@@ -109,7 +112,7 @@ describe('InsuranceTypesService', () => {
       const updated = { ...existing, name: 'Hull & Machinery Updated' };
 
       prismaMock.insuranceType.findFirst.mockResolvedValue(existing);
-      prismaMock.$transaction.mockImplementation(async (cb: Function) => {
+      prismaMock.$transaction.mockImplementation(async (cb) => {
         return cb(prismaMock);
       });
       prismaMock.insuranceType.update.mockResolvedValue(updated);
@@ -142,7 +145,7 @@ describe('InsuranceTypesService', () => {
       };
 
       prismaMock.insuranceType.findFirst.mockResolvedValue(existing);
-      prismaMock.$transaction.mockImplementation(async (cb: Function) => {
+      prismaMock.$transaction.mockImplementation(async (cb) => {
         return cb(prismaMock);
       });
 

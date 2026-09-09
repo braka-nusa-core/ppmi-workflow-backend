@@ -42,4 +42,6 @@ export class CreateOrgDto extends createZodDto(createOrganizationSchema) {}
 export class UpdateOrgDto extends createZodDto(updateOrganizationSchema) {}
 export class CreatePermissionDto extends createZodDto(createPermissionSchema) {}
 export class UpdatePermissionDto extends createZodDto(updatePermissionSchema) {}
-export class AssignPermissionsDto extends createZodDto(assignPermissionsSchema) {}
+export class AssignPermissionsDto extends createZodDto(
+  assignPermissionsSchema,
+) {}

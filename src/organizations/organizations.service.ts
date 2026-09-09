@@ -216,16 +216,25 @@ export class OrganizationsService {
     return permission;
   }
 
-  async createPermission(dto: CreatePermissionDto, actor: { id: string; fullname: string }) {
+  async createPermission(
+    dto: CreatePermissionDto,
+    actor: { id: string; fullname: string },
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const permission = await tx.permission
         .create({
-          data: { resource: dto.resource, action: dto.action, description: dto.description ?? null },
+          data: {
+            resource: dto.resource,
+            action: dto.action,
+            description: dto.description ?? null,
+          },
           select: { id: true, resource: true, action: true, description: true },
         })
         .catch((err) => {
           if (err.code === 'P2002') {
-            throw new BadRequestException(`Permission ${dto.resource}:${dto.action} already exists`);
+            throw new BadRequestException(
+              `Permission ${dto.resource}:${dto.action} already exists`,
+            );
           }
           throw err;
         });
@@ -244,7 +253,11 @@ export class OrganizationsService {
     });
   }
 
-  async updatePermission(id: string, dto: UpdatePermissionDto, actor: { id: string; fullname: string }) {
+  async updatePermission(
+    id: string,
+    dto: UpdatePermissionDto,
+    actor: { id: string; fullname: string },
+  ) {
     const existing = await this.prisma.permission.findFirst({
       where: { id, deletedAt: null },
     });
@@ -329,7 +342,11 @@ export class OrganizationsService {
     return assignments.map((a) => a.permission);
   }
 
-  async assignPermissions(orgId: string, dto: AssignPermissionsDto, actor: { id: string; fullname: string }) {
+  async assignPermissions(
+    orgId: string,
+    dto: AssignPermissionsDto,
+    actor: { id: string; fullname: string },
+  ) {
     const org = await this.prisma.organizationUnit.findFirst({
       where: { id: orgId, deletedAt: null },
     });
@@ -343,7 +360,9 @@ export class OrganizationsService {
       })
     ).map((p) => p.permissionId);
 
-    const newIds = dto.permissionIds.filter((id) => !existingPermissionIds.includes(id));
+    const newIds = dto.permissionIds.filter(
+      (id) => !existingPermissionIds.includes(id),
+    );
 
     if (newIds.length === 0) {
       return { assigned: 0 };
@@ -370,7 +389,11 @@ export class OrganizationsService {
     return { assigned: newIds.length };
   }
 
-  async removePermission(orgId: string, permissionId: string, actor: { id: string; fullname: string }) {
+  async removePermission(
+    orgId: string,
+    permissionId: string,
+    actor: { id: string; fullname: string },
+  ) {
     const org = await this.prisma.organizationUnit.findFirst({
       where: { id: orgId, deletedAt: null },
     });
@@ -386,7 +409,8 @@ export class OrganizationsService {
       },
     });
 
-    if (!assignment) throw new NotFoundException('Permission assignment not found');
+    if (!assignment)
+      throw new NotFoundException('Permission assignment not found');
 
     await this.prisma.organizationUnitPermission.delete({
       where: {

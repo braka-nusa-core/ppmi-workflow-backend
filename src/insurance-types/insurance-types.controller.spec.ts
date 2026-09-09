@@ -66,7 +66,11 @@ describe('InsuranceTypesController', () => {
     it('delegates to insuranceTypesService.create with dto and actor', async () => {
       const dto = { code: 'HM', name: 'Hull & Machinery' };
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
       const expected = { id: 'type-1', code: 'HM', name: 'Hull & Machinery' };
       insuranceTypesServiceMock.create.mockResolvedValue(expected);
@@ -85,9 +89,17 @@ describe('InsuranceTypesController', () => {
     it('delegates to insuranceTypesService.update with id, dto, and actor', async () => {
       const dto = { name: 'Hull & Machinery Updated' };
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
-      const expected = { id: 'type-1', code: 'HM', name: 'Hull & Machinery Updated' };
+      const expected = {
+        id: 'type-1',
+        code: 'HM',
+        name: 'Hull & Machinery Updated',
+      };
       insuranceTypesServiceMock.update.mockResolvedValue(expected);
 
       const result = await controller.update('type-1', dto, mockReq as any);
@@ -104,7 +116,11 @@ describe('InsuranceTypesController', () => {
   describe('delete', () => {
     it('delegates to insuranceTypesService.delete with id and actor', async () => {
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
       insuranceTypesServiceMock.delete.mockResolvedValue({ id: 'type-1' });
 

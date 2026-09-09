@@ -26,13 +26,13 @@ import { OrganizationsService } from './organizations.service';
 import {
   AssignPermissionsDto,
   assignPermissionsSchema,
+  createOrganizationSchema,
   CreateOrgDto,
   CreatePermissionDto,
-  createOrganizationSchema,
   createPermissionSchema,
+  updateOrganizationSchema,
   UpdateOrgDto,
   UpdatePermissionDto,
-  updateOrganizationSchema,
   updatePermissionSchema,
 } from './organizations.validation';
 
@@ -63,7 +63,10 @@ export class OrganizationsController {
   @UsePipes(new ZodValidationPipe(createPermissionSchema))
   @ApiOperation({ summary: 'Create a permission' })
   createPermission(@Body() body: CreatePermissionDto, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.createPermission(body, actor);
   }
 
@@ -72,8 +75,15 @@ export class OrganizationsController {
   @UsePipes(new ZodValidationPipe(updatePermissionSchema))
   @ApiOperation({ summary: 'Update a permission description' })
   @ApiParam({ name: 'id', type: String })
-  updatePermission(@Param('id') id: string, @Body() body: UpdatePermissionDto, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+  updatePermission(
+    @Param('id') id: string,
+    @Body() body: UpdatePermissionDto,
+    @Req() req: Request,
+  ) {
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.updatePermission(id, body, actor);
   }
 
@@ -82,7 +92,10 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Soft delete a permission' })
   @ApiParam({ name: 'id', type: String })
   deletePermission(@Param('id') id: string, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.deletePermission(id, actor);
   }
 
@@ -99,7 +112,10 @@ export class OrganizationsController {
   @UsePipes(new ZodValidationPipe(createOrganizationSchema))
   @ApiOperation({ summary: 'Create an organization' })
   create(@Body() body: CreateOrgDto, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.create(body, actor);
   }
 
@@ -108,8 +124,15 @@ export class OrganizationsController {
   @UsePipes(new ZodValidationPipe(updateOrganizationSchema))
   @ApiOperation({ summary: 'Update an organization' })
   @ApiParam({ name: 'id', type: String })
-  update(@Param('id') id: string, @Body() body: UpdateOrgDto, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+  update(
+    @Param('id') id: string,
+    @Body() body: UpdateOrgDto,
+    @Req() req: Request,
+  ) {
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.update(id, body, actor);
   }
 
@@ -118,7 +141,10 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Soft delete an organization' })
   @ApiParam({ name: 'id', type: String })
   delete(@Param('id') id: string, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.delete(id, actor);
   }
 
@@ -135,8 +161,15 @@ export class OrganizationsController {
   @UsePipes(new ZodValidationPipe(assignPermissionsSchema))
   @ApiOperation({ summary: 'Assign permissions to an organization' })
   @ApiParam({ name: 'id', type: String })
-  assignPermissions(@Param('id') id: string, @Body() body: AssignPermissionsDto, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+  assignPermissions(
+    @Param('id') id: string,
+    @Body() body: AssignPermissionsDto,
+    @Req() req: Request,
+  ) {
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.assignPermissions(id, body, actor);
   }
 
@@ -145,8 +178,15 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Remove a permission from an organization' })
   @ApiParam({ name: 'id', type: String })
   @ApiParam({ name: 'permissionId', type: String })
-  removePermission(@Param('id') id: string, @Param('permissionId') permissionId: string, @Req() req: Request) {
-    const actor = { id: req.credentials.sub, fullname: req.credentials.fullname };
+  removePermission(
+    @Param('id') id: string,
+    @Param('permissionId') permissionId: string,
+    @Req() req: Request,
+  ) {
+    const actor = {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    };
     return this.organizationsService.removePermission(id, permissionId, actor);
   }
 }
