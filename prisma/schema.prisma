@@ -57,12 +57,18 @@ enum QuotationStatus {
   APPROVED
   SENT_TO_INSURANCE
   REVISION
+  INSURANCE_APPROVED
   POLICY_ISSUED
 }
 
 enum QuotationApprovalAction {
   APPROVED
   REJECTED
+  REVISION
+}
+
+enum InsuranceReviewAction {
+  APPROVED
   REVISION
 }
 
@@ -141,6 +147,7 @@ model OrganizationUnit {
 
   users       User[]
   permissions OrganizationUnitPermission[]
+  quotations  Quotation[]
 
   @@unique([name, type])
   @@map("organization_unit")
@@ -154,9 +161,15 @@ model User {
   password String   @db.Text
   role     UserRole @default(USER)
 
-  organizationUnitId String?
-  organizationUnit   OrganizationUnit? @relation(fields: [organizationUnitId], references: [id])
-  logs               Log[]
+  organizationUnitId   String?
+  organizationUnit     OrganizationUnit?     @relation(fields: [organizationUnitId], references: [id])
+  logs                 Log[]
+  createdQuotations    Quotation[]           @relation("QuotationCreatedBy")
+  approvedQuotations   Quotation[]           @relation("QuotationApprovedBy")
+  quotationApprovals   QuotationApproval[]   @relation("QuotationApprovalActor")
+  quotationHistories   QuotationHistory[]    @relation("QuotationHistoryActor")
+  quotationSubmissions QuotationSubmission[] @relation("QuotationSubmissionSender")
+  insuranceReviews     InsuranceReview[]     @relation("InsuranceReviewRecorder")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -241,7 +254,8 @@ model InsuranceCompany {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  policyParticipants PolicyParticipant[]
+  policyParticipants   PolicyParticipant[]
+  quotationSubmissions QuotationSubmission[]
 
   @@index([deletedAt])
   @@map("insurance_company")
@@ -358,10 +372,11 @@ model Client {
 }
 
 model Quotation {
-  id              String @id @default(cuid()) @map("_id")
-  quotationNumber String @unique
+  id              String  @id @default(cuid()) @map("_id")
+  quotationNumber String  @unique
   clientId        String
   insuranceTypeId String
+  technicalUnitId String?
 
   insured String?
   address String?
@@ -383,14 +398,20 @@ model Quotation {
   approvedById String?
   approvedAt   DateTime?
 
+  insurerRevisionRequestedAt DateTime?
+  insurerRevisionUpdatedAt   DateTime?
+
   templateVersion String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  client        Client        @relation(fields: [clientId], references: [id])
-  insuranceType InsuranceType @relation(fields: [insuranceTypeId], references: [id])
+  client        Client            @relation(fields: [clientId], references: [id])
+  insuranceType InsuranceType     @relation(fields: [insuranceTypeId], references: [id])
+  technicalUnit OrganizationUnit? @relation(fields: [technicalUnitId], references: [id])
+  createdBy     User?             @relation("QuotationCreatedBy", fields: [createdById], references: [id])
+  approvedBy    User?             @relation("QuotationApprovedBy", fields: [approvedById], references: [id])
 
   objects     QuotationObject[]
   coverages   QuotationCoverage[]
@@ -399,10 +420,12 @@ model Quotation {
   attachments QuotationAttachment[]
   approvals   QuotationApproval[]
   histories   QuotationHistory[]
+  submissions QuotationSubmission[]
   policy      Policy?
 
   @@index([clientId])
   @@index([insuranceTypeId])
+  @@index([technicalUnitId])
   @@index([status])
   @@index([deletedAt])
   @@map("quotation")
@@ -511,6 +534,7 @@ model QuotationApproval {
   updatedAt DateTime @updatedAt
 
   quotation Quotation @relation(fields: [quotationId], references: [id])
+  approver  User?     @relation("QuotationApprovalActor", fields: [approverId], references: [id])
 
   @@index([quotationId])
   @@map("quotation_approval")
@@ -528,9 +552,44 @@ model QuotationHistory {
   createdAt DateTime @default(now())
 
   quotation Quotation @relation(fields: [quotationId], references: [id])
+  actor     User?     @relation("QuotationHistoryActor", fields: [actorId], references: [id])
 
   @@index([quotationId])
   @@map("quotation_history")
+}
+
+model QuotationSubmission {
+  id                 String   @id @default(cuid()) @map("_id")
+  quotationId        String
+  insuranceCompanyId String
+  sentById           String
+  note               String?  @db.Text
+  snapshot           Json
+  sentAt             DateTime @default(now())
+
+  quotation        Quotation         @relation(fields: [quotationId], references: [id])
+  insuranceCompany InsuranceCompany  @relation(fields: [insuranceCompanyId], references: [id])
+  sentBy           User              @relation("QuotationSubmissionSender", fields: [sentById], references: [id])
+  reviews          InsuranceReview[]
+
+  @@index([quotationId])
+  @@index([insuranceCompanyId])
+  @@map("quotation_submission")
+}
+
+model InsuranceReview {
+  id                    String                @id @default(cuid()) @map("_id")
+  quotationSubmissionId String
+  action                InsuranceReviewAction
+  note                  String?               @db.Text
+  recordedById          String
+  reviewedAt            DateTime              @default(now())
+
+  quotationSubmission QuotationSubmission @relation(fields: [quotationSubmissionId], references: [id])
+  recordedBy          User                @relation("InsuranceReviewRecorder", fields: [recordedById], references: [id])
+
+  @@index([quotationSubmissionId])
+  @@map("insurance_review")
 }
 
 model Policy {
