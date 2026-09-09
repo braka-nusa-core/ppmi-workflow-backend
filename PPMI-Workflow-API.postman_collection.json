@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PPMI Workflow API",
-    "description": "PPMI Workflow API Collection\nBase URL: https://v2.ppmi.wildanworks.space",
+    "description": "PPMI Workflow API Collection\nBase URL: https://v2.ppmi.wildanworks.space\nQS flow: see docs/flow-quotation.md. Insurance approval returns INSURANCE_APPROVED; Policy issuance is a separate module.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -983,7 +983,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientId\": \"\",\n  \"insuranceTypeId\": \"\",\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"\",\n  \"periodStart\": \"\",\n  \"periodEnd\": \"\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": \"\",\n  \"brokerage\": 0,\n  \"templateVersion\": \"\"\n}"
+              "raw": "{\n  \"clientId\": \"\",\n  \"insuranceTypeId\": \"\",\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"brokerage\": 0,\n  \"templateVersion\": \"\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations",
@@ -1014,7 +1014,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"\",\n  \"periodStart\": \"\",\n  \"periodEnd\": \"\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": \"\",\n  \"brokerage\": 0\n}"
+              "raw": "{\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"brokerage\": 0\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id",
@@ -1058,7 +1058,7 @@
           }
         },
         {
-          "name": "Submit Quotation",
+          "name": "Submit / Resubmit Quotation",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1079,7 +1079,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"\"\n}"
+              "raw": "{\n  \"note\": \"QS lengkap, mohon approval Supervisor Teknik\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id/submit",
@@ -1095,7 +1095,7 @@
           }
         },
         {
-          "name": "Approve Quotation",
+          "name": "Approve Quotation (Supervisor Teknik)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1116,7 +1116,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"\"\n}"
+              "raw": "{\n  \"note\": \"Disetujui untuk dikirim ke insurance\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id/approve",
@@ -1132,7 +1132,7 @@
           }
         },
         {
-          "name": "Reject Quotation",
+          "name": "Reject Quotation (Supervisor Teknik)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1169,7 +1169,7 @@
           }
         },
         {
-          "name": "Request Revision",
+          "name": "Request Internal Revision (Supervisor Teknik)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1206,7 +1206,7 @@
           }
         },
         {
-          "name": "Send to Insurance",
+          "name": "Send Approved QS to Insurance",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1227,7 +1227,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"\"\n}"
+              "raw": "{\n  \"insuranceCompanyId\": \"\",\n  \"note\": \"Dikirim ke underwriting\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id/send-to-insurance",
@@ -1243,7 +1243,7 @@
           }
         },
         {
-          "name": "Insurance Approve",
+          "name": "Record Insurance Approval (-> INSURANCE_APPROVED)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1264,7 +1264,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"\"\n}"
+              "raw": "{\n  \"note\": \"Insurance menyetujui QS\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id/insurance-approve",
@@ -1280,7 +1280,7 @@
           }
         },
         {
-          "name": "Insurance Revision",
+          "name": "Record Insurance Revision (-> REVISION)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1301,7 +1301,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"\"\n}"
+              "raw": "{\n  \"note\": \"Insurance meminta data tambahan\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id/insurance-revision",
@@ -1373,7 +1373,7 @@
           }
         },
         {
-          "name": "Export PDF",
+          "name": "Export Approved QS PDF (Placeholder)",
           "request": {
             "auth": {
               "type": "bearer",
