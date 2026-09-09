@@ -8,9 +8,11 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { PermissionGuard } from '../common/guards/permission.guard';
@@ -57,8 +59,13 @@ export class QuotationCoveragesController {
   create(
     @Param('quotationId') quotationId: string,
     @Body() body: CreateQuotationCoverageDto,
+    @Req() req: Request,
   ) {
-    return this.quotationCoveragesService.create(quotationId, body);
+    return this.quotationCoveragesService.create(
+      quotationId,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Patch(':id')
@@ -70,15 +77,29 @@ export class QuotationCoveragesController {
     @Param('quotationId') quotationId: string,
     @Param('id') id: string,
     @Body() body: UpdateQuotationCoverageDto,
+    @Req() req: Request,
   ) {
-    return this.quotationCoveragesService.update(quotationId, id, body);
+    return this.quotationCoveragesService.update(
+      quotationId,
+      id,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'update')
   @ApiOperation({ summary: 'Soft delete a quotation coverage' })
-  delete(@Param('quotationId') quotationId: string, @Param('id') id: string) {
-    return this.quotationCoveragesService.delete(quotationId, id);
+  delete(
+    @Param('quotationId') quotationId: string,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    return this.quotationCoveragesService.delete(
+      quotationId,
+      id,
+      req.credentials.sub,
+    );
   }
 }

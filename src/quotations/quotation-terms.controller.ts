@@ -8,10 +8,17 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { PermissionGuard } from '../common/guards/permission.guard';
 import { RequirePermission } from '../common/decorators/permission.decorator';
@@ -29,9 +36,7 @@ import {
 @UseGuards(AuthGuard, PermissionGuard)
 @ApiBearerAuth()
 export class QuotationTermsController {
-  constructor(
-    private readonly quotationTermsService: QuotationTermsService,
-  ) {}
+  constructor(private readonly quotationTermsService: QuotationTermsService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -45,10 +50,7 @@ export class QuotationTermsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'read')
   @ApiOperation({ summary: 'Get a quotation term' })
-  get(
-    @Param('quotationId') quotationId: string,
-    @Param('id') id: string,
-  ) {
+  get(@Param('quotationId') quotationId: string, @Param('id') id: string) {
     return this.quotationTermsService.get(quotationId, id);
   }
 
@@ -60,8 +62,13 @@ export class QuotationTermsController {
   create(
     @Param('quotationId') quotationId: string,
     @Body() body: CreateQuotationTermDto,
+    @Req() req: Request,
   ) {
-    return this.quotationTermsService.create(quotationId, body);
+    return this.quotationTermsService.create(
+      quotationId,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Patch(':id')
@@ -73,8 +80,14 @@ export class QuotationTermsController {
     @Param('quotationId') quotationId: string,
     @Param('id') id: string,
     @Body() body: UpdateQuotationTermDto,
+    @Req() req: Request,
   ) {
-    return this.quotationTermsService.update(quotationId, id, body);
+    return this.quotationTermsService.update(
+      quotationId,
+      id,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Delete(':id')
@@ -84,7 +97,12 @@ export class QuotationTermsController {
   delete(
     @Param('quotationId') quotationId: string,
     @Param('id') id: string,
+    @Req() req: Request,
   ) {
-    return this.quotationTermsService.delete(quotationId, id);
+    return this.quotationTermsService.delete(
+      quotationId,
+      id,
+      req.credentials.sub,
+    );
   }
 }

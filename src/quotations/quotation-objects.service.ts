@@ -4,10 +4,14 @@ import {
   CreateQuotationObjectDto,
   UpdateQuotationObjectDto,
 } from './quotation-objects.validation';
+import { QuotationsService } from './quotations.service';
 
 @Injectable()
 export class QuotationObjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly quotationsService: QuotationsService,
+  ) {}
 
   async list(quotationId: string) {
     return this.prisma.quotationObject.findMany({
@@ -24,32 +28,48 @@ export class QuotationObjectsService {
     return obj;
   }
 
-  async create(quotationId: string, dto: CreateQuotationObjectDto) {
-    return this.prisma.quotationObject.create({
+  async create(
+    quotationId: string,
+    dto: CreateQuotationObjectDto,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
+    const object = await this.prisma.quotationObject.create({
       data: {
         quotationId,
         objectType: dto.objectType,
         data: dto.data,
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return object;
   }
 
-  async update(quotationId: string, id: string, dto: UpdateQuotationObjectDto) {
+  async update(
+    quotationId: string,
+    id: string,
+    dto: UpdateQuotationObjectDto,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationObject.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
     if (!existing) throw new NotFoundException('Quotation object not found');
 
-    return this.prisma.quotationObject.update({
+    const object = await this.prisma.quotationObject.update({
       where: { id },
       data: {
         ...(dto.objectType !== undefined && { objectType: dto.objectType }),
         ...(dto.data !== undefined && { data: dto.data }),
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return object;
   }
 
-  async delete(quotationId: string, id: string) {
+  async delete(quotationId: string, id: string, actorId: string) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationObject.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
@@ -59,6 +79,7 @@ export class QuotationObjectsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
 
     return { id };
   }

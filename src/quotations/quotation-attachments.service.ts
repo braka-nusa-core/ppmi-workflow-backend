@@ -3,12 +3,14 @@ import { randomUUID } from 'crypto';
 import { extname } from 'path';
 import { PrismaService } from '../common/services/prisma.service';
 import { StorageService } from '../common/services/storage.service';
+import { QuotationsService } from './quotations.service';
 
 @Injectable()
 export class QuotationAttachmentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly quotationsService: QuotationsService,
   ) {}
 
   async list(quotationId: string) {
@@ -26,11 +28,17 @@ export class QuotationAttachmentsService {
     return att;
   }
 
-  async create(quotationId: string, file: Express.Multer.File) {
+  async create(
+    quotationId: string,
+    file: Express.Multer.File,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const key = `quotations/${quotationId}/${randomUUID()}${extname(file.originalname)}`;
     const url = await this.storage.upload(key, file.buffer, file.mimetype);
 
-    return this.prisma.quotationAttachment.create({
+    await this.quotationsService.assertEditable(quotationId, actorId);
+    const attachment = await this.prisma.quotationAttachment.create({
       data: {
         quotationId,
         fileName: file.originalname,
@@ -39,9 +47,12 @@ export class QuotationAttachmentsService {
         fileSize: file.size,
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return attachment;
   }
 
-  async delete(quotationId: string, id: string) {
+  async delete(quotationId: string, id: string, actorId: string) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationAttachment.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
@@ -52,6 +63,7 @@ export class QuotationAttachmentsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
 
     return { id };
   }

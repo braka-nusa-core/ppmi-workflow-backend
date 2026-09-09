@@ -9,10 +9,12 @@
   Param,
   ParseFilePipe,
   Post,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
@@ -77,15 +79,28 @@ export class QuotationAttachmentsController {
       }),
     )
     file: Express.Multer.File,
+    @Req() req: Request,
   ) {
-    return this.quotationAttachmentsService.create(quotationId, file);
+    return this.quotationAttachmentsService.create(
+      quotationId,
+      file,
+      req.credentials.sub,
+    );
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'update')
   @ApiOperation({ summary: 'Soft delete a quotation attachment' })
-  delete(@Param('quotationId') quotationId: string, @Param('id') id: string) {
-    return this.quotationAttachmentsService.delete(quotationId, id);
+  delete(
+    @Param('quotationId') quotationId: string,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    return this.quotationAttachmentsService.delete(
+      quotationId,
+      id,
+      req.credentials.sub,
+    );
   }
 }

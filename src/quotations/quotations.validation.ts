@@ -53,6 +53,11 @@ export const actionNoteSchema = z.object({
   note: z.string().optional(),
 });
 
+export const sendToInsuranceSchema = actionNoteSchema.extend({
+  insuranceCompanyId: z.string().min(1),
+});
+
 export class CreateQuotationDto extends createZodDto(createQuotationSchema) {}
 export class UpdateQuotationDto extends createZodDto(updateQuotationSchema) {}
 export class ActionNoteDto extends createZodDto(actionNoteSchema) {}
+export class SendToInsuranceDto extends createZodDto(sendToInsuranceSchema) {}

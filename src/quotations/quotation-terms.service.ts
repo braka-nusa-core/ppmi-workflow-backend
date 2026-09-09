@@ -4,10 +4,14 @@ import {
   CreateQuotationTermDto,
   UpdateQuotationTermDto,
 } from './quotation-terms.validation';
+import { QuotationsService } from './quotations.service';
 
 @Injectable()
 export class QuotationTermsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly quotationsService: QuotationsService,
+  ) {}
 
   async list(quotationId: string) {
     return this.prisma.quotationTerm.findMany({
@@ -26,23 +30,36 @@ export class QuotationTermsService {
     return term;
   }
 
-  async create(quotationId: string, dto: CreateQuotationTermDto) {
-    return this.prisma.quotationTerm.create({
+  async create(
+    quotationId: string,
+    dto: CreateQuotationTermDto,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
+    const term = await this.prisma.quotationTerm.create({
       data: {
         quotationId,
         termsConditionId: dto.termsConditionId,
         description: dto.description,
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return term;
   }
 
-  async update(quotationId: string, id: string, dto: UpdateQuotationTermDto) {
+  async update(
+    quotationId: string,
+    id: string,
+    dto: UpdateQuotationTermDto,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationTerm.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
     if (!existing) throw new NotFoundException('Quotation term not found');
 
-    return this.prisma.quotationTerm.update({
+    const term = await this.prisma.quotationTerm.update({
       where: { id },
       data: {
         ...(dto.termsConditionId !== undefined && {
@@ -51,9 +68,12 @@ export class QuotationTermsService {
         ...(dto.description !== undefined && { description: dto.description }),
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return term;
   }
 
-  async delete(quotationId: string, id: string) {
+  async delete(quotationId: string, id: string, actorId: string) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationTerm.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
@@ -63,6 +83,7 @@ export class QuotationTermsService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
 
     return { id };
   }

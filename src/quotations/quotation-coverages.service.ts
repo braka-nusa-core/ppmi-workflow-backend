@@ -4,10 +4,14 @@ import {
   CreateQuotationCoverageDto,
   UpdateQuotationCoverageDto,
 } from './quotation-coverages.validation';
+import { QuotationsService } from './quotations.service';
 
 @Injectable()
 export class QuotationCoveragesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly quotationsService: QuotationsService,
+  ) {}
 
   async list(quotationId: string) {
     return this.prisma.quotationCoverage.findMany({
@@ -24,8 +28,13 @@ export class QuotationCoveragesService {
     return cov;
   }
 
-  async create(quotationId: string, dto: CreateQuotationCoverageDto) {
-    return this.prisma.quotationCoverage.create({
+  async create(
+    quotationId: string,
+    dto: CreateQuotationCoverageDto,
+    actorId: string,
+  ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
+    const coverage = await this.prisma.quotationCoverage.create({
       data: {
         quotationId,
         coverageType: dto.coverageType,
@@ -33,19 +42,23 @@ export class QuotationCoveragesService {
         value: dto.value,
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return coverage;
   }
 
   async update(
     quotationId: string,
     id: string,
     dto: UpdateQuotationCoverageDto,
+    actorId: string,
   ) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationCoverage.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
     if (!existing) throw new NotFoundException('Quotation coverage not found');
 
-    return this.prisma.quotationCoverage.update({
+    const coverage = await this.prisma.quotationCoverage.update({
       where: { id },
       data: {
         ...(dto.coverageType !== undefined && {
@@ -55,9 +68,12 @@ export class QuotationCoveragesService {
         ...(dto.value !== undefined && { value: dto.value }),
       },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
+    return coverage;
   }
 
-  async delete(quotationId: string, id: string) {
+  async delete(quotationId: string, id: string, actorId: string) {
+    await this.quotationsService.assertEditable(quotationId, actorId);
     const existing = await this.prisma.quotationCoverage.findFirst({
       where: { id, quotationId, deletedAt: null },
     });
@@ -67,6 +83,7 @@ export class QuotationCoveragesService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    await this.quotationsService.markInsurerRevisionUpdated(quotationId);
 
     return { id };
   }

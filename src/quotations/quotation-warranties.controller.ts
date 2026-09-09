@@ -8,10 +8,17 @@
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { PermissionGuard } from '../common/guards/permission.guard';
 import { RequirePermission } from '../common/decorators/permission.decorator';
@@ -45,10 +52,7 @@ export class QuotationWarrantiesController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'read')
   @ApiOperation({ summary: 'Get a quotation warranty' })
-  get(
-    @Param('quotationId') quotationId: string,
-    @Param('id') id: string,
-  ) {
+  get(@Param('quotationId') quotationId: string, @Param('id') id: string) {
     return this.quotationWarrantiesService.get(quotationId, id);
   }
 
@@ -60,8 +64,13 @@ export class QuotationWarrantiesController {
   create(
     @Param('quotationId') quotationId: string,
     @Body() body: CreateQuotationWarrantyDto,
+    @Req() req: Request,
   ) {
-    return this.quotationWarrantiesService.create(quotationId, body);
+    return this.quotationWarrantiesService.create(
+      quotationId,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Patch(':id')
@@ -73,8 +82,14 @@ export class QuotationWarrantiesController {
     @Param('quotationId') quotationId: string,
     @Param('id') id: string,
     @Body() body: UpdateQuotationWarrantyDto,
+    @Req() req: Request,
   ) {
-    return this.quotationWarrantiesService.update(quotationId, id, body);
+    return this.quotationWarrantiesService.update(
+      quotationId,
+      id,
+      body,
+      req.credentials.sub,
+    );
   }
 
   @Delete(':id')
@@ -84,7 +99,12 @@ export class QuotationWarrantiesController {
   delete(
     @Param('quotationId') quotationId: string,
     @Param('id') id: string,
+    @Req() req: Request,
   ) {
-    return this.quotationWarrantiesService.delete(quotationId, id);
+    return this.quotationWarrantiesService.delete(
+      quotationId,
+      id,
+      req.credentials.sub,
+    );
   }
 }
