@@ -32,10 +32,12 @@ export class PermissionGuard implements CanActivate {
       where: {
         resource: permission.resource,
         action: permission.action,
+        deletedAt: null,
         organizations: {
           some: {
             organizationUnit: {
-              users: { some: { id: user.sub } },
+              deletedAt: null,
+              users: { some: { id: user.sub, deletedAt: null } },
             },
           },
         },

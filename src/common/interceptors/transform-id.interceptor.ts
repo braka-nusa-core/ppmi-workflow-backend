@@ -8,7 +8,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 function isPlainObject(data: unknown): data is Record<string, unknown> {
-  return data !== null && typeof data === 'object' && Object.getPrototypeOf(data) === Object.prototype;
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    Object.getPrototypeOf(data) === Object.prototype
+  );
 }
 
 function transformIdKey(data: unknown): unknown {
