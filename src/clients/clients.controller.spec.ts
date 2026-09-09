@@ -66,7 +66,11 @@ describe('ClientsController', () => {
     it('delegates to clientsService.create with dto and actor', async () => {
       const dto = { name: 'PT ABC' };
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
       const expected = { id: 'client-1', name: 'PT ABC' };
       clientsServiceMock.create.mockResolvedValue(expected);
@@ -85,18 +89,21 @@ describe('ClientsController', () => {
     it('delegates to clientsService.update with id, dto, and actor', async () => {
       const dto = { name: 'PT ABC Updated' };
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
       const expected = { id: 'client-1', name: 'PT ABC Updated' };
       clientsServiceMock.update.mockResolvedValue(expected);
 
       const result = await controller.update('client-1', dto, mockReq as any);
 
-      expect(clientsServiceMock.update).toHaveBeenCalledWith(
-        'client-1',
-        dto,
-        { id: 'user-1', fullname: 'User Test' },
-      );
+      expect(clientsServiceMock.update).toHaveBeenCalledWith('client-1', dto, {
+        id: 'user-1',
+        fullname: 'User Test',
+      });
       expect(result).toEqual(expected);
     });
   });
@@ -104,7 +111,11 @@ describe('ClientsController', () => {
   describe('delete', () => {
     it('delegates to clientsService.delete with id and actor', async () => {
       const mockReq = {
-        credentials: { sub: 'user-1', fullname: 'User Test', role: 'USER' as const },
+        credentials: {
+          sub: 'user-1',
+          fullname: 'User Test',
+          role: 'USER' as const,
+        },
       };
       clientsServiceMock.delete.mockResolvedValue({ id: 'client-1' });
 
