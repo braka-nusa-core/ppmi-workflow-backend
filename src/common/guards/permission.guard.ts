@@ -37,7 +37,19 @@ export class PermissionGuard implements CanActivate {
           some: {
             organizationUnit: {
               deletedAt: null,
-              users: { some: { id: user.sub, deletedAt: null } },
+              OR: [
+                {
+                  users: { some: { id: user.sub, deletedAt: null } },
+                },
+                {
+                  children: {
+                    some: {
+                      deletedAt: null,
+                      users: { some: { id: user.sub, deletedAt: null } },
+                    },
+                  },
+                },
+              ],
             },
           },
         },
