@@ -588,7 +588,12 @@
                 "url": {
                   "raw": "{{baseUrl}}/organizations/:id/permissions/:permissionId",
                   "host": ["{{baseUrl}}"],
-                  "path": ["organizations", ":id", "permissions", ":permissionId"],
+                  "path": [
+                    "organizations",
+                    ":id",
+                    "permissions",
+                    ":permissionId"
+                  ],
                   "variable": [
                     {
                       "key": "id",
@@ -983,7 +988,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientId\": \"\",\n  \"insuranceTypeId\": \"\",\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"brokerage\": 0,\n  \"templateVersion\": \"\"\n}"
+              "raw": "{\n  \"clientId\": \"\",\n  \"insuranceTypeId\": \"\",\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"recipient\": \"\",\n  \"attentionTo\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"periodText\": \"\",\n  \"interest\": \"\",\n  \"sumInsured\": 0,\n  \"sumInsuredCurrency\": \"USD\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"deductibleText\": \"\",\n  \"deductibleBasis\": \"\",\n  \"brokerage\": 0,\n  \"insuranceLabelValue\": \"\",\n  \"confirmedAcceptedBy\": \"\",\n  \"templateVersion\": \"\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations",
@@ -1014,7 +1019,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"interest\": \"\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"brokerage\": 0\n}"
+              "raw": "{\n  \"insured\": \"\",\n  \"address\": \"\",\n  \"recipient\": \"\",\n  \"attentionTo\": \"\",\n  \"quotationDate\": \"2026-09-09\",\n  \"periodStart\": \"2026-10-01\",\n  \"periodEnd\": \"2027-09-30\",\n  \"periodText\": \"\",\n  \"interest\": \"\",\n  \"sumInsured\": 0,\n  \"sumInsuredCurrency\": \"USD\",\n  \"rate\": 0,\n  \"premium\": 0,\n  \"deductible\": 0,\n  \"deductibleText\": \"\",\n  \"deductibleBasis\": \"\",\n  \"brokerage\": 0,\n  \"insuranceLabelValue\": \"\",\n  \"confirmedAcceptedBy\": \"\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/quotations/:id",
@@ -1485,7 +1490,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"warrantyId\": \"\",\n  \"description\": \"\"\n}"
+                  "raw": "{\n  \"warrantyId\": \"\",\n  \"description\": \"\",\n  \"sortOrder\": 0\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/quotations/:quotationId/warranties",
@@ -1522,7 +1527,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"warrantyId\": \"\",\n  \"description\": \"\"\n}"
+                  "raw": "{\n  \"warrantyId\": \"\",\n  \"description\": \"\",\n  \"sortOrder\": 0\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/quotations/:quotationId/warranties/:id",
@@ -1660,7 +1665,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"termsConditionId\": \"\",\n  \"description\": \"\"\n}"
+                  "raw": "{\n  \"termsConditionId\": \"\",\n  \"description\": \"\",\n  \"section\": \"TERMS_CONDITIONS\",\n  \"sortOrder\": 0,\n  \"isSelected\": true,\n  \"isEditable\": false,\n  \"isRemovable\": false,\n  \"selectionGroup\": \"\",\n  \"conditionRule\": {}\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/quotations/:quotationId/terms",
@@ -1697,7 +1702,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"termsConditionId\": \"\",\n  \"description\": \"\"\n}"
+                  "raw": "{\n  \"termsConditionId\": \"\",\n  \"description\": \"\",\n  \"section\": \"TERMS_CONDITIONS\",\n  \"sortOrder\": 0,\n  \"isSelected\": true,\n  \"isEditable\": false,\n  \"isRemovable\": false,\n  \"selectionGroup\": \"\",\n  \"conditionRule\": {}\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/quotations/:quotationId/terms/:id",
@@ -2235,6 +2240,265 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Quotation References",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          { "key": "token", "value": "{{accessToken}}", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get H&M Template Reference",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/quotation-references/templates/HULL_MACHINERY"
+          }
+        },
+        {
+          "name": "Get Cargo Template Reference",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/quotation-references/templates/CARGO"
+          }
+        },
+        {
+          "name": "List Adjusters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/quotation-references/adjusters"
+          }
+        },
+        {
+          "name": "List Surveyors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/quotation-references/surveyors"
+          }
+        }
+      ]
+    },
+    {
+      "name": "P&I Quotations",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          { "key": "token", "value": "{{accessToken}}", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "List P&I Club Formats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pni/club-formats"
+          }
+        },
+        {
+          "name": "Get P&I Club Template",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pni/club-formats/:clubFormat/template",
+              "host": ["{{baseUrl}}"],
+              "path": ["pni", "club-formats", ":clubFormat", "template"],
+              "variable": [
+                { "key": "clubFormat", "value": "INIGO_SYNDICATE_1301" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List P&I Quotations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pni/quotations"
+          }
+        },
+        {
+          "name": "Create P&I Quotation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quotation\": {\n    \"clientId\": \"\",\n    \"insuranceTypeId\": \"\",\n    \"insured\": \"\"\n  },\n  \"pni\": {\n    \"clubFormat\": \"INIGO_SYNDICATE_1301\",\n    \"referenceNumber\": \"\",\n    \"validityDays\": 30\n  },\n  \"vessels\": [],\n  \"insuranceBlocks\": []\n}"
+            },
+            "url": "{{baseUrl}}/pni/quotations"
+          }
+        },
+        {
+          "name": "Get P&I Quotation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pni/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["pni", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Patch P&I Quotation",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pni\": {\n    \"validityDays\": 30\n  },\n  \"vessels\": [],\n  \"insuranceBlocks\": [],\n  \"remove\": {\n    \"vesselIds\": []\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pni/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["pni", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "H&M Quotations",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          { "key": "token", "value": "{{accessToken}}", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get H&M Template",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/hm/template"
+          }
+        },
+        {
+          "name": "Create H&M Quotation Detail",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vesselType\": \"\",\n  \"tradingWarranty\": \"\",\n  \"premiumPaymentEnabled\": true,\n  \"brokerageEnabled\": true,\n  \"installments\": [\n    { \"installmentNo\": 1, \"percentage\": 25, \"dueAfterDays\": 30 },\n    { \"installmentNo\": 2, \"percentage\": 25, \"dueAfterDays\": 60 },\n    { \"installmentNo\": 3, \"percentage\": 25, \"dueAfterDays\": 90 },\n    { \"installmentNo\": 4, \"percentage\": 25, \"dueAfterDays\": 120 }\n  ],\n  \"adjusterIds\": [],\n  \"surveyorIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hm/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["hm", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Get H&M Quotation Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/hm/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["hm", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Patch H&M Quotation Detail",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tradingWarranty\": \"\",\n  \"premiumPaymentEnabled\": true,\n  \"installments\": [],\n  \"adjusterIds\": [],\n  \"surveyorIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hm/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["hm", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cargo Quotations",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          { "key": "token", "value": "{{accessToken}}", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get Cargo Template",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/cargo/template"
+          }
+        },
+        {
+          "name": "Create Cargo Quotation Detail",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interestInsured\": \"\",\n  \"voyageFrom\": \"\",\n  \"voyageTo\": \"\",\n  \"etd\": \"2026-10-01\",\n  \"eta\": \"2026-10-03\",\n  \"conveyance\": \"\",\n  \"instituteCargoClause\": \"INSTITUTE_CARGO_A\",\n  \"adjusterIds\": [],\n  \"surveyorIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cargo/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["cargo", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Get Cargo Quotation Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cargo/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["cargo", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Patch Cargo Quotation Detail",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interestInsured\": \"\",\n  \"voyageFrom\": \"\",\n  \"voyageTo\": \"\",\n  \"etd\": \"2026-10-01\",\n  \"eta\": \"2026-10-03\",\n  \"conveyance\": \"\",\n  \"instituteCargoClause\": \"INSTITUTE_CARGO_A\",\n  \"adjusterIds\": [],\n  \"surveyorIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cargo/quotations/:quotationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["cargo", "quotations", ":quotationId"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
         }
       ]
     }
