@@ -72,6 +72,45 @@ enum InsuranceReviewAction {
   REVISION
 }
 
+enum PniClubFormat {
+  INIGO_SYNDICATE_1301
+  EAGLE_OCEAN_MARINE
+  MSIG_SPECIALTY_MARINE_NV
+}
+
+enum PniPremiumBasis {
+  PER_ANNUM
+  PER_VESSEL_PER_ANNUM
+  PRO_RATA
+  INCLUDED_NO_ADDITIONAL_CHARGE
+  OTHER
+}
+
+enum PniProvisionType {
+  CONDITION
+  CLAUSE
+  EXCLUSION
+  WARRANTY
+}
+
+enum PniProvisionSource {
+  PREDEFINED
+  CUSTOM
+}
+
+enum PniProvisionScope {
+  QUOTE
+  ALL_VESSELS
+  SELECTED_VESSELS
+}
+
+enum PniDeductibleScope {
+  FLAT
+  CLAIM_CATEGORY
+  ALL_VESSELS
+  SELECTED_VESSELS
+}
+
 enum ParticipantRole {
   LEADER
   MEMBER
@@ -282,6 +321,7 @@ model QsTemplate {
   id              String  @id @default(cuid()) @map("_id")
   name            String
   templateVersion String?
+  pniClubFormat   PniClubFormat?
   content         Json?
 
   createdAt DateTime  @default(now())
@@ -289,6 +329,7 @@ model QsTemplate {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([pniClubFormat])
   @@map("qs_template")
 }
 
@@ -422,6 +463,7 @@ model Quotation {
   histories   QuotationHistory[]
   submissions QuotationSubmission[]
   policy      Policy?
+  pniQuotation PniQuotation?
 
   @@index([clientId])
   @@index([insuranceTypeId])
@@ -429,6 +471,279 @@ model Quotation {
   @@index([status])
   @@index([deletedAt])
   @@map("quotation")
+}
+
+model PniQuotation {
+  id          String        @id @default(cuid()) @map("_id")
+  quotationId String        @unique
+  clubFormat  PniClubFormat
+
+  referenceNumber     String?
+  validityDays        Int?
+  assuredDomicile     String?
+  broker              String?
+  insurerOrSecurity   String? @db.Text
+  tradingLimits       String? @db.Text
+  paymentTermsText    String? @db.Text
+  subjectivities      String? @db.Text
+  importantInformation String? @db.Text
+  signatureName       String?
+  signatureCity       String?
+  signatureDate       DateTime?
+  details             Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  quotation            Quotation               @relation(fields: [quotationId], references: [id])
+  vessels              PniVessel[]
+  insuranceBlocks      PniInsuranceBlock[]
+  provisions           PniProvision[]
+  installments         PniInstallment[]
+  requiredDocuments    PniRequiredDocument[]
+  organizationRoles    PniOrganizationRole[]
+  coverRestrictions    PniCoverRestriction[]
+
+  @@index([clubFormat])
+  @@index([deletedAt])
+  @@map("pni_quotation")
+}
+
+model PniVessel {
+  id              String @id @default(cuid()) @map("_id")
+  pniQuotationId  String
+  name            String
+  imoNumber       String?
+  vesselType      String?
+  builtYear       Int?
+  flag            String?
+  vesselClass     String?
+  classNotApplicable Boolean @default(false)
+  grossTonnage    Decimal? @db.Decimal(15, 2)
+  portOfRegistry  String?
+  sortOrder       Int     @default(0)
+  details         Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation        PniQuotation              @relation(fields: [pniQuotationId], references: [id])
+  coverages           PniVesselCoverage[]
+  provisionScopes     PniProvisionVessel[]
+  deductibleScopes    PniDeductibleVessel[]
+
+  @@index([pniQuotationId])
+  @@index([deletedAt])
+  @@map("pni_vessel")
+}
+
+model PniInsuranceBlock {
+  id                  String          @id @default(cuid()) @map("_id")
+  pniQuotationId      String
+  inheritsFromBlockId String?
+  typeOfInsurance     String
+  security            String?         @db.Text
+  policyWordingReference String?      @db.Text
+  tradingArea          String?         @db.Text
+  paymentWarrantyText  String?         @db.Text
+  maximumInsured       Decimal?        @db.Decimal(15, 2)
+  currency             String          @default("USD")
+  premium              Decimal         @default(0) @db.Decimal(15, 2)
+  premiumBasis         PniPremiumBasis @default(PER_ANNUM)
+  sortOrder            Int             @default(0)
+  details              Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation PniQuotation       @relation(fields: [pniQuotationId], references: [id])
+  inheritsFrom PniInsuranceBlock? @relation("PniInsuranceBlockInheritance", fields: [inheritsFromBlockId], references: [id])
+  inheritedBy  PniInsuranceBlock[] @relation("PniInsuranceBlockInheritance")
+  vesselCoverages PniVesselCoverage[]
+  provisions      PniProvision[]
+  deductibles     PniDeductible[]
+  coverRestrictions PniCoverRestriction[]
+
+  @@index([pniQuotationId])
+  @@index([inheritsFromBlockId])
+  @@index([deletedAt])
+  @@map("pni_insurance_block")
+}
+
+model PniVesselCoverage {
+  id                  String  @id @default(cuid()) @map("_id")
+  pniVesselId         String
+  insuranceBlockId    String
+  annualPremium       Decimal? @db.Decimal(15, 2)
+  limitAmount         Decimal? @db.Decimal(15, 2)
+  currency            String  @default("USD")
+  details             Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  vessel         PniVessel         @relation(fields: [pniVesselId], references: [id])
+  insuranceBlock PniInsuranceBlock @relation(fields: [insuranceBlockId], references: [id])
+
+  @@unique([pniVesselId, insuranceBlockId])
+  @@index([insuranceBlockId])
+  @@index([deletedAt])
+  @@map("pni_vessel_coverage")
+}
+
+model PniProvision {
+  id                String             @id @default(cuid()) @map("_id")
+  pniQuotationId    String
+  insuranceBlockId  String?
+  type              PniProvisionType
+  source            PniProvisionSource @default(CUSTOM)
+  scope             PniProvisionScope  @default(QUOTE)
+  title             String
+  content           String?            @db.Text
+  reference         String?            @db.Text
+  conditionRule     Json?
+  sortOrder         Int                @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation  PniQuotation       @relation(fields: [pniQuotationId], references: [id])
+  insuranceBlock PniInsuranceBlock? @relation(fields: [insuranceBlockId], references: [id])
+  vesselScopes  PniProvisionVessel[]
+
+  @@index([pniQuotationId])
+  @@index([insuranceBlockId])
+  @@index([deletedAt])
+  @@map("pni_provision")
+}
+
+model PniProvisionVessel {
+  provisionId String
+  vesselId    String
+
+  provision PniProvision @relation(fields: [provisionId], references: [id])
+  vessel    PniVessel    @relation(fields: [vesselId], references: [id])
+
+  @@id([provisionId, vesselId])
+  @@index([vesselId])
+  @@map("pni_provision_vessel")
+}
+
+model PniDeductible {
+  id                String             @id @default(cuid()) @map("_id")
+  insuranceBlockId  String
+  scope             PniDeductibleScope
+  claimCategory     String?
+  amount            Decimal?           @db.Decimal(15, 2)
+  currency          String             @default("USD")
+  description       String?            @db.Text
+  sortOrder         Int                @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  insuranceBlock PniInsuranceBlock      @relation(fields: [insuranceBlockId], references: [id])
+  vesselScopes   PniDeductibleVessel[]
+
+  @@index([insuranceBlockId])
+  @@index([deletedAt])
+  @@map("pni_deductible")
+}
+
+model PniDeductibleVessel {
+  deductibleId String
+  vesselId     String
+
+  deductible PniDeductible @relation(fields: [deductibleId], references: [id])
+  vessel     PniVessel     @relation(fields: [vesselId], references: [id])
+
+  @@id([deductibleId, vesselId])
+  @@index([vesselId])
+  @@map("pni_deductible_vessel")
+}
+
+model PniInstallment {
+  id              String @id @default(cuid()) @map("_id")
+  pniQuotationId  String
+  installmentNo   Int
+  amount          Decimal? @db.Decimal(15, 2)
+  currency        String @default("USD")
+  dueDate         DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation PniQuotation @relation(fields: [pniQuotationId], references: [id])
+
+  @@unique([pniQuotationId, installmentNo])
+  @@index([deletedAt])
+  @@map("pni_installment")
+}
+
+model PniRequiredDocument {
+  id              String @id @default(cuid()) @map("_id")
+  pniQuotationId  String
+  name            String
+  isRequired      Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation PniQuotation @relation(fields: [pniQuotationId], references: [id])
+
+  @@index([pniQuotationId])
+  @@index([deletedAt])
+  @@map("pni_required_document")
+}
+
+model PniOrganizationRole {
+  id              String @id @default(cuid()) @map("_id")
+  pniQuotationId  String
+  organization    String?
+  role            String
+  sortOrder       Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation PniQuotation @relation(fields: [pniQuotationId], references: [id])
+
+  @@index([pniQuotationId])
+  @@index([deletedAt])
+  @@map("pni_organization_role")
+}
+
+model PniCoverRestriction {
+  id                String  @id @default(cuid()) @map("_id")
+  pniQuotationId    String
+  insuranceBlockId  String?
+  name              String
+  partReference     String?
+  sectionReference  String?
+  isSelected        Boolean @default(true)
+  sortOrder         Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  pniQuotation  PniQuotation        @relation(fields: [pniQuotationId], references: [id])
+  insuranceBlock PniInsuranceBlock? @relation(fields: [insuranceBlockId], references: [id])
+
+  @@index([pniQuotationId])
+  @@index([insuranceBlockId])
+  @@index([deletedAt])
+  @@map("pni_cover_restriction")
 }
 
 model QuotationObject {

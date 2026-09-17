@@ -10,6 +10,7 @@ import { InsuranceTypesModule } from './insurance-types/insurance-types.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { QuotationsModule } from './quotations/quotations.module';
 import { UsersModule } from './users/users.module';
+import { PniModule } from './pni/pni.module';
 
 @Global()
 @Module({
@@ -27,6 +28,7 @@ import { UsersModule } from './users/users.module';
     ClientsModule,
     InsuranceTypesModule,
     QuotationsModule,
+    PniModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, StorageService],
