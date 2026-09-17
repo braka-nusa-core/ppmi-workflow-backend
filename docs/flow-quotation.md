@@ -69,7 +69,11 @@ QS baru dibuat oleh user yang terdaftar pada department H&M, P&I, atau Cargo di 
 | Entity                                                                                              | Tanggung jawab                                                                             |
 | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `Quotation`                                                                                         | Data QS, status, client, insurance type, unit Teknik pemilik, dan actor creation/approval. |
-| `QuotationObject`, `QuotationCoverage`, `QuotationTerm`, `QuotationWarranty`, `QuotationAttachment` | Detail teknis QS.                                                                          |
+| `QuotationObject`, `QuotationCoverage`, `QuotationTerm`, `QuotationWarranty`, `QuotationAttachment` | Child data quotation generic.                                                              |
+| `PniQuotation` | Extension P&I dengan vessel, insurance block, provision, deductible, dan payment detail. |
+| `HmQuotation`, `HmQuotationInstallment` | Extension H&M dan schedule premium payment.                                                |
+| `CargoQuotation` | Extension Cargo dengan voyage, sailing date, conveyance, dan base Cargo Clause.            |
+| `QuotationAdjuster`, `QuotationSurveyor` | Assignment master adjuster dan surveyor pada quotation.                                    |
 | `QuotationApproval`                                                                                 | Keputusan Supervisor Teknik: approved, rejected, atau revision request.                    |
 | `QuotationHistory`                                                                                  | Riwayat seluruh transition status dan actor internal.                                      |
 | `QuotationSubmission`                                                                               | Pengiriman QS ke perusahaan asuransi, termasuk snapshot QS immutable.                      |
@@ -117,6 +121,18 @@ Setiap pengiriman membuat `QuotationSubmission` dengan:
 - Export hanya diizinkan pada QS `APPROVED`.
 - Endpoint export masih placeholder. Snapshot submission menjadi artefak data immutable sementara sampai generator PDF tersedia.
 
+### Domain Gate Saat Submit
+
+Sebelum transition `DRAFT` atau `REVISION` ke `WAITING_APPROVAL`, sistem memeriksa kelengkapan domain berikut:
+
+| Insurance Type Code | Syarat Submit |
+| --- | --- |
+| `HM` | Detail `HmQuotation` wajib ada. Bila premium payment aktif, harus ada tepat empat instalment aktif. |
+| `CARGO` | Detail `CargoQuotation` dan satu `instituteCargoClause` wajib ada. |
+| Lainnya | Tidak memiliki gate H&M/Cargo tambahan. |
+
+P&I tetap memakai extension dan endpoint tersendiri. Validasi kelengkapan per club P&I belum dipaksakan saat submit.
+
 ## Audit dan Konsistensi
 
 - Setiap transition menulis `QuotationHistory` dan `Log` dalam transaction yang sama.
@@ -144,6 +160,16 @@ Setiap pengiriman membuat `QuotationSubmission` dengan:
 | `GET /quotations/:id/approvals`           | Riwayat keputusan Supervisor Teknik.                              |
 | `GET /quotations/:id/history`             | Riwayat status QS.                                                |
 | `GET /quotations/:id/export-pdf`          | Export QS approved; generator PDF masih placeholder.              |
+
+Endpoint domain dan reference data:
+
+| Endpoint | Fungsi |
+| --- | --- |
+| `GET /pni/club-formats` | Daftar format club P&I. |
+| `GET /pni/quotations/:quotationId` | Detail P&I quotation. |
+| `GET /hm/quotations/:quotationId` | Detail H&M quotation. |
+| `GET /cargo/quotations/:quotationId` | Detail Cargo quotation. |
+| `GET /quotation-references/templates/:domain` | Template UI H&M atau Cargo. |
 
 Endpoint child data menggunakan prefix `quotations/:quotationId` untuk `objects`, `coverages`, `terms`, `warranties`, dan `attachments`. Semua mutasi child data mengikuti lock status dan ownership QS.
 

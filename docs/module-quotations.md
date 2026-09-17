@@ -26,7 +26,7 @@ Selain permission, service memvalidasi ownership unit Teknik dan memastikan appr
 | Method | Endpoint | Permission | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/quotations` | `quotation:read` | List QS aktif. |
-| `GET` | `/quotations/:id` | `quotation:read` | Detail QS beserta child data, approval, history, submission, dan review. |
+| `GET` | `/quotations/:id` | `quotation:read` | Detail QS beserta domain detail, child data, approval, history, submission, dan review. |
 | `POST` | `/quotations` | `quotation:create` | Membuat QS `DRAFT`. |
 | `PATCH` | `/quotations/:id` | `quotation:update` | Mengubah QS `DRAFT` atau `REVISION`. |
 | `DELETE` | `/quotations/:id` | `quotation:update` | Soft delete QS `DRAFT`. |
@@ -41,6 +41,17 @@ Selain permission, service memvalidasi ownership unit Teknik dan memastikan appr
 | `GET` | `/quotations/:id/history` | `quotation:read` | Riwayat transition status QS. |
 | `GET` | `/quotations/:id/export-pdf` | `quotation:export` | Export QS `APPROVED`; generator PDF masih placeholder. |
 
+## Quotation References
+
+| Method | Endpoint | Permission | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/quotation-references/templates/HULL_MACHINERY` | `quotation:read` | Template UI H&M aktif. |
+| `GET` | `/quotation-references/templates/CARGO` | `quotation:read` | Template UI Cargo aktif. |
+| `GET` | `/quotation-references/adjusters` | `quotation:read` | Master adjuster aktif. |
+| `GET` | `/quotation-references/surveyors` | `quotation:read` | Master surveyor aktif. |
+
+Detail domain memiliki endpoint sendiri: [P&I](module-pni.md), [H&M](module-hm.md), dan [Cargo](module-cargo.md).
+
 ## Create QS
 
 `POST /quotations` membuat QS `DRAFT` untuk department Teknik actor. Actor harus terdaftar pada department H&M, P&I, atau Cargo di bawah division Teknik.
@@ -51,14 +62,23 @@ Selain permission, service memvalidasi ownership unit Teknik dan memastikan appr
   "insuranceTypeId": "clx...insurance-type",
   "insured": "PT Pelayaran Nusantara",
   "address": "Jl. Pelabuhan No. 1",
+  "recipient": "PT Pelayaran Nusantara",
+  "attentionTo": "Marine Insurance Team",
   "quotationDate": "2026-09-09",
   "periodStart": "2026-10-01",
   "periodEnd": "2027-09-30",
+  "periodText": "12 months as from date to be agreed",
   "interest": "Hull & Machinery",
+  "sumInsured": 50000000000,
+  "sumInsuredCurrency": "IDR",
   "rate": 0.0025,
   "premium": 125000000,
   "deductible": 5000000,
+  "deductibleText": "1% of Sum Insured any one accident or occurrence",
+  "deductibleBasis": "PERCENTAGE_OF_SUM_INSURED",
   "brokerage": 0.01,
+  "insuranceLabelValue": "Example Underwriter",
+  "confirmedAcceptedBy": "Authorised Signatory",
   "templateVersion": "v1"
 }
 ```
@@ -115,6 +135,22 @@ Endpoint insurance approval dan revision mencatat `InsuranceReview` pada submiss
 
 Semua child mutation membutuhkan `quotation:update`, hanya diperbolehkan pada QS `DRAFT` atau `REVISION`, dan hanya untuk unit Teknik pemilik QS. Mutasi attachment menggunakan `multipart/form-data` dengan field `file`.
 
+### Terms dan Warranties
+
+Selain `termsConditionId` dan `description`, term mendukung metadata berikut:
+
+| Field | Fungsi |
+| --- | --- |
+| `section` | `TERMS_CONDITIONS` atau `ADJUSTER_SURVEYOR`. |
+| `sortOrder` | Urutan render term. |
+| `isSelected` | Status pemilihan term. |
+| `isEditable` | Menandai term yang dapat diubah. |
+| `isRemovable` | Menandai term yang dapat dihapus. |
+| `selectionGroup` | Kelompok pilihan term. |
+| `conditionRule` | Rule condition dalam JSON. |
+
+Warranty mendukung `sortOrder` untuk urutan render.
+
 ## Status dan Data Rules
 
 - `DRAFT` dan `REVISION` adalah satu-satunya status yang editable.
@@ -122,6 +158,7 @@ Semua child mutation membutuhkan `quotation:update`, hanya diperbolehkan pada QS
 - Revisi insurer harus memiliki perubahan QS sebelum `POST /submit` dapat dipanggil.
 - Revisi insurer sementara ini wajib approval ulang Supervisor Teknik sebelum dikirim ulang.
 - `INSURANCE_APPROVED` menunggu handoff module Policy untuk menerbitkan policy number dan policy document.
+- H&M dan Cargo memiliki validasi kelengkapan tambahan saat submit; lihat [module H&M](module-hm.md) dan [module Cargo](module-cargo.md).
 - Detail transition dan diagram tersedia di `docs/flow-quotation.md`.
 
 ## Audit Response
@@ -131,6 +168,9 @@ Semua child mutation membutuhkan `quotation:update`, hanya diperbolehkan pada QS
 - `approvals` dengan approver Supervisor Teknik.
 - `histories` dengan actor transition.
 - `submissions` dengan perusahaan asuransi, pengirim, waktu kirim, dan daftar `reviews`.
+- `hmQuotation` dan instalment aktif bila quotation memiliki detail H&M.
+- `cargoQuotation` bila quotation memiliki detail Cargo.
+- `adjusters` dan `surveyors` yang ditugaskan ke quotation.
 
 Snapshot internal pada `QuotationSubmission` tidak diekspos melalui detail QS. Snapshot tersebut dipakai untuk membuktikan isi QS yang dikirim ke insurer.
 
