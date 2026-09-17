@@ -7,6 +7,7 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../common/services/prisma.service';
 import { ClientsService } from '../clients/clients.service';
+import { TechnicalQuotationValidationService } from './technical-quotation-validation.service';
 import {
   ActionNoteDto,
   CreateQuotationDto,
@@ -34,6 +35,7 @@ export class QuotationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clientsService: ClientsService,
+    private readonly technicalQuotationValidationService: TechnicalQuotationValidationService,
   ) {}
 
   async list() {
@@ -43,6 +45,8 @@ export class QuotationsService {
         client: { select: { id: true, name: true, clientCode: true } },
         insuranceType: { select: { id: true, code: true, name: true } },
         technicalUnit: { select: { id: true, name: true } },
+        hmQuotation: { select: { id: true } },
+        cargoQuotation: { select: { id: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -57,13 +61,33 @@ export class QuotationsService {
         technicalUnit: { select: { id: true, name: true } },
         objects: { where: { deletedAt: null } },
         coverages: { where: { deletedAt: null } },
+        hmQuotation: {
+          where: { deletedAt: null },
+          include: {
+            installments: {
+              where: { deletedAt: null },
+              orderBy: { sortOrder: 'asc' },
+            },
+          },
+        },
+        cargoQuotation: { where: { deletedAt: null } },
+        adjusters: {
+          include: { adjuster: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+        surveyors: {
+          include: { surveyor: true },
+          orderBy: { sortOrder: 'asc' },
+        },
         terms: {
           where: { deletedAt: null },
           include: { termsCondition: true },
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
         },
         warranties: {
           where: { deletedAt: null },
           include: { warranty: true },
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
         },
         attachments: { where: { deletedAt: null } },
         approvals: {
@@ -170,14 +194,23 @@ export class QuotationsService {
           technicalUnitId,
           insured: dto.insured,
           address: dto.address,
+          recipient: dto.recipient,
+          attentionTo: dto.attentionTo,
           quotationDate: dto.quotationDate ? new Date(dto.quotationDate) : null,
           periodStart: dto.periodStart ? new Date(dto.periodStart) : null,
           periodEnd: dto.periodEnd ? new Date(dto.periodEnd) : null,
+          periodText: dto.periodText,
           interest: dto.interest,
+          sumInsured: dto.sumInsured,
+          sumInsuredCurrency: dto.sumInsuredCurrency,
           rate: dto.rate,
           premium: dto.premium,
           deductible: dto.deductible,
+          deductibleText: dto.deductibleText,
+          deductibleBasis: dto.deductibleBasis,
           brokerage: dto.brokerage,
+          insuranceLabelValue: dto.insuranceLabelValue,
+          confirmedAcceptedBy: dto.confirmedAcceptedBy,
           status: 'DRAFT',
           createdById: actor.id,
           templateVersion: dto.templateVersion,
@@ -232,6 +265,10 @@ export class QuotationsService {
           }),
           ...(dto.insured !== undefined && { insured: dto.insured }),
           ...(dto.address !== undefined && { address: dto.address }),
+          ...(dto.recipient !== undefined && { recipient: dto.recipient }),
+          ...(dto.attentionTo !== undefined && {
+            attentionTo: dto.attentionTo,
+          }),
           ...(dto.quotationDate !== undefined && {
             quotationDate: new Date(dto.quotationDate),
           }),
@@ -241,18 +278,35 @@ export class QuotationsService {
           ...(dto.periodEnd !== undefined && {
             periodEnd: new Date(dto.periodEnd),
           }),
+          ...(dto.periodText !== undefined && { periodText: dto.periodText }),
           ...(dto.interest !== undefined && { interest: dto.interest }),
+          ...(dto.sumInsured !== undefined && { sumInsured: dto.sumInsured }),
+          ...(dto.sumInsuredCurrency !== undefined && {
+            sumInsuredCurrency: dto.sumInsuredCurrency,
+          }),
           ...(dto.rate !== undefined && { rate: dto.rate }),
           ...(dto.premium !== undefined && { premium: dto.premium }),
           ...(dto.deductible !== undefined && { deductible: dto.deductible }),
+          ...(dto.deductibleText !== undefined && {
+            deductibleText: dto.deductibleText,
+          }),
+          ...(dto.deductibleBasis !== undefined && {
+            deductibleBasis: dto.deductibleBasis,
+          }),
           ...(dto.brokerage !== undefined && { brokerage: dto.brokerage }),
+          ...(dto.insuranceLabelValue !== undefined && {
+            insuranceLabelValue: dto.insuranceLabelValue,
+          }),
+          ...(dto.confirmedAcceptedBy !== undefined && {
+            confirmedAcceptedBy: dto.confirmedAcceptedBy,
+          }),
           ...(dto.templateVersion !== undefined && {
             templateVersion: dto.templateVersion,
           }),
           ...(existing.status === 'REVISION' &&
             Object.keys(dto).length > 0 && {
               insurerRevisionUpdatedAt: new Date(),
-          }),
+            }),
         },
       });
 
@@ -497,6 +551,7 @@ export class QuotationsService {
 
   async submit(id: string, actor: Actor, dto?: ActionNoteDto) {
     await this.assertEditable(id, actor.id);
+    await this.technicalQuotationValidationService.validateForSubmit(id);
     const quotation = await this.prisma.quotation.findFirst({
       where: { id, deletedAt: null },
       select: { status: true },
@@ -712,7 +767,9 @@ export class QuotationsService {
       actor.role !== 'SUPERADMIN' &&
       actor.organizationUnitId !== technicalUnitId
     ) {
-      throw new ForbiddenException('Quotation belongs to another technical unit');
+      throw new ForbiddenException(
+        'Quotation belongs to another technical unit',
+      );
     }
   }
 

@@ -12,6 +12,9 @@ import { QuotationWarrantiesController } from './quotation-warranties.controller
 import { QuotationWarrantiesService } from './quotation-warranties.service';
 import { QuotationAttachmentsController } from './quotation-attachments.controller';
 import { QuotationAttachmentsService } from './quotation-attachments.service';
+import { QuotationReferencesController } from './quotation-references.controller';
+import { QuotationReferencesService } from './quotation-references.service';
+import { TechnicalQuotationValidationService } from './technical-quotation-validation.service';
 
 @Module({
   imports: [ClientsModule],
@@ -22,6 +25,7 @@ import { QuotationAttachmentsService } from './quotation-attachments.service';
     QuotationTermsController,
     QuotationWarrantiesController,
     QuotationAttachmentsController,
+    QuotationReferencesController,
   ],
   providers: [
     QuotationsService,
@@ -30,6 +34,9 @@ import { QuotationAttachmentsService } from './quotation-attachments.service';
     QuotationTermsService,
     QuotationWarrantiesService,
     QuotationAttachmentsService,
+    QuotationReferencesService,
+    TechnicalQuotationValidationService,
   ],
+  exports: [QuotationsService],
 })
 export class QuotationsModule {}

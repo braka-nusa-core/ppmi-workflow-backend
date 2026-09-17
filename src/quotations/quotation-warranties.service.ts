@@ -17,7 +17,7 @@ export class QuotationWarrantiesService {
     return this.prisma.quotationWarranty.findMany({
       where: { quotationId, deletedAt: null },
       include: { warranty: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
@@ -41,6 +41,7 @@ export class QuotationWarrantiesService {
         quotationId,
         warrantyId: dto.warrantyId,
         description: dto.description,
+        sortOrder: dto.sortOrder,
       },
     });
     await this.quotationsService.markInsurerRevisionUpdated(quotationId);
@@ -64,6 +65,7 @@ export class QuotationWarrantiesService {
       data: {
         ...(dto.warrantyId !== undefined && { warrantyId: dto.warrantyId }),
         ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.sortOrder !== undefined && { sortOrder: dto.sortOrder }),
       },
     });
     await this.quotationsService.markInsurerRevisionUpdated(quotationId);

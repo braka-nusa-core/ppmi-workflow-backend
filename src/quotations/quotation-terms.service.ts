@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../common/services/prisma.service';
 import {
   CreateQuotationTermDto,
@@ -17,7 +18,7 @@ export class QuotationTermsService {
     return this.prisma.quotationTerm.findMany({
       where: { quotationId, deletedAt: null },
       include: { termsCondition: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
@@ -41,6 +42,13 @@ export class QuotationTermsService {
         quotationId,
         termsConditionId: dto.termsConditionId,
         description: dto.description,
+        section: dto.section,
+        sortOrder: dto.sortOrder,
+        isSelected: dto.isSelected,
+        isEditable: dto.isEditable,
+        isRemovable: dto.isRemovable,
+        selectionGroup: dto.selectionGroup,
+        conditionRule: dto.conditionRule as Prisma.InputJsonValue | undefined,
       },
     });
     await this.quotationsService.markInsurerRevisionUpdated(quotationId);
@@ -66,6 +74,17 @@ export class QuotationTermsService {
           termsConditionId: dto.termsConditionId,
         }),
         ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.section !== undefined && { section: dto.section }),
+        ...(dto.sortOrder !== undefined && { sortOrder: dto.sortOrder }),
+        ...(dto.isSelected !== undefined && { isSelected: dto.isSelected }),
+        ...(dto.isEditable !== undefined && { isEditable: dto.isEditable }),
+        ...(dto.isRemovable !== undefined && { isRemovable: dto.isRemovable }),
+        ...(dto.selectionGroup !== undefined && {
+          selectionGroup: dto.selectionGroup,
+        }),
+        ...(dto.conditionRule !== undefined && {
+          conditionRule: dto.conditionRule as Prisma.InputJsonValue,
+        }),
       },
     });
     await this.quotationsService.markInsurerRevisionUpdated(quotationId);
