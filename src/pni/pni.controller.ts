@@ -37,21 +37,21 @@ import {
 export class PniController {
   constructor(private readonly pniService: PniService) {}
 
-  @Get('club-formats')
+  @Get('clubs')
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'read')
-  @ApiOperation({ summary: 'List supported P&I club formats' })
-  listClubFormats() {
-    return this.pniService.listClubFormats();
+  @ApiOperation({ summary: 'List P&I clubs' })
+  listClubs() {
+    return this.pniService.listClubs();
   }
 
-  @Get('club-formats/:clubFormat/template')
+  @Get('clubs/:clubCode/template')
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'read')
-  @ApiOperation({ summary: 'Get active templates for a P&I club format' })
-  @ApiParam({ name: 'clubFormat', type: String })
-  getTemplate(@Param('clubFormat') clubFormat: string) {
-    return this.pniService.getTemplate(clubFormat);
+  @ApiOperation({ summary: 'Get templates for a P&I club' })
+  @ApiParam({ name: 'clubCode', type: String })
+  getTemplate(@Param('clubCode') clubCode: string) {
+    return this.pniService.getTemplate(clubCode);
   }
 
   @Get('quotations')

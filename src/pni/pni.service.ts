@@ -12,21 +12,6 @@ import { CreatePniQuotationDto, UpdatePniQuotationDto } from './pni.validation';
 type Actor = { id: string; fullname: string };
 type Transaction = Prisma.TransactionClient;
 
-const CLUB_FORMATS = [
-  {
-    code: 'INIGO_SYNDICATE_1301',
-    displayName: '(Inigo Syndicate 1301)',
-  },
-  {
-    code: 'EAGLE_OCEAN_MARINE',
-    displayName: '(Eagle Ocean Marine / American S.O. Mutual P&I Assoc.)',
-  },
-  {
-    code: 'MSIG_SPECIALTY_MARINE_NV',
-    displayName: '(MSIG Europe / MSIG Specialty Marine NV)',
-  },
-] as const;
-
 const TECHNICAL_DEPARTMENTS = new Set(['H&M', 'P&I', 'Cargo']);
 
 @Injectable()
@@ -36,14 +21,23 @@ export class PniService {
     private readonly clientsService: ClientsService,
   ) {}
 
-  listClubFormats() {
-    return CLUB_FORMATS;
+  listClubs() {
+    return this.prisma.club.findMany({
+      where: { deletedAt: null },
+      select: { id: true, code: true, name: true },
+      orderBy: { code: 'asc' },
+    });
   }
 
-  async getTemplate(clubFormat: string) {
-    this.assertClubFormat(clubFormat);
+  async getTemplate(clubCode: string) {
+    const club = await this.prisma.club.findFirst({
+      where: { code: clubCode, deletedAt: null },
+      select: { id: true },
+    });
+    if (!club) throw new BadRequestException('Unknown P&I club');
+
     return this.prisma.qsTemplate.findMany({
-      where: { pniClubFormat: clubFormat as never, deletedAt: null },
+      where: { clubId: club.id, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
     });
   }
@@ -55,7 +49,11 @@ export class PniService {
         client: { select: { id: true, name: true, clientCode: true } },
         insuranceType: { select: { id: true, code: true, name: true } },
         pniQuotation: {
-          select: { id: true, clubFormat: true, referenceNumber: true },
+          select: {
+            id: true,
+            referenceNumber: true,
+            club: { select: { id: true, code: true, name: true } },
+          },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -103,6 +101,7 @@ export class PniService {
         data: {
           quotationId: quotation.id,
           ...this.pniData(dto.pni),
+          ...(await this.resolveClub(tx, dto.pni.clubCode)),
         },
       });
 
@@ -169,7 +168,11 @@ export class PniService {
       if (dto.pni) {
         await tx.pniQuotation.update({
           where: { id: existing.id },
-          data: this.pniData(dto.pni),
+          data: {
+            ...this.pniData(dto.pni),
+            ...(dto.pni.clubCode !== undefined &&
+              (await this.resolveClub(tx, dto.pni.clubCode))),
+          },
         });
       }
 
@@ -194,6 +197,8 @@ export class PniService {
 
   private detailInclude() {
     return {
+      club: { select: { id: true, code: true, name: true } },
+      qsTemplate: { select: { id: true, name: true, templateVersion: true } },
       quotation: {
         include: {
           client: true,
@@ -912,7 +917,6 @@ export class PniService {
 
   private pniData(input: any) {
     return {
-      ...(input.clubFormat !== undefined && { clubFormat: input.clubFormat }),
       ...(input.referenceNumber !== undefined && {
         referenceNumber: input.referenceNumber,
       }),
@@ -923,12 +927,6 @@ export class PniService {
         assuredDomicile: input.assuredDomicile,
       }),
       ...(input.broker !== undefined && { broker: input.broker }),
-      ...(input.insurerOrSecurity !== undefined && {
-        insurerOrSecurity: input.insurerOrSecurity,
-      }),
-      ...(input.tradingLimits !== undefined && {
-        tradingLimits: input.tradingLimits,
-      }),
       ...(input.paymentTermsText !== undefined && {
         paymentTermsText: input.paymentTermsText,
       }),
@@ -1057,9 +1055,19 @@ export class PniService {
     }
   }
 
-  private assertClubFormat(clubFormat: string) {
-    if (!CLUB_FORMATS.some((format) => format.code === clubFormat)) {
-      throw new BadRequestException('Unknown P&I club format');
-    }
+  private async resolveClub(tx: Transaction, clubCode: string) {
+    const club = await tx.club.findFirst({
+      where: { code: clubCode, deletedAt: null },
+      select: { id: true },
+    });
+    if (!club) throw new BadRequestException('Unknown P&I club');
+
+    const template = await tx.qsTemplate.findFirst({
+      where: { clubId: club.id, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+      select: { id: true },
+    });
+
+    return { clubId: club.id, qsTemplateId: template?.id ?? null };
   }
 }

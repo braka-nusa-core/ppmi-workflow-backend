@@ -49,6 +49,7 @@ enum LogReferenceType {
   QS_TEMPLATE
   BANK
   INSURANCE_TYPE
+  CLUB
 }
 
 enum QuotationStatus {
@@ -70,12 +71,6 @@ enum QuotationApprovalAction {
 enum InsuranceReviewAction {
   APPROVED
   REVISION
-}
-
-enum PniClubFormat {
-  INIGO_SYNDICATE_1301
-  EAGLE_OCEAN_MARINE
-  MSIG_SPECIALTY_MARINE_NV
 }
 
 enum PniPremiumBasis {
@@ -337,21 +332,40 @@ model Bank {
   @@map("bank")
 }
 
+model Club {
+  id        String   @id @default(cuid()) @map("_id")
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  qsTemplates    QsTemplate[]
+  pniQuotations  PniQuotation[]
+
+  @@index([deletedAt])
+  @@map("club")
+}
+
 model QsTemplate {
   id              String  @id @default(cuid()) @map("_id")
   name            String
   templateVersion String?
   templateDomain  QsTemplateDomain?
-  pniClubFormat   PniClubFormat?
+  clubId          String?
   content         Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  club Club? @relation(fields: [clubId], references: [id])
+
+  pniQuotations PniQuotation[]
+
   @@index([deletedAt])
   @@index([templateDomain])
-  @@index([pniClubFormat])
+  @@index([clubId])
   @@map("qs_template")
 }
 
@@ -433,6 +447,7 @@ model Client {
   deletedAt DateTime?
 
   quotations Quotation[]
+  vesselPolicies VesselPolicy[]
 
   @@index([deletedAt])
   @@map("client")
@@ -605,14 +620,13 @@ model QuotationSurveyor {
 model PniQuotation {
   id          String        @id @default(cuid()) @map("_id")
   quotationId String        @unique
-  clubFormat  PniClubFormat
+  clubId      String
+  qsTemplateId String?
 
   referenceNumber     String?
   validityDays        Int?
   assuredDomicile     String?
   broker              String?
-  insurerOrSecurity   String? @db.Text
-  tradingLimits       String? @db.Text
   paymentTermsText    String? @db.Text
   subjectivities      String? @db.Text
   importantInformation String? @db.Text
@@ -626,6 +640,8 @@ model PniQuotation {
   deletedAt DateTime?
 
   quotation            Quotation               @relation(fields: [quotationId], references: [id])
+  club                 Club                    @relation(fields: [clubId], references: [id])
+  qsTemplate           QsTemplate?             @relation(fields: [qsTemplateId], references: [id])
   vessels              PniVessel[]
   insuranceBlocks      PniInsuranceBlock[]
   provisions           PniProvision[]
@@ -634,7 +650,8 @@ model PniQuotation {
   organizationRoles    PniOrganizationRole[]
   coverRestrictions    PniCoverRestriction[]
 
-  @@index([clubFormat])
+  @@index([clubId])
+  @@index([qsTemplateId])
   @@index([deletedAt])
   @@map("pni_quotation")
 }
@@ -1371,4 +1388,65 @@ model FileUpload {
   @@index([module, referenceId])
   @@index([deletedAt])
   @@map("file_upload")
+}
+
+enum VesselPolicyStatus {
+  ON
+  NEW_VESSEL
+  OFF
+  CANCEL
+  SELL
+}
+
+model Vessel {
+  id             String   @id @default(cuid()) @map("_id")
+  name           String
+  normalizedName String
+  identityKey    String   @unique
+  vesselType     String?
+  builtYear      Int?
+  grossTonnage   Decimal? @db.Decimal(15, 2)
+  vesselClass    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  policies VesselPolicy[]
+
+  @@index([normalizedName])
+  @@index([deletedAt])
+  @@map("vessel")
+}
+
+model VesselPolicy {
+  id              String              @id @default(cuid()) @map("_id")
+  vesselId        String
+  clientId        String
+  coverageKey     String              @unique
+  policyNumber    String?
+  policyNumberRaw String?
+  insuredRaw      String?
+  periodRaw       String?
+  periodStart     DateTime?
+  periodEnd       DateTime?
+  club            String?
+  status          VesselPolicyStatus?
+  statusRaw       String?
+  paymentDate     DateTime?
+  paymentStatus   String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  vessel Vessel  @relation(fields: [vesselId], references: [id])
+  client Client? @relation(fields: [clientId], references: [id])
+
+  @@index([vesselId])
+  @@index([clientId])
+  @@index([policyNumber])
+  @@index([periodEnd])
+  @@index([deletedAt])
+  @@map("vessel_policy")
 }

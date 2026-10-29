@@ -8,7 +8,7 @@ describe('createPniQuotationSchema', () => {
         clientId: 'client-1',
         insuranceTypeId: 'insurance-type-1',
       },
-      pni: { clubFormat: 'MSIG_SPECIALTY_MARINE_NV' },
+      pni: { clubCode: 'MSIG' },
       insuranceBlocks: [
         {
           key: 'war-pni',
@@ -26,7 +26,7 @@ describe('createPniQuotationSchema', () => {
     expect(() =>
       createPniQuotationSchema.parse({
         quotation: { insuranceTypeId: 'insurance-type-1' },
-        pni: { clubFormat: 'INIGO_SYNDICATE_1301' },
+        pni: { clubCode: 'MSIG' },
       }),
     ).toThrow();
   });

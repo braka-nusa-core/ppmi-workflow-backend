@@ -1,12 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-const clubFormatSchema = z.enum([
-  'INIGO_SYNDICATE_1301',
-  'EAGLE_OCEAN_MARINE',
-  'MSIG_SPECIALTY_MARINE_NV',
-]);
-
 const jsonSchema = z.record(z.string(), z.unknown());
 const identifierSchema = z.string().min(1);
 const amountSchema = z.number().finite().nonnegative();
@@ -144,13 +138,11 @@ const coverRestrictionSchema = z.object({
 });
 
 const pniFieldsSchema = z.object({
-  clubFormat: clubFormatSchema,
+  clubCode: identifierSchema,
   referenceNumber: z.string().optional(),
   validityDays: z.number().int().positive().optional(),
   assuredDomicile: z.string().optional(),
   broker: z.string().optional(),
-  insurerOrSecurity: z.string().optional(),
-  tradingLimits: z.string().optional(),
   paymentTermsText: z.string().optional(),
   subjectivities: z.string().optional(),
   importantInformation: z.string().optional(),

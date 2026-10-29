@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ClientsModule } from './clients/clients.module';
 import { PrismaService } from './common/services/prisma.service';
 import { StorageService } from './common/services/storage.service';
+import { ClubsModule } from './clubs/clubs.module';
 import { InsuranceTypesModule } from './insurance-types/insurance-types.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { QuotationsModule } from './quotations/quotations.module';
@@ -29,6 +30,7 @@ import { CargoModule } from './cargo/cargo.module';
     OrganizationsModule,
     ClientsModule,
     InsuranceTypesModule,
+    ClubsModule,
     QuotationsModule,
     PniModule,
     HmModule,
