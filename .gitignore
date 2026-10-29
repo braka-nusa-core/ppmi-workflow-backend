@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 src/generated/*
 prisma/seed.ts
 prisma/pni.ts
+prisma/hm-cargo.ts
+prisma/data/
+prisma/clients.ts

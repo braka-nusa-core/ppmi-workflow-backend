@@ -15,6 +15,8 @@
 ## Master Data
 
 - [Clients](module-clients.md)
+- [Clubs](module-clubs.md)
+- [Vessels and Vessel Policies](module-vessels.md)
 - [Insurance Types](module-insurance-types.md)
 - [Organizations and Permissions](module-organizations.md)
 - [Users](module-users.md)

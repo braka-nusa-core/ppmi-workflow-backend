@@ -50,6 +50,8 @@ enum LogReferenceType {
   BANK
   INSURANCE_TYPE
   CLUB
+  VESSEL
+  VESSEL_POLICY
 }
 
 enum QuotationStatus {
@@ -1430,7 +1432,8 @@ model VesselPolicy {
   periodRaw       String?
   periodStart     DateTime?
   periodEnd       DateTime?
-  club            String?
+  clubCode        String?
+  clubRaw         String?
   status          VesselPolicyStatus?
   statusRaw       String?
   paymentDate     DateTime?

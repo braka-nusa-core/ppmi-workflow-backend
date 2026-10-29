@@ -763,6 +763,192 @@
       ]
     },
     {
+      "name": "Clubs",
+      "item": [
+        {
+          "name": "List Clubs",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/clubs", "host": ["{{baseUrl}}"], "path": ["clubs"] }
+          }
+        },
+        {
+          "name": "Get Club",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/clubs/:id", "host": ["{{baseUrl}}"], "path": ["clubs", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Create Club",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"MSIG\",\n  \"name\": \"MSIG Specialty Marine NV\"\n}" },
+            "url": { "raw": "{{baseUrl}}/clubs", "host": ["{{baseUrl}}"], "path": ["clubs"] }
+          }
+        },
+        {
+          "name": "Update Club",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"\"\n}" },
+            "url": { "raw": "{{baseUrl}}/clubs/:id", "host": ["{{baseUrl}}"], "path": ["clubs", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Restore Club",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/clubs/:id/restore", "host": ["{{baseUrl}}"], "path": ["clubs", ":id", "restore"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Delete Club",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/clubs/:id", "host": ["{{baseUrl}}"], "path": ["clubs", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vessels",
+      "item": [
+        {
+          "name": "List Vessels",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels?q=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels"],
+              "query": [
+                { "key": "q", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Vessel",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/vessels/:id", "host": ["{{baseUrl}}"], "path": ["vessels", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Create Vessel",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"BUANA HARBOUR 3201\",\n  \"vesselType\": \"HARBOUR TUG\",\n  \"builtYear\": 2018,\n  \"grossTonnage\": 354,\n  \"vesselClass\": \"BKI\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vessels", "host": ["{{baseUrl}}"], "path": ["vessels"] }
+          }
+        },
+        {
+          "name": "Update Vessel",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"vesselClass\": \"BKI\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vessels/:id", "host": ["{{baseUrl}}"], "path": ["vessels", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Delete Vessel",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/vessels/:id", "host": ["{{baseUrl}}"], "path": ["vessels", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vessel Policies",
+      "item": [
+        {
+          "name": "List Vessel Policies",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessel-policies?clientId=&vesselId=&status=&expiringWithinDays=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessel-policies"],
+              "query": [
+                { "key": "clientId", "value": "", "disabled": true },
+                { "key": "vesselId", "value": "", "disabled": true },
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "expiringWithinDays", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Vessel Policy",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/vessel-policies/:id", "host": ["{{baseUrl}}"], "path": ["vessel-policies", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Create Vessel Policy",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"vesselId\": \"\",\n  \"clientId\": \"\",\n  \"policyNumber\": \"\",\n  \"periodStart\": \"2026-01-04\",\n  \"periodEnd\": \"2027-01-04\",\n  \"clubCode\": \"MSIG\",\n  \"status\": \"ON\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vessel-policies", "host": ["{{baseUrl}}"], "path": ["vessel-policies"] }
+          }
+        },
+        {
+          "name": "Update Vessel Policy",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ON\"\n}" },
+            "url": { "raw": "{{baseUrl}}/vessel-policies/:id", "host": ["{{baseUrl}}"], "path": ["vessel-policies", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        },
+        {
+          "name": "Delete Vessel Policy",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/vessel-policies/:id", "host": ["{{baseUrl}}"], "path": ["vessel-policies", ":id"], "variable": [{ "key": "id", "value": "" }] }
+          }
+        }
+      ]
+    },
+    {
       "name": "Insurance Types",
       "item": [
         {
@@ -2296,11 +2482,11 @@
       },
       "item": [
         {
-          "name": "List P&I Club Formats",
+          "name": "List P&I Clubs",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/pni/club-formats"
+            "url": "{{baseUrl}}/pni/clubs"
           }
         },
         {
@@ -2309,12 +2495,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/pni/club-formats/:clubFormat/template",
+              "raw": "{{baseUrl}}/pni/clubs/:clubCode/template",
               "host": ["{{baseUrl}}"],
-              "path": ["pni", "club-formats", ":clubFormat", "template"],
-              "variable": [
-                { "key": "clubFormat", "value": "INIGO_SYNDICATE_1301" }
-              ]
+              "path": ["pni", "clubs", ":clubCode", "template"],
+              "variable": [{ "key": "clubCode", "value": "MSIG" }]
             }
           }
         },
@@ -2333,7 +2517,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"quotation\": {\n    \"clientId\": \"\",\n    \"insuranceTypeId\": \"\",\n    \"insured\": \"\"\n  },\n  \"pni\": {\n    \"clubFormat\": \"INIGO_SYNDICATE_1301\",\n    \"referenceNumber\": \"\",\n    \"validityDays\": 30\n  },\n  \"vessels\": [],\n  \"insuranceBlocks\": []\n}"
+              "raw": "{\n  \"quotation\": {\n    \"clientId\": \"\",\n    \"insuranceTypeId\": \"\",\n    \"insured\": \"\"\n  },\n  \"pni\": {\n    \"clubCode\": \"MSIG\",\n    \"referenceNumber\": \"\",\n    \"validityDays\": 30\n  },\n  \"vessels\": [],\n  \"insuranceBlocks\": []\n}"
             },
             "url": "{{baseUrl}}/pni/quotations"
           }

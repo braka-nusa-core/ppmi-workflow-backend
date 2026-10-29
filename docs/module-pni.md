@@ -6,20 +6,24 @@ Module P&I mengelola detail Quotation Slip P&I sebagai extension one-to-one dari
 
 | Method | Endpoint | Permission | Keterangan |
 | --- | --- | --- | --- |
-| `GET` | `/pni/club-formats` | `quotation:read` | Daftar format club P&I. |
-| `GET` | `/pni/club-formats/:clubFormat/template` | `quotation:read` | Template aktif untuk club format. |
+| `GET` | `/pni/clubs` | `quotation:read` | Daftar klub P&I yang aktif. |
+| `GET` | `/pni/clubs/:clubCode/template` | `quotation:read` | Template P&I untuk klub. |
 | `GET` | `/pni/quotations` | `quotation:read` | List quotation aktif yang memiliki detail P&I. |
 | `POST` | `/pni/quotations` | `quotation:create` | Membuat root quotation dan detail P&I dalam satu transaction. |
 | `GET` | `/pni/quotations/:quotationId` | `quotation:read` | Detail P&I lengkap. |
 | `PATCH` | `/pni/quotations/:quotationId` | `quotation:update` | Patch root quotation dan aggregate P&I. |
 
-## Club Format
+## Klub P&I
 
-| Code | Label Dokumen |
+Klub P&I diambil dari tabel `club` (lihat [Clubs](module-clubs.md)). Klub yang dipakai untuk quotation P&I:
+
+| Code | Nama |
 | --- | --- |
-| `INIGO_SYNDICATE_1301` | `(Inigo Syndicate 1301)` |
-| `EAGLE_OCEAN_MARINE` | `(Eagle Ocean Marine / American S.O. Mutual P&I Assoc.)` |
-| `MSIG_SPECIALTY_MARINE_NV` | `(MSIG Europe / MSIG Specialty Marine NV)` |
+| `MSIG` | MSIG Specialty Marine NV |
+| `EOM` | Eagle Ocean Marine |
+| `HYDOR` | HYDOR |
+
+Template P&I disimpan di `qs_template` dengan `clubId`. Saat quotation dibuat, sistem memilih template terbaru milik klub itu dan menyimpannya di `qsTemplateId`. Field `clubCode` di body dipetakan ke klub tersebut.
 
 ## Create P&I Quotation
 
@@ -33,7 +37,7 @@ Module P&I mengelola detail Quotation Slip P&I sebagai extension one-to-one dari
     "insured": "PT Example Shipping"
   },
   "pni": {
-    "clubFormat": "INIGO_SYNDICATE_1301",
+    "clubCode": "MSIG",
     "referenceNumber": "SO20262055",
     "validityDays": 30,
     "broker": "PT. Pandi Proteksi Marine Indonesia"

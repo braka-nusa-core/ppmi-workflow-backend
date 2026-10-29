@@ -165,7 +165,7 @@ Endpoint domain dan reference data:
 
 | Endpoint | Fungsi |
 | --- | --- |
-| `GET /pni/club-formats` | Daftar format club P&I. |
+| `GET /pni/clubs` | Daftar klub P&I. |
 | `GET /pni/quotations/:quotationId` | Detail P&I quotation. |
 | `GET /hm/quotations/:quotationId` | Detail H&M quotation. |
 | `GET /cargo/quotations/:quotationId` | Detail Cargo quotation. |

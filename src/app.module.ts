@@ -7,6 +7,8 @@ import { ClientsModule } from './clients/clients.module';
 import { PrismaService } from './common/services/prisma.service';
 import { StorageService } from './common/services/storage.service';
 import { ClubsModule } from './clubs/clubs.module';
+import { VesselsModule } from './vessels/vessels.module';
+import { VesselPoliciesModule } from './vessel-policies/vessel-policies.module';
 import { InsuranceTypesModule } from './insurance-types/insurance-types.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { QuotationsModule } from './quotations/quotations.module';
@@ -31,6 +33,8 @@ import { CargoModule } from './cargo/cargo.module';
     ClientsModule,
     InsuranceTypesModule,
     ClubsModule,
+    VesselsModule,
+    VesselPoliciesModule,
     QuotationsModule,
     PniModule,
     HmModule,
