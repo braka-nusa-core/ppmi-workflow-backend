@@ -19,6 +19,14 @@ import { CargoModule } from './cargo/cargo.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { MeetingsModule } from './meetings/meetings.module';
+import { InsuranceCompaniesModule } from './insurance-companies/insurance-companies.module';
+import { PoliciesModule } from './policies/policies.module';
+import { RequestInvoicesModule } from './request-invoices/request-invoices.module';
+import { BanksModule } from './banks/banks.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { PaymentsModule } from './payments/payments.module';
+import { ShipmentsModule } from './shipments/shipments.module';
+import { QsOptionsModule } from './qs-options/qs-options.module';
 
 @Global()
 @Module({
@@ -45,6 +53,14 @@ import { MeetingsModule } from './meetings/meetings.module';
     NotificationsModule,
     AssignmentsModule,
     MeetingsModule,
+    InsuranceCompaniesModule,
+    PoliciesModule,
+    RequestInvoicesModule,
+    BanksModule,
+    InvoicesModule,
+    PaymentsModule,
+    ShipmentsModule,
+    QsOptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, StorageService],

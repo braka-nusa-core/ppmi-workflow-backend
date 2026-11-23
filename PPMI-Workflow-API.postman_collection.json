@@ -3583,6 +3583,1396 @@
           }
         }
       ]
+    },
+    {
+      "name": "Insurance Companies",
+      "item": [
+        {
+          "name": "List Insurance Companies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-companies?q=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["insurance-companies"],
+              "query": [
+                { "key": "q", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Insurance Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-companies/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["insurance-companies", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Insurance Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["insurance-companies"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"EXAMPLE\",\n  \"name\": \"PT Example Insurance\",\n  \"address\": \"\",\n  \"phone\": \"\",\n  \"email\": \"\",\n  \"contactPerson\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Insurance Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-companies/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["insurance-companies", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"021-000000\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Insurance Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-companies/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["insurance-companies", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Placement and Policies",
+      "item": [
+        {
+          "name": "Get Placement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/placement",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "placement"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Replace Placement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/placement",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "placement"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": \"\",\n      \"role\": \"LEADER\",\n      \"share\": 40\n    },\n    {\n      \"insuranceCompanyId\": \"\",\n      \"role\": \"MEMBER\",\n      \"share\": 30\n    },\n    {\n      \"insuranceCompanyId\": \"\",\n      \"role\": \"MEMBER\",\n      \"share\": 30\n    }\n  ]\n}"
+            },
+            "description": "Exactly one LEADER. Shares must total exactly 100.00."
+          }
+        },
+        {
+          "name": "Issue Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/issue-policy",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "issue-policy"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "policyNumber", "value": "", "type": "text" },
+                { "key": "policyDate", "value": "2026-07-13", "type": "text" },
+                { "key": "periodStart", "value": "2026-07-13", "type": "text" },
+                { "key": "periodEnd", "value": "2027-07-13", "type": "text" }
+              ]
+            },
+            "description": "Quotation must be INSURANCE_APPROVED. The file is optional."
+          }
+        },
+        {
+          "name": "List Policies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies?status=&q=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "q", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Update Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyDate\": \"2026-07-13\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload Policy Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/document",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":id", "document"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
+            }
+          }
+        },
+        {
+          "name": "Complete Placement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/complete-placement",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":id", "complete-placement"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Request for Invoice",
+      "item": [
+        {
+          "name": "Create RFI",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:policyId/request-invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":policyId", "request-invoices"],
+              "variable": [{ "key": "policyId", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "List RFIs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices?status=&policyId=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "policyId", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get RFI",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Update RFI",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Upload RFI Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id", "documents"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                {
+                  "key": "documentType",
+                  "value": "POLICY_DOCUMENT",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "documentType: POLICY_DOCUMENT, SIGNED_QS, CN_DN, RENEWAL_ATTACHMENT, OTHER"
+          }
+        },
+        {
+          "name": "Delete RFI Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id/documents/:documentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id", "documents", ":documentId"],
+              "variable": [
+                { "key": "id", "value": "" },
+                { "key": "documentId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit RFI",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id", "submit"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Approve RFI (Finance)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id", "approve"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Return RFI to Teknik (Finance)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id/return",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id", "return"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Share does not match the policy\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete RFI",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banks",
+      "item": [
+        {
+          "name": "List Banks",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/banks?currency=&q=",
+              "host": ["{{baseUrl}}"],
+              "path": ["banks"],
+              "query": [
+                { "key": "currency", "value": "", "disabled": true },
+                { "key": "q", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Bank",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/banks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["banks", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Bank",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/banks",
+              "host": ["{{baseUrl}}"],
+              "path": ["banks"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Bank\",\n  \"accountName\": \"PT Pandi Proteksi Marine Indonesia\",\n  \"accountNumber\": \"000.00.00.000000\",\n  \"branch\": \"\",\n  \"currency\": \"IDR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Bank",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/banks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["banks", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"branch\": \"Jakarta\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Bank",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/banks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["banks", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Get Invoice Draft",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:requestInvoiceId/invoice-draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":requestInvoiceId", "invoice-draft"],
+              "variable": [{ "key": "requestInvoiceId", "value": "" }]
+            },
+            "description": "Prefilled form for a READY_FOR_INVOICE RFI. Nothing is saved."
+          }
+        },
+        {
+          "name": "Preview Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "preview"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceNumber\": \"\",\n  \"currency\": \"IDR\",\n  \"issueDate\": \"2026-07-20\",\n  \"paymentTermDays\": 14,\n  \"insuranceTypeLabel\": \"CARGO\",\n  \"billToName\": \"PT Example Client\",\n  \"billToAddress\": \"Jl. Example No. 1, Jakarta\",\n  \"coverName\": \"Leader insurer name\",\n  \"items\": [\n    {\n      \"description\": \"VESSEL NAME\",\n      \"policyNumber\": \"POLICY-NUMBER\",\n      \"voyageFrom\": \"Tanjung Perak\",\n      \"voyageTo\": \"Berau\",\n      \"subjectInterest\": \"As Per List\",\n      \"sailingStart\": \"2026-07-13\",\n      \"sailingEnd\": \"2026-08-13\",\n      \"sumInsured\": 28633463500,\n      \"rate\": 0.15\n    }\n  ],\n  \"discount\": 0,\n  \"stampDutyPolicyCost\": 150000,\n  \"bankId\": \"\",\n  \"paymentDetail\": \"FULL PAYMENT\",\n  \"notes\": \"The amount is not tax include, please pay for full payment.\",\n  \"signerName\": \"\",\n  \"signerTitle\": \"Head Finance\"\n}"
+            },
+            "description": "Computes totals and amount in words without saving. Use it for the live preview."
+          }
+        },
+        {
+          "name": "Issue Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/request-invoices/:requestInvoiceId/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["request-invoices", ":requestInvoiceId", "invoices"],
+              "variable": [{ "key": "requestInvoiceId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceNumber\": \"\",\n  \"currency\": \"IDR\",\n  \"issueDate\": \"2026-07-20\",\n  \"paymentTermDays\": 14,\n  \"insuranceTypeLabel\": \"CARGO\",\n  \"billToName\": \"PT Example Client\",\n  \"billToAddress\": \"Jl. Example No. 1, Jakarta\",\n  \"coverName\": \"Leader insurer name\",\n  \"items\": [\n    {\n      \"description\": \"VESSEL NAME\",\n      \"policyNumber\": \"POLICY-NUMBER\",\n      \"voyageFrom\": \"Tanjung Perak\",\n      \"voyageTo\": \"Berau\",\n      \"subjectInterest\": \"As Per List\",\n      \"sailingStart\": \"2026-07-13\",\n      \"sailingEnd\": \"2026-08-13\",\n      \"sumInsured\": 28633463500,\n      \"rate\": 0.15\n    }\n  ],\n  \"discount\": 0,\n  \"stampDutyPolicyCost\": 150000,\n  \"bankId\": \"\",\n  \"paymentDetail\": \"FULL PAYMENT\",\n  \"notes\": \"The amount is not tax include, please pay for full payment.\",\n  \"signerName\": \"\",\n  \"signerTitle\": \"Head Finance\"\n}"
+            },
+            "description": "invoiceNumber empty = generated. Totals and words are always recomputed by the server."
+          }
+        },
+        {
+          "name": "List Invoices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices?status=&currency=&q=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "currency", "value": "", "disabled": true },
+                { "key": "q", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Update Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" },
+            "description": "Refused once a payment is recorded."
+          }
+        },
+        {
+          "name": "Upload Invoice Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:invoiceId/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":invoiceId", "documents"],
+              "variable": [{ "key": "invoiceId", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "documentType", "value": "INVOICE_PDF", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Invoice Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:invoiceId/documents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":invoiceId", "documents", ":id"],
+              "variable": [
+                { "key": "invoiceId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Invoice Number Settings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoice-number-settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoice-number-settings"]
+            }
+          }
+        },
+        {
+          "name": "Set Invoice Number Suffix",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/invoice-number-settings/:insuranceTypeId",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoice-number-settings", ":insuranceTypeId"],
+              "variable": [{ "key": "insuranceTypeId", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"suffix\": \"MC\"\n}" },
+            "description": "Default suffix is MC; its meaning is not confirmed yet."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "List Incoming Payments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:invoiceId/incoming-payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":invoiceId", "incoming-payments"],
+              "variable": [{ "key": "invoiceId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Record Incoming Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:invoiceId/incoming-payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":invoiceId", "incoming-payments"],
+              "variable": [{ "key": "invoiceId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentDate\": \"2026-08-01\",\n  \"amount\": 43100195.25,\n  \"paymentMethod\": \"TRANSFER\",\n  \"bankId\": \"\",\n  \"receiptNumber\": \"\",\n  \"notes\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload Incoming Payment Proof",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incoming-payments/:id/proof",
+              "host": ["{{baseUrl}}"],
+              "path": ["incoming-payments", ":id", "proof"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
+            }
+          }
+        },
+        {
+          "name": "Update Incoming Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/incoming-payments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["incoming-payments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Refund Incoming Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incoming-payments/:id/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["incoming-payments", ":id", "refund"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Incoming Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incoming-payments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["incoming-payments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "List Outgoing Payments of Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:policyId/outgoing-payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":policyId", "outgoing-payments"],
+              "variable": [{ "key": "policyId", "value": "" }]
+            },
+            "description": "Every placement participant, its outgoing payment, and a suggested amount (share x nett premium)."
+          }
+        },
+        {
+          "name": "Create Outgoing Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:policyId/outgoing-payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", ":policyId", "outgoing-payments"],
+              "variable": [{ "key": "policyId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyParticipantId\": \"\",\n  \"amount\": 0,\n  \"notes\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Outgoing Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/outgoing-payments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["outgoing-payments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 0\n}" }
+          }
+        },
+        {
+          "name": "Add Outgoing Installment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/outgoing-payments/:id/installments",
+              "host": ["{{baseUrl}}"],
+              "path": ["outgoing-payments", ":id", "installments"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 0,\n  \"paymentDate\": \"2026-08-05\",\n  \"notes\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload Outgoing Installment Proof",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/outgoing-installments/:id/proof",
+              "host": ["{{baseUrl}}"],
+              "path": ["outgoing-installments", ":id", "proof"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Outgoing Installment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/outgoing-installments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["outgoing-installments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipments",
+      "item": [
+        {
+          "name": "List Shipments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shipments?status=&invoiceId=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "invoiceId", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shipment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Shipment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/:invoiceId/shipments",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", ":invoiceId", "shipments"],
+              "variable": [{ "key": "invoiceId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courier\": \"JNE\",\n  \"trackingNumber\": \"\",\n  \"shipmentDate\": \"2026-08-02\",\n  \"receiver\": \"\",\n  \"notes\": \"\"\n}"
+            },
+            "description": "trackingNumber is the courier receipt (resi)."
+          }
+        },
+        {
+          "name": "Update Shipment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"notes\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Mark Shipment Delivered",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id/deliver",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id", "deliver"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receivedDate\": \"2026-08-04\",\n  \"receiver\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Complete Shipment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id", "complete"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Needs the invoice PAID and every underwriter FULLY_PAID."
+          }
+        },
+        {
+          "name": "Upload Shipment Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id", "documents"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "documentType", "value": "Signed policy", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Shipment Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shipments/:id/documents/:documentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipments", ":id", "documents", ":documentId"],
+              "variable": [
+                { "key": "id", "value": "" },
+                { "key": "documentId", "value": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "QSheet Options",
+      "item": [
+        {
+          "name": "List Options of a Group",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-options?group=SECURITY",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-options"],
+              "query": [{ "key": "group", "value": "SECURITY" }]
+            }
+          }
+        },
+        {
+          "name": "List All Options",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-options/all?group=",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-options", "all"],
+              "query": [{ "key": "group", "value": "", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Create Option",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/qs-options",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-options"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"group\": \"SECURITY\",\n  \"value\": \"MSIG\",\n  \"sortOrder\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Option",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/qs-options/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-options", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Option",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-options/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-options", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
     }
   ]
 }

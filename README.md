@@ -73,15 +73,16 @@ Mencoba alur QS dari awal:
 
 ## Modul
 
-| Kelompok       | Modul                                                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Master data    | users, organizations, clients, clubs, insurance-types, vessels (beserta dokumen, foto, survey, dan checklist dokumen), vessel-policies |
-| Quotation slip | quotations (workflow, objek, coverage, terms, warranties, lampiran, versi terms), pni, hm, cargo                                       |
-| Operasional    | assignments (PIC), meetings dan follow-ups, notifications dan reminder                                                                 |
+| Kelompok               | Modul                                                                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Master data            | users, organizations, clients, clubs, insurance-types, insurance-companies, banks, vessels (beserta dokumen, foto, survey, dan checklist dokumen), vessel-policies |
+| Quotation slip         | quotations (workflow, objek, coverage, terms, warranties, lampiran, versi terms), pni (termasuk input QSheet), hm, cargo, qs-options                               |
+| Policy sampai shipment | policies (placement leader/member, penerbitan polis), request-invoices, invoices (terbilang, nomor otomatis), payments (masuk dan keluar), shipments (resi)        |
+| Operasional            | assignments (PIC), meetings dan follow-ups, notifications dan reminder                                                                                             |
 
 Rincian endpoint dan aturan tiap modul ada di [docs/](docs/README.md). Koleksi Postman ada di `PPMI-Workflow-API.postman_collection.json`.
 
-Tabel untuk `Policy`, invoice, pembayaran, dan shipment sudah ada di schema, tetapi belum ada modulnya. Status quotation `POLICY_ISSUED` belum bisa dicapai karena belum ada kode yang menerbitkan policy.
+Alur setelah quotation disetujui insurer: Teknik mengisi placement dan menerbitkan polis, lalu membuat Request for Invoice. Finance memeriksa RFI, menerbitkan invoice, mencatat pembayaran dari klien dan ke penanggung, lalu mencatat pengiriman dokumen. Rencana dan default yang dipakai ada di `markdown/plan-policy-sampai-shipment.md`. Insurance Voucher, voucher internal Finance, dan PSRE belum dibangun.
 
 ## Konvensi
 

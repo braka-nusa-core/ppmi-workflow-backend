@@ -314,6 +314,104 @@ async function main() {
     skipDuplicates: true,
   });
 
+  // Policy to shipment: Teknik works up to the Request for Invoice, Finance
+  // takes over from the RFI review onwards.
+  const workflowPermissions: {
+    resource: string;
+    actions: string[];
+    teknik: string[];
+    finance: string[];
+  }[] = [
+    {
+      resource: 'insurance-company',
+      actions: ['read', 'create', 'update', 'delete'],
+      teknik: ['read', 'create', 'update', 'delete'],
+      finance: ['read'],
+    },
+    {
+      resource: 'policy',
+      actions: ['read', 'create', 'update'],
+      teknik: ['read', 'create', 'update'],
+      finance: ['read'],
+    },
+    {
+      resource: 'request-invoice',
+      actions: ['read', 'create', 'update', 'submit', 'review'],
+      teknik: ['read', 'create', 'update', 'submit'],
+      finance: ['read', 'review'],
+    },
+    {
+      resource: 'bank',
+      actions: ['read', 'create', 'update', 'delete'],
+      teknik: ['read'],
+      finance: ['read', 'create', 'update', 'delete'],
+    },
+    {
+      resource: 'invoice',
+      actions: ['read', 'create', 'update'],
+      teknik: [],
+      finance: ['read', 'create', 'update'],
+    },
+    {
+      resource: 'payment',
+      actions: ['read', 'create', 'update'],
+      teknik: [],
+      finance: ['read', 'create', 'update'],
+    },
+    {
+      resource: 'shipment',
+      actions: ['read', 'create', 'update'],
+      teknik: [],
+      finance: ['read', 'create', 'update'],
+    },
+    {
+      resource: 'qs-option',
+      actions: ['read', 'create', 'update', 'delete'],
+      teknik: ['read', 'create', 'update', 'delete'],
+      finance: [],
+    },
+  ];
+
+  for (const group of workflowPermissions) {
+    for (const action of group.actions) {
+      const saved = await prisma.permission.upsert({
+        where: { resource_action: { resource: group.resource, action } },
+        update: { deletedAt: null },
+        create: {
+          resource: group.resource,
+          action,
+          description: `${action} ${group.resource}`,
+        },
+      });
+
+      const units = [
+        ...(group.teknik.includes(action) ? [teknik.id] : []),
+        ...(group.finance.includes(action) ? [finance.id] : []),
+      ];
+      await prisma.organizationUnitPermission.createMany({
+        data: units.map((organizationUnitId) => ({
+          organizationUnitId,
+          permissionId: saved.id,
+        })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  // Dropdown values for the P&I QSheet. The user still chooses the value.
+  const qsOptions = [
+    { group: 'SECURITY', value: 'MSIG', sortOrder: 1 },
+    { group: 'SECURITY', value: 'HYDOR', sortOrder: 2 },
+    { group: 'SECURITY', value: 'IOM', sortOrder: 3 },
+  ];
+  for (const option of qsOptions) {
+    const existing = await prisma.qsOption.findFirst({
+      where: { group: option.group, value: option.value, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) await prisma.qsOption.create({ data: option });
+  }
+
   const users = [
     {
       fullname: 'Super Admin',
