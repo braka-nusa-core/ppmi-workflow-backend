@@ -15,6 +15,7 @@ describe('QuotationsService workflow', () => {
     },
     user: { findFirst: vi.fn() },
     insuranceCompany: { findFirst: vi.fn() },
+    pniQuotation: { findFirst: vi.fn() },
     quotationApproval: { create: vi.fn() },
     quotationSubmission: { findFirst: vi.fn(), create: vi.fn() },
     insuranceReview: { create: vi.fn() },
@@ -442,18 +443,51 @@ describe('QuotationsService workflow', () => {
     it('only exports an approved quotation', async () => {
       quotationIs({ status: 'DRAFT' });
 
-      await expect(service.exportPdf('q-1', 'user-1')).rejects.toThrow(
+      await expect(service.exportPdf('q-1', actor)).rejects.toThrow(
         'Only an approved quotation can be exported',
       );
+      expect(prismaMock.log.create).not.toHaveBeenCalled();
     });
 
-    it('returns the placeholder for an approved quotation', async () => {
+    it('returns the full quotation with its P&I detail and logs the export', async () => {
       quotationIs({ status: 'APPROVED' });
+      prismaMock.pniQuotation.findFirst.mockResolvedValue({ id: 'pni-1' });
 
-      await expect(service.exportPdf('q-1', 'user-1')).resolves.toMatchObject({
-        message: 'PDF generation not yet implemented',
+      const result = await service.exportPdf('q-1', actor);
+
+      expect(result.exportedAt).toBeInstanceOf(Date);
+      expect(result.quotation).toMatchObject({
+        id: 'q-1',
         quotationNumber: 'QS-001',
+        pniQuotation: { id: 'pni-1' },
       });
+      expect(prismaMock.log.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          referenceId: 'q-1',
+          description: 'User Test exported quotation QS-001',
+        }),
+      });
+    });
+
+    it('returns null P&I detail for an H&M or Cargo quotation', async () => {
+      quotationIs({ status: 'APPROVED' });
+      prismaMock.pniQuotation.findFirst.mockResolvedValue(null);
+
+      const result = await service.exportPdf('q-1', actor);
+
+      expect(result.quotation.pniQuotation).toBeNull();
+    });
+
+    it('refuses another technical unit', async () => {
+      quotationIs({ status: 'APPROVED', technicalUnitId: 'unit-pi' });
+      prismaMock.user.findFirst.mockResolvedValue({
+        role: 'USER',
+        organizationUnitId: 'unit-hm',
+      });
+
+      await expect(service.exportPdf('q-1', actor)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

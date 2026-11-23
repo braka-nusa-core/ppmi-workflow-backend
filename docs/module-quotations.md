@@ -39,7 +39,7 @@ Selain permission, service memvalidasi ownership unit Teknik dan memastikan appr
 | `POST` | `/quotations/:id/insurance-revision` | `quotation:record-insurer-review` | `SENT_TO_INSURANCE -> REVISION`. |
 | `GET` | `/quotations/:id/approvals` | `quotation:read` | Riwayat keputusan Supervisor Teknik. |
 | `GET` | `/quotations/:id/history` | `quotation:read` | Riwayat transition status QS. |
-| `GET` | `/quotations/:id/export-pdf` | `quotation:export` | Export QS `APPROVED`; generator PDF masih placeholder. |
+| `GET` | `/quotations/:id/export-pdf` | `quotation:export` | Semua data QS `APPROVED` untuk dirender frontend: data inti, detail P&I/H&M/Cargo, terms, warranties, lampiran. Mencatat siapa yang mengekspor. |
 
 ## Quotation References
 

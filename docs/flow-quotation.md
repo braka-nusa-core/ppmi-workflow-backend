@@ -159,7 +159,7 @@ P&I tetap memakai extension dan endpoint tersendiri. Validasi kelengkapan per cl
 | `POST /quotations/:id/insurance-revision` | Mencatat permintaan revisi dari insurer.                          |
 | `GET /quotations/:id/approvals`           | Riwayat keputusan Supervisor Teknik.                              |
 | `GET /quotations/:id/history`             | Riwayat status QS.                                                |
-| `GET /quotations/:id/export-pdf`          | Export QS approved; generator PDF masih placeholder.              |
+| `GET /quotations/:id/export-pdf`          | Data lengkap QS approved; dokumen dibuat oleh frontend.          |
 
 Endpoint domain dan reference data:
 

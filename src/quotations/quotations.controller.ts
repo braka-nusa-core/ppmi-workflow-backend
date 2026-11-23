@@ -259,10 +259,14 @@ export class QuotationsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission('quotation', 'export')
   @ApiOperation({
-    summary: 'Export an approved quotation as PDF (placeholder)',
+    summary:
+      'All data of an approved quotation for the frontend to render the QS document',
   })
   @ApiParam({ name: 'id', type: String })
   exportPdf(@Param('id') id: string, @Req() req: Request) {
-    return this.quotationsService.exportPdf(id, req.credentials.sub);
+    return this.quotationsService.exportPdf(id, {
+      id: req.credentials.sub,
+      fullname: req.credentials.fullname,
+    });
   }
 }
