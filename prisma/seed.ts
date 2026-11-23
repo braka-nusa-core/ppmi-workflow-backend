@@ -370,6 +370,12 @@ async function main() {
       teknik: ['read', 'create', 'update', 'delete'],
       finance: [],
     },
+    {
+      resource: 'qs-template',
+      actions: ['read', 'create', 'update', 'delete'],
+      teknik: ['read', 'create', 'update', 'delete'],
+      finance: [],
+    },
   ];
 
   for (const group of workflowPermissions) {
@@ -396,6 +402,20 @@ async function main() {
         skipDuplicates: true,
       });
     }
+  }
+
+  // Insurance types. Existing rows keep their name; only missing ones are added.
+  const insuranceTypes = [
+    { code: 'HM', name: 'Hull & Machinery' },
+    { code: 'CARGO', name: 'Cargo' },
+    { code: 'PNI', name: 'Protection & Indemnity' },
+  ];
+  for (const type of insuranceTypes) {
+    await prisma.insuranceType.upsert({
+      where: { code: type.code },
+      update: {},
+      create: type,
+    });
   }
 
   // Dropdown values for the P&I QSheet. The user still chooses the value.
