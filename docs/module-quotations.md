@@ -135,6 +135,21 @@ Endpoint insurance approval dan revision mencatat `InsuranceReview` pada submiss
 
 Semua child mutation membutuhkan `quotation:update`, hanya diperbolehkan pada QS `DRAFT` atau `REVISION`, dan hanya untuk unit Teknik pemilik QS. Mutasi attachment menggunakan `multipart/form-data` dengan field `file`.
 
+### Objek yang merujuk ke master kapal
+
+Objek quotation (`/quotations/:quotationId/objects`) boleh ditautkan ke master kapal lewat `vesselId`. Ini dipakai untuk kapal pada quotation H&M dan Cargo, yang sebelumnya hanya berupa JSON bebas di `data`. P&I tetap memakai `PniVessel`.
+
+```json
+{ "objectType": "VESSEL", "vesselId": "vessel-master-id" }
+```
+
+- `vesselId` harus merujuk kapal master yang masih aktif, jika tidak `400 Bad Request`.
+- Saat objek dibuat, `data` terisi dari master (nama, IMO, tipe, tahun, GT, class, flag, trading area, port of registry). Field master yang kosong tidak ikut disalin. Nilai yang dikirim di `data` selalu menang.
+- Setelah dibuat, `data` tidak pernah disalin ulang dari master, jadi mengubah master tidak mengubah quotation yang sudah ada.
+- `PATCH` dapat mengganti `vesselId` atau mengosongkannya dengan `null`. `data` hanya berubah bila dikirim.
+- Jika `data` bukan objek (misalnya teks), `data` disimpan apa adanya dan tidak digabung dengan master.
+- Tanpa `vesselId`, perilaku sama seperti sebelumnya.
+
 ### Terms dan Warranties
 
 Selain `termsConditionId` dan `description`, term mendukung metadata berikut:
