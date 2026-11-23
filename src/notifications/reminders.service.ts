@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/services/prisma.service';
+import { usersWithPermission } from '../common/utils/permission-users';
 import { NewNotification, NotificationsService } from './notifications.service';
 import {
   ReminderType,
@@ -284,7 +285,7 @@ export class RemindersService {
   private async vesselRecipients(vesselId: string) {
     const pics = await this.activePicUserIds('VESSEL', vesselId);
     if (pics.length > 0) return pics;
-    return this.usersWithPermission('vessel', 'update');
+    return usersWithPermission(this.prisma, 'vessel', 'update');
   }
 
   /** Active internal PICs of the quotation, else its creator. */
@@ -315,39 +316,5 @@ export class RemindersService {
       select: { userId: true },
     });
     return assignments.map((assignment) => assignment.userId!);
-  }
-
-  /**
-   * Mirrors PermissionGuard: a permission granted to a unit also applies to
-   * the users of its child units. SUPERADMIN always qualifies.
-   */
-  private async usersWithPermission(resource: string, action: string) {
-    const units = await this.prisma.organizationUnit.findMany({
-      where: {
-        deletedAt: null,
-        permissions: {
-          some: { permission: { resource, action, deletedAt: null } },
-        },
-      },
-      select: { id: true, children: { select: { id: true } } },
-    });
-    const unitIds = units.flatMap((unit) => [
-      unit.id,
-      ...unit.children.map((child) => child.id),
-    ]);
-
-    const users = await this.prisma.user.findMany({
-      where: {
-        deletedAt: null,
-        OR: [
-          { role: 'SUPERADMIN' },
-          ...(unitIds.length > 0
-            ? [{ organizationUnitId: { in: unitIds } }]
-            : []),
-        ],
-      },
-      select: { id: true },
-    });
-    return users.map((user) => user.id);
   }
 }
