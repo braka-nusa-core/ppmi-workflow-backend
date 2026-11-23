@@ -9,7 +9,8 @@ export const QUOTATION_STATUS_TRANSITIONS: Record<string, string[]> = {
   REVISION: REQUIRES_SUPERVISOR_APPROVAL_AFTER_INSURER_REVISION
     ? ['WAITING_APPROVAL']
     : ['SENT_TO_INSURANCE'],
-  INSURANCE_APPROVED: [],
+  // Reached only through the policy module (POST /quotations/:id/issue-policy).
+  INSURANCE_APPROVED: ['POLICY_ISSUED'],
   POLICY_ISSUED: [],
 };
 

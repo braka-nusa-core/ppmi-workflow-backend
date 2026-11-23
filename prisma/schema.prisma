@@ -137,6 +137,26 @@ enum ParticipantRole {
   MEMBER
 }
 
+enum VoyageType {
+  UNDER_VOYAGE
+  SINGLE_VOYAGE
+}
+
+enum PniVesselScope {
+  SINGLE
+  FLEET
+}
+
+enum PniCoverType {
+  FULL
+  LIMITED
+}
+
+enum PniPremiumType {
+  MUTUAL
+  FIX
+}
+
 enum PolicyStatus {
   POLICY_ISSUED
   PLACEMENT_COMPLETED
@@ -329,12 +349,14 @@ model Bank {
   accountNumber String?
   accountName   String?
   branch        String?
+  currency      String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   incomingPayments IncomingPayment[]
+  invoices         Invoice[]
 
   @@index([deletedAt])
   @@map("bank")
@@ -361,6 +383,8 @@ model QsTemplate {
   templateVersion String?
   templateDomain  QsTemplateDomain?
   clubId          String?
+  // P&I templates can differ per cover type (conditions, survey warranty).
+  coverType       PniCoverType?
   content         Json?
 
   createdAt DateTime  @default(now())
@@ -374,6 +398,7 @@ model QsTemplate {
   @@index([deletedAt])
   @@index([templateDomain])
   @@index([clubId])
+  @@index([coverType])
   @@map("qs_template")
 }
 
@@ -493,6 +518,8 @@ model Quotation {
   confirmedAcceptedBy String?
 
   status QuotationStatus
+  // Under Voyage or Single Voyage (vessel brought in, e.g. from China). Used by H&M and P&I.
+  voyageType VoyageType?
 
   createdById  String?
   approvedById String?
@@ -522,6 +549,7 @@ model Quotation {
   histories   QuotationHistory[]
   submissions QuotationSubmission[]
   termVersions QuotationTermVersion[]
+  participants PolicyParticipant[]
   vesselSurveys VesselSurvey[]
   policy      Policy?
   pniQuotation PniQuotation?
@@ -636,6 +664,12 @@ model PniQuotation {
   qsTemplateId String?
 
   referenceNumber     String?
+  referenceDate       DateTime?
+  vesselScope         PniVesselScope?
+  // Fleet only: the number of vessels as declared by the user.
+  declaredVesselCount Int?
+  coverType           PniCoverType?
+  premiumType         PniPremiumType?
   validityDays        Int?
   assuredDomicile     String?
   broker              String?
@@ -1084,10 +1118,16 @@ model InsuranceReview {
 model Policy {
   id                String       @id @default(cuid()) @map("_id")
   quotationId       String       @unique
-  policyNumber      String       @unique
+  // Not unique: a renewal may keep the previous policy number.
+  policyNumber      String
   policyDate        DateTime?
   insuranceTypeId   String
-  policyDocumentUrl String?
+  policyDocumentUrl  String?
+  policyDocumentName String?
+  periodStart        DateTime?
+  periodEnd          DateTime?
+  issuedById         String?
+  placementCompletedAt DateTime?
   status            PolicyStatus
 
   createdAt DateTime  @default(now())
@@ -1102,6 +1142,7 @@ model Policy {
   requestInvoices RequestInvoice[]
 
   @@index([quotationId])
+  @@index([policyNumber])
   @@index([insuranceTypeId])
   @@index([status])
   @@index([deletedAt])
@@ -1110,7 +1151,9 @@ model Policy {
 
 model PolicyParticipant {
   id                 String          @id @default(cuid()) @map("_id")
-  policyId           String
+  // Placement is entered on the quotation, before or after the policy is issued.
+  quotationId        String
+  policyId           String?
   insuranceCompanyId String
   role               ParticipantRole
   share              Decimal         @db.Decimal(5, 2)
@@ -1120,11 +1163,13 @@ model PolicyParticipant {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  policy           Policy           @relation(fields: [policyId], references: [id])
+  quotation        Quotation        @relation(fields: [quotationId], references: [id])
+  policy           Policy?          @relation(fields: [policyId], references: [id])
   insuranceCompany InsuranceCompany @relation(fields: [insuranceCompanyId], references: [id])
 
   outgoingPayments OutgoingPayment[]
 
+  @@index([quotationId])
   @@index([policyId])
   @@index([insuranceCompanyId])
   @@index([deletedAt])
@@ -1179,6 +1224,9 @@ model RequestInvoiceDocument {
   documentType     RequestInvoiceDocumentType
   fileName         String?
   url              String?
+  mimeType         String?
+  fileSize         Int?
+  uploadedById     String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1217,12 +1265,37 @@ model Invoice {
   grandTotal       Decimal?      @db.Decimal(15, 2)
   status           InvoiceStatus
 
+  currency            String   @default("IDR")
+  // Snapshot of what is printed, so later master data changes never alter an issued invoice.
+  insuranceTypeLabel  String?
+  billToName          String?
+  billToAddress       String?  @db.Text
+  coverName           String?
+  grossPremium        Decimal? @db.Decimal(18, 2)
+  discount            Decimal? @db.Decimal(18, 2)
+  nettPremium         Decimal? @db.Decimal(18, 2)
+  stampDutyPolicyCost Decimal? @db.Decimal(18, 2)
+  balanceDue          Decimal? @db.Decimal(18, 2)
+  amountInWords       String?  @db.Text
+  paymentTermDays     Int?
+  paymentDetail       String?
+  bankId              String?
+  bankName            String?
+  bankAccountName     String?
+  bankAccountNumber   String?
+  notes               String?  @db.Text
+  signerName          String?
+  signerTitle         String?
+  issuedById          String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   requestInvoice RequestInvoice @relation(fields: [requestInvoiceId], references: [id])
 
+  bank             Bank?             @relation(fields: [bankId], references: [id])
+  items            InvoiceItem[]
   documents        InvoiceDocument[]
   incomingPayments IncomingPayment[]
   shipments        Shipment[]
@@ -1261,6 +1334,9 @@ model IncomingPayment {
   receiptNumber     String?
   proofOfPaymentUrl String?
   status            IncomingPaymentStatus
+  currency          String?
+  notes             String?               @db.Text
+  recordedById      String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1303,6 +1379,8 @@ model OutgoingPayment {
   amount              Decimal?              @db.Decimal(15, 2)
   paymentDate         DateTime?
   status              OutgoingPaymentStatus
+  currency            String?
+  notes               String?               @db.Text
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1345,6 +1423,8 @@ model Shipment {
   trackingNumber String?
   shipmentDate   DateTime?
   receiver       String?
+  receivedDate   DateTime?
+  notes          String?   @db.Text
   status         ShipmentStatus
 
   createdAt DateTime  @default(now())
@@ -1719,4 +1799,63 @@ model VesselDocument {
   @@index([validUntil])
   @@index([deletedAt])
   @@map("vessel_document")
+}
+
+// One printed line of an invoice (usually one vessel / one policy).
+model InvoiceItem {
+  id              String    @id @default(cuid()) @map("_id")
+  invoiceId       String
+  sortOrder       Int       @default(0)
+  description     String
+  policyNumber    String?
+  voyageFrom      String?
+  voyageTo        String?
+  subjectInterest String?
+  sailingStart    DateTime?
+  sailingEnd      DateTime?
+  sumInsured      Decimal?  @db.Decimal(18, 2)
+  // Percent, e.g. 0.15 means 0.15%.
+  rate            Decimal?  @db.Decimal(9, 4)
+  total           Decimal?  @db.Decimal(18, 2)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([deletedAt])
+  @@map("invoice_item")
+}
+
+// Invoice number suffix per insurance type, e.g. ".../PPMI/FIN/MC". A missing
+// row falls back to the default in code. Meaning of the suffix is not confirmed.
+model InvoiceNumberSetting {
+  id              String  @id @default(cuid()) @map("_id")
+  insuranceTypeId String  @unique
+  suffix          String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("invoice_number_setting")
+}
+
+// Selectable values for QSheet fields (e.g. SECURITY: MSIG, HYDOR, IOM).
+model QsOption {
+  id        String  @id @default(cuid()) @map("_id")
+  group     String
+  value     String
+  label     String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([group])
+  @@index([deletedAt])
+  @@map("qs_option")
 }
