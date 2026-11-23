@@ -1565,7 +1565,7 @@
           }
         },
         {
-          "name": "Export Approved QS PDF (Placeholder)",
+          "name": "Export Approved QS (data for the document)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -4968,6 +4968,120 @@
               "raw": "{{baseUrl}}/qs-options/:id",
               "host": ["{{baseUrl}}"],
               "path": ["qs-options", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "QS Templates",
+      "item": [
+        {
+          "name": "List QS Templates",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-templates?templateDomain=PNI&clubId=&coverType=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-templates"],
+              "query": [
+                { "key": "templateDomain", "value": "PNI" },
+                { "key": "clubId", "value": "", "disabled": true },
+                { "key": "coverType", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get QS Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-templates/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-templates", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create QS Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/qs-templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-templates"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Club - Limited Cover\",\n  \"templateVersion\": \"2026-11\",\n  \"templateDomain\": \"PNI\",\n  \"clubId\": \"\",\n  \"coverType\": \"LIMITED\",\n  \"content\": {\n    \"conditions\": [],\n    \"surveyWarranty\": \"\"\n  }\n}"
+            },
+            "description": "P&I needs clubId; coverType FULL or LIMITED is optional (empty = generic for the club)."
+          }
+        },
+        {
+          "name": "Update QS Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/qs-templates/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-templates", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": {\n    \"conditions\": []\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete QS Template",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/qs-templates/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["qs-templates", ":id"],
               "variable": [{ "key": "id", "value": "" }]
             }
           }
