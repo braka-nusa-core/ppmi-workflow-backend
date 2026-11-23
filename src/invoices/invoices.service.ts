@@ -35,6 +35,9 @@ const todayInJakarta = () =>
     new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }),
   );
 
+const INVOICE_NUMBER_TAKEN = 'Invoice number is already used';
+const MAX_NUMBER_ATTEMPTS = 3;
+
 const isUniqueViolation = (error: unknown) =>
   (error as { code?: string } | null)?.code === 'P2002';
 
@@ -219,14 +222,53 @@ export class InvoicesService {
     const figures = this.figures(dto.currency, dto);
     const bank = await this.findBank(dto.bankId);
 
-    const invoiceNumber =
-      dto.invoiceNumber ??
-      (await this.numbers.generate(
-        dto.issueDate,
-        await this.insuranceTypeIdOf(rfi.policyId),
-      ));
-    await this.assertNumberFree(invoiceNumber);
+    // A number typed by Finance is used as is and refused when taken. A
+    // generated number can lose a race with another invoice issued at the same
+    // moment; then the next number is generated and tried again.
+    if (dto.invoiceNumber) {
+      await this.assertNumberFree(dto.invoiceNumber);
+      return this.issue(
+        requestInvoiceId,
+        dto.invoiceNumber,
+        dto,
+        figures,
+        bank,
+        actor,
+      );
+    }
 
+    const insuranceTypeId = await this.insuranceTypeIdOf(rfi.policyId);
+    for (let attempt = 1; ; attempt++) {
+      const invoiceNumber = await this.numbers.generate(
+        dto.issueDate,
+        insuranceTypeId,
+      );
+      try {
+        return await this.issue(
+          requestInvoiceId,
+          invoiceNumber,
+          dto,
+          figures,
+          bank,
+          actor,
+        );
+      } catch (error) {
+        const raced =
+          error instanceof BadRequestException &&
+          error.message === INVOICE_NUMBER_TAKEN;
+        if (!raced || attempt >= MAX_NUMBER_ATTEMPTS) throw error;
+      }
+    }
+  }
+
+  private async issue(
+    requestInvoiceId: string,
+    invoiceNumber: string,
+    dto: CreateInvoiceDto,
+    figures: ReturnType<InvoicesService['figures']>,
+    bank: Awaited<ReturnType<InvoicesService['findBank']>>,
+    actor: Actor,
+  ) {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const invoice = await tx.invoice.create({
@@ -268,7 +310,7 @@ export class InvoicesService {
       });
     } catch (error) {
       if (isUniqueViolation(error)) {
-        throw new BadRequestException('Invoice number is already used');
+        throw new BadRequestException(INVOICE_NUMBER_TAKEN);
       }
       throw error;
     }
@@ -398,7 +440,7 @@ export class InvoicesService {
       });
     } catch (error) {
       if (isUniqueViolation(error)) {
-        throw new BadRequestException('Invoice number is already used');
+        throw new BadRequestException(INVOICE_NUMBER_TAKEN);
       }
       throw error;
     }
@@ -511,7 +553,7 @@ export class InvoicesService {
       where: { invoiceNumber },
       select: { id: true },
     });
-    if (used) throw new BadRequestException('Invoice number is already used');
+    if (used) throw new BadRequestException(INVOICE_NUMBER_TAKEN);
   }
 
   private async insuranceTypeIdOf(policyId: string) {

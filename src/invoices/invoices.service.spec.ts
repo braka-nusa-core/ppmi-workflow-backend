@@ -182,11 +182,16 @@ describe('InvoicesService', () => {
       );
     });
 
-    it('refuses a duplicate number and an unknown bank', async () => {
+    it('refuses a number typed by Finance that is taken, and an unknown bank', async () => {
       prismaMock.invoice.findFirst.mockResolvedValue({ id: 'other' });
-      await expect(service.create('rfi-1', sample, actor)).rejects.toThrow(
-        /already used/,
-      );
+      await expect(
+        service.create(
+          'rfi-1',
+          { ...sample, invoiceNumber: '007/07-26/PPMI/FIN/MC' },
+          actor,
+        ),
+      ).rejects.toThrow(/already used/);
+      expect(prismaMock.invoice.create).not.toHaveBeenCalled();
 
       prismaMock.invoice.findFirst.mockResolvedValue(null);
       prismaMock.bank.findFirst.mockResolvedValue(null);
@@ -195,7 +200,35 @@ describe('InvoicesService', () => {
       );
     });
 
-    it('maps a Prisma P2002 to a 400', async () => {
+    it('retries with the next generated number when another invoice took it', async () => {
+      prismaMock.invoice.create
+        .mockRejectedValueOnce({ code: 'P2002' })
+        .mockImplementationOnce(async (args) => ({
+          id: 'inv-2',
+          invoiceNumber: args.data.invoiceNumber,
+        }));
+
+      const result = await service.create('rfi-1', sample, actor);
+
+      expect(result.id).toBe('inv-2');
+      expect(prismaMock.invoice.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry a number typed by Finance', async () => {
+      prismaMock.invoice.findFirst.mockResolvedValue(null);
+      prismaMock.invoice.create.mockRejectedValue({ code: 'P2002' });
+
+      await expect(
+        service.create(
+          'rfi-1',
+          { ...sample, invoiceNumber: '007/07-26/PPMI/FIN/MC' },
+          actor,
+        ),
+      ).rejects.toThrow(/already used/);
+      expect(prismaMock.invoice.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('maps a Prisma P2002 to a 400 after the retries run out', async () => {
       prismaMock.invoice.create.mockRejectedValue({ code: 'P2002' });
       await expect(service.create('rfi-1', sample, actor)).rejects.toThrow(
         BadRequestException,

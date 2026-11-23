@@ -70,7 +70,8 @@ Format `{NNN}/{MM}-{YY}/PPMI/FIN/{suffix}`, misalnya `007/07-26/PPMI/FIN/MC`.
 - `NNN` = 1 + urutan tertinggi di antara semua invoice (termasuk yang sudah dihapus, karena nomor tetap unik) yang nomornya memuat `/{MM}-{YY}/PPMI/FIN/`. Urutan direset tiap bulan untuk semua jenis asuransi. Nomor yang tidak cocok polanya diabaikan. Diisi nol sampai 3 digit.
 - `suffix` diambil dari `InvoiceNumberSetting` untuk jenis asuransi quotation. Bila belum diatur, dipakai konstanta `DEFAULT_INVOICE_SUFFIX = 'MC'`. **Arti `MC` belum dikonfirmasi.**
 - Nomor hanya usulan: Finance boleh mengubahnya di form, selama unik. Nomor ganda ditolak dengan `400`.
-- Dua permintaan bersamaan bisa mendapat usulan yang sama. Yang kedua gagal dengan `400` (unique constraint), lalu minta draft lagi.
+- Bila nomor tidak dikirim, server membuat nomor sendiri. Kalau nomor itu ternyata baru saja dipakai invoice lain yang terbit bersamaan, server mencoba nomor berikutnya (sampai 3 kali).
+- Nomor yang dikirim Finance tidak pernah diganti diam-diam: bila sudah terpakai, permintaan ditolak dengan `400`. Usulan nomor di draft bisa basi bila ada invoice lain yang terbit lebih dulu; kosongkan `invoiceNumber` agar server memilih nomor yang masih kosong.
 
 ## 4. Endpoint
 
