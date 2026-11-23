@@ -911,6 +911,9 @@ model QuotationObject {
   id          String @id @default(cuid()) @map("_id")
   quotationId String
   objectType  String
+  // Optional link to the vessel master. `data` stays the quotation's own
+  // snapshot, so later edits to the master never change an issued quotation.
+  vesselId    String?
   data        Json?
 
   createdAt DateTime  @default(now())
@@ -918,8 +921,10 @@ model QuotationObject {
   deletedAt DateTime?
 
   quotation Quotation @relation(fields: [quotationId], references: [id])
+  vessel    Vessel?   @relation(fields: [vesselId], references: [id])
 
   @@index([quotationId])
+  @@index([vesselId])
   @@index([deletedAt])
   @@map("quotation_object")
 }
@@ -1499,6 +1504,28 @@ model FollowUp {
   @@map("follow_up")
 }
 
+// Which document categories a vessel is expected to have. Empty until the
+// business agrees on the list; rows are managed through the API.
+model VesselDocumentRequirement {
+  id         String  @id @default(cuid()) @map("_id")
+  // Same free-text code as VesselDocument.category (upper snake case).
+  category   String
+  label      String?
+  // Null means every vessel; otherwise matched against Vessel.vesselType
+  // ignoring case and spacing.
+  vesselType String?
+  isActive   Boolean @default(true)
+  sortOrder  Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([category])
+  @@index([deletedAt])
+  @@map("vessel_document_requirement")
+}
+
 model VesselSurvey {
   id               String    @id @default(cuid()) @map("_id")
   vesselId         String
@@ -1623,6 +1650,7 @@ model Vessel {
   pniVessels PniVessel[]
   documents  VesselDocument[]
   surveys    VesselSurvey[]
+  quotationObjects QuotationObject[]
 
   @@index([imoNumber])
   @@index([normalizedName])
