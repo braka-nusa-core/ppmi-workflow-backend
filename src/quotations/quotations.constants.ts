@@ -13,6 +13,14 @@ export const QUOTATION_STATUS_TRANSITIONS: Record<string, string[]> = {
   POLICY_ISSUED: [],
 };
 
+// Provisional: the business has not fixed which events start a new terms
+// version. Today a snapshot is taken when a quotation is submitted for internal
+// approval and when it is sent to the insurer. Adjust here once confirmed.
+export const TERM_VERSION_TRIGGERS: Record<string, string> = {
+  WAITING_APPROVAL: 'SUBMIT',
+  SENT_TO_INSURANCE: 'SEND_TO_INSURANCE',
+};
+
 export function validateTransition(current: string, next: string): boolean {
   const allowed = QUOTATION_STATUS_TRANSITIONS[current];
   if (!allowed) return false;

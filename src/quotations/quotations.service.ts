@@ -16,8 +16,10 @@ import {
 } from './quotations.validation';
 import {
   REQUIRES_SUPERVISOR_APPROVAL_AFTER_INSURER_REVISION,
+  TERM_VERSION_TRIGGERS,
   validateTransition,
 } from './quotations.constants';
+import { createTermVersion } from './quotation-term-versions.util';
 
 type Actor = { id: string; fullname: string };
 
@@ -529,6 +531,18 @@ export class QuotationsService {
           note,
         },
       });
+
+      const termVersionReason = TERM_VERSION_TRIGGERS[nextStatus];
+      if (termVersionReason) {
+        await createTermVersion(
+          tx,
+          id,
+          existing.status === 'REVISION'
+            ? 'RESUBMIT_AFTER_REVISION'
+            : termVersionReason,
+          { actorId: actor.id, note },
+        );
+      }
 
       await tx.log.create({
         data: {

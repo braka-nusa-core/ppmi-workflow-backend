@@ -151,6 +151,30 @@ Selain `termsConditionId` dan `description`, term mendukung metadata berikut:
 
 Warranty mendukung `sortOrder` untuk urutan render.
 
+### Versi Terms
+
+Setiap kali terms perlu dibandingkan (misalnya sebelum dan sesudah negosiasi atau revisi), sistem menyimpan snapshot terms yang tidak berubah sebagai versi.
+
+| Method | Endpoint | Permission | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/quotations/:quotationId/term-versions` | `quotation:read` | Daftar versi (tanpa isi terms, dengan `termCount`). |
+| `GET` | `/quotations/:quotationId/term-versions/:version` | `quotation:read` | Satu versi beserta seluruh terms. |
+| `GET` | `/quotations/:quotationId/term-versions/compare?from=1&to=2` | `quotation:read` | Bandingkan dua versi. `to=current` (default) membandingkan dengan terms saat ini. |
+| `POST` | `/quotations/:quotationId/term-versions` | `quotation:update` | Simpan terms saat ini sebagai versi baru (`reason = MANUAL`), body `{ "note": "..." }` opsional. |
+
+**Versi otomatis (sementara):** snapshot dibuat saat quotation berpindah ke `WAITING_APPROVAL` (`SUBMIT`, atau `RESUBMIT_AFTER_REVISION` setelah revisi insurer) dan ke `SENT_TO_INSURANCE` (`SEND_TO_INSURANCE`). Versi otomatis dilewati bila terms sama dengan versi terakhir. Peristiwa pemicunya belum disepakati bisnis dan diatur di `TERM_VERSION_TRIGGERS` pada `src/quotations/quotations.constants.ts`.
+
+**Hasil perbandingan:**
+
+| Field | Keterangan |
+| --- | --- |
+| `added` / `removed` | Term dari katalog yang hanya ada di salah satu versi. |
+| `changed` | Term yang sama dengan `before`, `after`, dan `fields` yang berbeda (`description`, `section`, `isSelected`, `isEditable`, `isRemovable`, `selectionGroup`, `conditionRule`). Perubahan urutan tidak dihitung. |
+| `unchanged` | Jumlah term yang tidak berubah. |
+| `notComparable` | Term teks bebas (tanpa referensi katalog) yang hanya ada di satu sisi. Bisa jadi hasil penulisan ulang klausul yang sama, jadi dicantumkan dengan catatan untuk ditinjau manual. `null` bila tidak ada. |
+
+Pencocokan dilakukan lewat id term yang sama, lalu lewat referensi katalog (`termsConditionId` + `section`) untuk term yang dihapus lalu ditambahkan kembali.
+
 ## Status dan Data Rules
 
 - `DRAFT` dan `REVISION` adalah satu-satunya status yang editable.

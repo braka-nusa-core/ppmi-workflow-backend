@@ -15,6 +15,8 @@ import { QuotationAttachmentsService } from './quotation-attachments.service';
 import { QuotationReferencesController } from './quotation-references.controller';
 import { QuotationReferencesService } from './quotation-references.service';
 import { TechnicalQuotationValidationService } from './technical-quotation-validation.service';
+import { QuotationTermVersionsController } from './quotation-term-versions.controller';
+import { QuotationTermVersionsService } from './quotation-term-versions.service';
 
 @Module({
   imports: [ClientsModule],
@@ -26,6 +28,7 @@ import { TechnicalQuotationValidationService } from './technical-quotation-valid
     QuotationWarrantiesController,
     QuotationAttachmentsController,
     QuotationReferencesController,
+    QuotationTermVersionsController,
   ],
   providers: [
     QuotationsService,
@@ -36,6 +39,7 @@ import { TechnicalQuotationValidationService } from './technical-quotation-valid
     QuotationAttachmentsService,
     QuotationReferencesService,
     TechnicalQuotationValidationService,
+    QuotationTermVersionsService,
   ],
   exports: [QuotationsService],
 })
