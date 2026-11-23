@@ -45,6 +45,8 @@ Semua jumlah uang dihitung dengan `Decimal` (tanpa float) dan dikirim sebagai an
 - Setelah setiap tulis (create, update, refund, delete), dalam transaksi yang sama, status invoice dihitung ulang dari pembayaran `PAID` yang belum dihapus: 0 menjadi `UNPAID`, di bawah `balanceDue` menjadi `PARTIALLY_PAID`, sama atau lebih menjadi `PAID`. Fungsinya `recomputeInvoiceStatus` di `src/payments/payment.util.ts`.
 - Baris invoice dikunci selama transaksi agar dua pembayaran bersamaan tidak sama-sama lolos pengecekan sisa.
 - Log `referenceType: INCOMING_PAYMENT`.
+- Daftar pembayaran (`GET /invoices/:invoiceId/incoming-payments`) membawa `amountInWords` per pembayaran, dengan kalimat yang sama seperti invoice (IDR atau USD; mata uang lain `null`).
+- Invoice tanpa `balanceDue` tidak bisa menerima pembayaran, dan tidak pernah berstatus `PAID`.
 
 ---
 
@@ -79,6 +81,7 @@ Cicilan (`OutgoingInstallment`): `installmentOrder`, `amount`, `paymentDate`, `p
 - Peserta harus milik quotation polis ini dan belum dihapus. Peserta yang sudah punya pembayaran aktif ditolak (409).
 - Setelah setiap tulis, status dihitung ulang dari cicilan yang belum dihapus: 0 menjadi `WAITING_PAYMENT`, di bawah `amount` menjadi `PARTIAL_PAYMENT`, sama menjadi `FULLY_PAID`. Fungsinya `recomputeOutgoingStatus`.
 - Log `referenceType: OUTGOING_PAYMENT` dengan `referenceId` id pembayaran.
+- `GET /policies/:policyId/outgoing-payments` membawa `amountInWords` untuk setiap pembayaran keluar dan setiap cicilannya.
 
 ---
 

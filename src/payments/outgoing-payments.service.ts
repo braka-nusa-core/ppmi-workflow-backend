@@ -10,6 +10,7 @@ import { PrismaService } from '../common/services/prisma.service';
 import { StorageService } from '../common/services/storage.service';
 import {
   Actor,
+  paymentWords,
   recomputeOutgoingStatus,
   round2,
   sumInstallments,
@@ -74,6 +75,11 @@ export class OutgoingPaymentsService {
               : null,
           outgoingPayment: payment && {
             ...payment,
+            amountInWords: paymentWords(payment.amount, payment.currency),
+            installments: payment.installments.map((installment) => ({
+              ...installment,
+              amountInWords: paymentWords(installment.amount, payment.currency),
+            })),
             paid: payment.installments.reduce(
               (total, i) => total.plus(toDecimal(i.amount)),
               toDecimal(0),

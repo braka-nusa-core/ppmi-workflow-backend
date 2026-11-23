@@ -7,6 +7,7 @@ import {
   recomputeOutgoingStatus,
   round2,
   sumDecimals,
+  paymentWords,
 } from './payment.util';
 
 const D = (v: string | number) => new Prisma.Decimal(v);
@@ -126,5 +127,29 @@ describe('recomputeOutgoingStatus', () => {
       where: { id: 'out-1' },
       data: { status: expected },
     });
+  });
+});
+
+describe('paymentWords', () => {
+  it('uses the same wording as the invoice for IDR and USD', () => {
+    expect(paymentWords(new Prisma.Decimal('43100195.25'), 'IDR')).toBe(
+      'Forty-three million one hundred thousand one hundred ninety-five Indonesian Rupiah and twenty-five cents.',
+    );
+    expect(paymentWords('1', 'USD')).toBe('One US Dollar.');
+  });
+
+  it('returns null without an amount or for another currency', () => {
+    expect(paymentWords(null, 'IDR')).toBeNull();
+    expect(paymentWords('10', 'EUR')).toBeNull();
+    expect(paymentWords('10', null)).toBeNull();
+  });
+});
+
+describe('computeInvoiceStatus without a balance due', () => {
+  it('never reports PAID for an invoice that has no total', () => {
+    expect(computeInvoiceStatus(new Prisma.Decimal('100'), null)).toBe(
+      'PARTIALLY_PAID',
+    );
+    expect(computeInvoiceStatus(new Prisma.Decimal('0'), null)).toBe('UNPAID');
   });
 });

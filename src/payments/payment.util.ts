@@ -1,4 +1,5 @@
 import { Prisma } from '../generated/prisma/client';
+import { amountInWords } from '../common/utils/amount-in-words';
 
 type Decimal = Prisma.Decimal;
 const Decimal = Prisma.Decimal;
@@ -44,6 +45,8 @@ export function computeInvoiceStatus(
   balanceDue: Decimal | string | number | null | undefined,
 ): InvoicePaymentStatus {
   if (paid.lte(0)) return 'UNPAID';
+  // Without a total the invoice can never be proven fully paid.
+  if (balanceDue === null || balanceDue === undefined) return 'PARTIALLY_PAID';
   return paid.lt(toDecimal(balanceDue)) ? 'PARTIALLY_PAID' : 'PAID';
 }
 
@@ -136,4 +139,17 @@ export async function recomputeOutgoingStatus(
     data: { status },
   });
   return { paid, status };
+}
+
+/**
+ * Amount in words for payment documents, matching the invoice wording.
+ * Null when the amount is missing or the currency is not IDR or USD.
+ */
+export function paymentWords(
+  amount: Decimal | string | number | null | undefined,
+  currency: string | null | undefined,
+) {
+  if (amount === null || amount === undefined) return null;
+  if (currency !== 'IDR' && currency !== 'USD') return null;
+  return amountInWords(amount.toString(), currency);
 }

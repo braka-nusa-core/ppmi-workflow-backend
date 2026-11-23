@@ -11,6 +11,7 @@ import { StorageService } from '../common/services/storage.service';
 import {
   Actor,
   lockInvoice,
+  paymentWords,
   recomputeInvoiceStatus,
   sumPaidIncoming,
   toDecimal,
@@ -54,7 +55,13 @@ export class IncomingPaymentsService {
         remaining: balanceDue.minus(paid),
         status: invoice.status,
       },
-      payments,
+      payments: payments.map((payment) => ({
+        ...payment,
+        amountInWords: paymentWords(
+          payment.amount,
+          payment.currency ?? invoice.currency,
+        ),
+      })),
     };
   }
 
