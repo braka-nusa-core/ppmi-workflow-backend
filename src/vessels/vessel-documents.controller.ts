@@ -32,6 +32,7 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { PermissionGuard } from '../common/guards/permission.guard';
 import { ZodValidationPipe } from '../common/pipes/zod.pipe';
 import { VesselDocumentsService } from './vessel-documents.service';
+import { VesselRequirementsService } from './vessel-requirements.service';
 import {
   CreateVesselDocumentDto,
   UpdateVesselDocumentDto,
@@ -50,7 +51,21 @@ const ALLOWED_FILE_TYPES =
 @ApiBearerAuth()
 @ApiParam({ name: 'vesselId', type: String })
 export class VesselDocumentsController {
-  constructor(private readonly documentsService: VesselDocumentsService) {}
+  constructor(
+    private readonly documentsService: VesselDocumentsService,
+    private readonly requirementsService: VesselRequirementsService,
+  ) {}
+
+  @Get('checklist')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermission('vessel', 'read')
+  @ApiOperation({
+    summary:
+      'Which required document categories the vessel has, expiring, expired, or still lacks',
+  })
+  checklist(@Param('vesselId') vesselId: string) {
+    return this.requirementsService.checklist(vesselId);
+  }
 
   @Get()
   @HttpCode(HttpStatus.OK)

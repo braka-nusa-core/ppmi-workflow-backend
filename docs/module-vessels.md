@@ -130,6 +130,39 @@ Dokumen dan foto disimpan per kapal. Foto adalah dokumen dengan kategori `PHOTO`
 - Upload, ubah, dan hapus dicatat di tabel `log` dengan `referenceType = VESSEL`.
 - Menghapus dokumen hanya soft delete. File di storage tidak dihapus.
 
+#### Checklist dokumen kapal
+
+Daftar kategori dokumen yang wajib dimiliki kapal diatur lewat data, bukan kode, karena daftar resminya belum disepakati. **Daftar ini kosong sampai diisi**, dan selama kosong checklist selalu lengkap.
+
+**Authentication:** Bearer token. Permission mengikuti resource `vessel`.
+
+| Method | Endpoint | Permission | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/vessel-document-requirements` | `vessel:read` | Daftar kategori wajib. |
+| `POST` | `/vessel-document-requirements` | `vessel:update` | Wajibkan satu kategori. |
+| `PATCH` | `/vessel-document-requirements/:id` | `vessel:update` | Ubah label, tipe kapal, urutan, atau aktif. |
+| `DELETE` | `/vessel-document-requirements/:id` | `vessel:update` | Soft delete. |
+| `GET` | `/vessels/:vesselId/documents/checklist` | `vessel:read` | Hasil untuk satu kapal. |
+
+```json
+{ "category": "SURAT_LAUT", "label": "Surat Laut", "vesselType": "TUG BOAT" }
+```
+
+- `category` memakai kode yang sama dengan kategori dokumen (huruf besar, spasi menjadi `_`).
+- `vesselType` boleh dikosongkan, artinya berlaku untuk semua kapal. Jika diisi, hanya berlaku untuk kapal bertipe sama (huruf besar dan spasi tidak dibedakan).
+- Kategori yang sama tidak bisa diwajibkan dua kali untuk tipe kapal yang sama: `400 Bad Request`.
+
+Hasil checklist per kategori wajib:
+
+| Status | Arti |
+| --- | --- |
+| `OK` | Ada dokumen yang masih berlaku (tanpa tanggal berakhir, atau belum lewat). |
+| `EXPIRING_SOON` | Ada dokumen yang berlaku, tetapi berakhir dalam jendela reminder (default 7 hari). |
+| `EXPIRED` | Ada dokumen, tetapi semuanya sudah lewat tanggalnya atau berstatus `EXPIRED`. |
+| `MISSING` | Belum ada dokumen untuk kategori itu. |
+
+`summary` berisi jumlah per status dan `complete`. `complete` bernilai `true` bila tidak ada yang `EXPIRED` atau `MISSING` (`EXPIRING_SOON` masih dianggap lengkap, karena dokumennya masih berlaku). Bila beberapa dokumen berlaku, yang dilaporkan adalah yang paling lama berlaku, dan dokumen tanpa tanggal berakhir dianggap paling lama.
+
 ### 1.5 Survey kapal
 
 Survey dicatat per kapal. Perusahaan surveyor memakai master `Surveyor` yang sudah ada. Laporan survey adalah dokumen kapal (bagian 1.4) yang ditautkan lewat `reportDocumentId`.
