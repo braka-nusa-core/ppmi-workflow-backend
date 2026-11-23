@@ -38,6 +38,17 @@ async function main() {
     create: { name: 'H&M', type: 'DEPARTMENT', parentId: teknik.id },
   });
 
+  // The approval flow checks for exactly this unit name under the Teknik division.
+  const supervisorTeknik = await prisma.organizationUnit.upsert({
+    where: { name_type: { name: 'Supervisor Teknik', type: 'DEPARTMENT' } },
+    update: { parentId: teknik.id, deletedAt: null },
+    create: {
+      name: 'Supervisor Teknik',
+      type: 'DEPARTMENT',
+      parentId: teknik.id,
+    },
+  });
+
   const finance = await prisma.organizationUnit.upsert({
     where: { name_type: { name: 'Finance', type: 'DIVISION' } },
     update: { deletedAt: null },
@@ -327,6 +338,12 @@ async function main() {
       email: 'hm.user1@ppmi.com',
       role: 'USER' as const,
       organizationUnitId: hm.id,
+    },
+    {
+      fullname: 'Supervisor Teknik',
+      email: 'supervisor.teknik@ppmi.com',
+      role: 'USER' as const,
+      organizationUnitId: supervisorTeknik.id,
     },
     {
       fullname: 'Finance User 1',
