@@ -64,6 +64,20 @@ Template P&I disimpan di `qs_template` dengan `clubId`. Saat quotation dibuat, s
 
 `key` adalah referensi sementara dalam request yang sama. Key dapat digunakan oleh vessel coverage, provision, deductible, dan cover restriction untuk merujuk child record baru. Setelah record ada, gunakan `id` pada request patch berikutnya.
 
+### Vessel dari master kapal
+
+Vessel P&I dapat dihubungkan ke master kapal lewat `vesselId` (lihat [Vessels](module-vessels.md)):
+
+```json
+{ "vessels": [{ "key": "vessel-1", "vesselId": "vessel-master-id" }] }
+```
+
+- `vesselId` harus merujuk kapal master yang masih aktif, jika tidak `400 Bad Request`.
+- Vessel P&I tetap menyimpan salinan (snapshot) datanya sendiri. Saat baris dibuat, field yang tidak dikirim diisi dari master (nama, IMO, tipe, tahun, flag, class, GT, port of registry). Nilai yang dikirim eksplisit selalu dipakai.
+- Setelah dibuat, snapshot tidak berubah otomatis ketika master diubah, supaya dokumen lama tetap sama. Patch dengan `id` hanya mengubah field yang dikirim.
+- `name` wajib kecuali `vesselId` atau `id` dikirim.
+- Tanpa `vesselId`, perilaku lama tidak berubah. Vessel P&I yang sudah ada memiliki `vesselId = null`.
+
 ## Aggregate P&I
 
 `GET /pni/quotations/:quotationId` dan payload patch dapat mencakup:

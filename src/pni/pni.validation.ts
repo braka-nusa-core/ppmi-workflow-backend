@@ -28,21 +28,27 @@ const quotationFieldsSchema = z.object({
   templateVersion: z.string().optional(),
 });
 
-const vesselSchema = z.object({
-  id: identifierSchema.optional(),
-  key: identifierSchema.optional(),
-  name: z.string().min(1),
-  imoNumber: z.string().optional(),
-  vesselType: z.string().optional(),
-  builtYear: z.number().int().min(1800).max(3000).optional(),
-  flag: z.string().optional(),
-  vesselClass: z.string().optional(),
-  classNotApplicable: z.boolean().optional(),
-  grossTonnage: amountSchema.optional(),
-  portOfRegistry: z.string().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-  details: jsonSchema.optional(),
-});
+const vesselSchema = z
+  .object({
+    id: identifierSchema.optional(),
+    key: identifierSchema.optional(),
+    vesselId: identifierSchema.nullable().optional(),
+    name: z.string().min(1).optional(),
+    imoNumber: z.string().optional(),
+    vesselType: z.string().optional(),
+    builtYear: z.number().int().min(1800).max(3000).optional(),
+    flag: z.string().optional(),
+    vesselClass: z.string().optional(),
+    classNotApplicable: z.boolean().optional(),
+    grossTonnage: amountSchema.optional(),
+    portOfRegistry: z.string().optional(),
+    sortOrder: z.number().int().min(0).optional(),
+    details: jsonSchema.optional(),
+  })
+  .refine((vessel) => vessel.id || vessel.vesselId || vessel.name, {
+    message: 'name is required when vesselId is not provided',
+    path: ['name'],
+  });
 
 const insuranceBlockSchema = z.object({
   id: identifierSchema.optional(),

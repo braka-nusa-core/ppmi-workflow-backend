@@ -266,7 +266,11 @@ export class PniService {
     const blockRefs = new Map<string, string>();
 
     for (const input of dto.vessels ?? []) {
+      const master = input.vesselId
+        ? await this.findMasterVessel(tx, input.vesselId)
+        : null;
       const data = {
+        vesselId: input.vesselId,
         name: input.name,
         imoNumber: input.imoNumber,
         vesselType: input.vesselType,
@@ -279,9 +283,28 @@ export class PniService {
         sortOrder: input.sortOrder,
         details: this.json(input.details),
       };
+      // The master record only fills blanks when a row is first created; the
+      // quotation keeps its own snapshot afterwards.
       const vessel = input.id
         ? await this.updateOwnedVessel(tx, input.id, pniQuotationId, data)
-        : await tx.pniVessel.create({ data: { pniQuotationId, ...data } });
+        : await tx.pniVessel.create({
+            data: {
+              pniQuotationId,
+              ...data,
+              name: data.name ?? master!.name,
+              imoNumber: data.imoNumber ?? master?.imoNumber ?? undefined,
+              vesselType: data.vesselType ?? master?.vesselType ?? undefined,
+              builtYear: data.builtYear ?? master?.builtYear ?? undefined,
+              flag: data.flag ?? master?.flag ?? undefined,
+              vesselClass: data.vesselClass ?? master?.vesselClass ?? undefined,
+              classNotApplicable:
+                data.classNotApplicable ?? master?.classNotApplicable,
+              grossTonnage:
+                data.grossTonnage ?? master?.grossTonnage ?? undefined,
+              portOfRegistry:
+                data.portOfRegistry ?? master?.portOfRegistry ?? undefined,
+            },
+          });
       vesselRefs.set(vessel.id, vessel.id);
       if (input.key) vesselRefs.set(input.key, vessel.id);
     }
@@ -767,6 +790,15 @@ export class PniService {
       );
     cache.set(ref, block.id);
     return block.id;
+  }
+
+  private async findMasterVessel(tx: Transaction, vesselId: string) {
+    const vessel = await tx.vessel.findFirst({
+      where: { id: vesselId, deletedAt: null },
+    });
+    if (!vessel)
+      throw new BadRequestException(`Vessel ${vesselId} was not found`);
+    return vessel;
   }
 
   private async updateOwnedVessel(
