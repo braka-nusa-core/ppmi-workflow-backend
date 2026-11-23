@@ -52,6 +52,10 @@ enum LogReferenceType {
   CLUB
   VESSEL
   VESSEL_POLICY
+  VESSEL_SURVEY
+  ASSIGNMENT
+  MEETING
+  FOLLOW_UP
 }
 
 enum QuotationStatus {
@@ -225,6 +229,8 @@ model User {
   quotationApprovals   QuotationApproval[]   @relation("QuotationApprovalActor")
   quotationHistories   QuotationHistory[]    @relation("QuotationHistoryActor")
   quotationSubmissions QuotationSubmission[] @relation("QuotationSubmissionSender")
+  assignments          Assignment[]          @relation("AssignmentUser")
+  followUps            FollowUp[]            @relation("FollowUpAssignee")
   insuranceReviews     InsuranceReview[]     @relation("InsuranceReviewRecorder")
 
   createdAt DateTime  @default(now())
@@ -413,6 +419,7 @@ model Surveyor {
   deletedAt DateTime?
 
   quotationSurveyors QuotationSurveyor[]
+  vesselSurveys      VesselSurvey[]
 
   @@index([deletedAt])
   @@map("surveyor")
@@ -514,6 +521,8 @@ model Quotation {
   approvals   QuotationApproval[]
   histories   QuotationHistory[]
   submissions QuotationSubmission[]
+  termVersions QuotationTermVersion[]
+  vesselSurveys VesselSurvey[]
   policy      Policy?
   pniQuotation PniQuotation?
   hmQuotation HmQuotation?
@@ -566,6 +575,7 @@ model CargoQuotation {
   deletedAt DateTime?
 
   quotation Quotation @relation(fields: [quotationId], references: [id])
+  installments CargoQuotationInstallment[]
 
   @@index([deletedAt])
   @@map("cargo_quotation")
@@ -661,6 +671,7 @@ model PniQuotation {
 model PniVessel {
   id              String @id @default(cuid()) @map("_id")
   pniQuotationId  String
+  vesselId        String?
   name            String
   imoNumber       String?
   vesselType      String?
@@ -678,11 +689,13 @@ model PniVessel {
   deletedAt DateTime?
 
   pniQuotation        PniQuotation              @relation(fields: [pniQuotationId], references: [id])
+  vessel              Vessel?                   @relation(fields: [vesselId], references: [id])
   coverages           PniVesselCoverage[]
   provisionScopes     PniProvisionVessel[]
   deductibleScopes    PniDeductibleVessel[]
 
   @@index([pniQuotationId])
+  @@index([vesselId])
   @@index([deletedAt])
   @@map("pni_vessel")
 }
@@ -1367,12 +1380,199 @@ model Notification {
   title       String?
   message     String? @db.Text
   isRead      Boolean @default(false)
+  readAt      DateTime?
+
+  // What the notification is about, so the UI can link to it.
+  type          String?
+  referenceType String?
+  referenceId   String?
+  dueDate       DateTime?
+  // Unique per (event, due date, recipient) so reminders are never sent twice.
+  dedupeKey     String?   @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([recipientId])
+  @@index([recipientId, isRead])
   @@map("notification")
+}
+
+enum AssignmentEntityType {
+  VESSEL
+  QUOTATION
+  POLICY
+  CLIENT
+}
+
+enum AssignmentCategory {
+  INTERNAL
+  EXTERNAL
+  INSURER
+  INSURED
+}
+
+model Assignment {
+  id               String               @id @default(cuid()) @map("_id")
+  entityType       AssignmentEntityType
+  entityId         String
+  category         AssignmentCategory
+  // INTERNAL assignments point at a user; the others carry contact details.
+  userId           String?
+  name             String?
+  email            String?
+  phone            String?
+  organizationName String?
+  role             String?
+  note             String?              @db.Text
+  startDate        DateTime             @default(now())
+  endDate          DateTime?
+  createdById      String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user User? @relation("AssignmentUser", fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("assignment")
+}
+
+enum FollowUpStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+model Meeting {
+  id          String    @id @default(cuid()) @map("_id")
+  title       String
+  meetingDate DateTime
+  location    String?
+  participants String?  @db.Text
+  agenda      String?   @db.Text
+  outcome     String?   @db.Text
+  entityType  AssignmentEntityType?
+  entityId    String?
+  createdById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  followUps FollowUp[]
+
+  @@index([entityType, entityId])
+  @@index([meetingDate])
+  @@index([deletedAt])
+  @@map("meeting")
+}
+
+model FollowUp {
+  id          String         @id @default(cuid()) @map("_id")
+  meetingId   String?
+  entityType  AssignmentEntityType?
+  entityId    String?
+  title       String
+  description String?        @db.Text
+  assigneeId  String?
+  dueDate     DateTime?
+  status      FollowUpStatus @default(OPEN)
+  completedAt DateTime?
+  createdById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  meeting  Meeting? @relation(fields: [meetingId], references: [id])
+  assignee User?    @relation("FollowUpAssignee", fields: [assigneeId], references: [id])
+
+  @@index([meetingId])
+  @@index([entityType, entityId])
+  @@index([assigneeId])
+  @@index([status, dueDate])
+  @@index([deletedAt])
+  @@map("follow_up")
+}
+
+model VesselSurvey {
+  id               String    @id @default(cuid()) @map("_id")
+  vesselId         String
+  surveyorId       String?
+  quotationId      String?
+  surveyType       String?
+  // Free text for now (PLANNED, NOMINATED, DONE, ...): final list not agreed yet.
+  status           String    @default("PLANNED")
+  nominatedAt      DateTime?
+  surveyDate       DateTime?
+  reportDate       DateTime?
+  validUntil       DateTime?
+  reportDocumentId String?
+  note             String?   @db.Text
+  createdById      String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  vessel         Vessel          @relation(fields: [vesselId], references: [id])
+  surveyor       Surveyor?       @relation(fields: [surveyorId], references: [id])
+  quotation      Quotation?      @relation(fields: [quotationId], references: [id])
+  reportDocument VesselDocument? @relation(fields: [reportDocumentId], references: [id])
+
+  @@index([vesselId])
+  @@index([surveyorId])
+  @@index([quotationId])
+  @@index([validUntil])
+  @@index([deletedAt])
+  @@map("vessel_survey")
+}
+
+model QuotationTermVersion {
+  id          String   @id @default(cuid()) @map("_id")
+  quotationId String
+  version     Int
+  // Why this version exists, e.g. SUBMIT, SEND_TO_INSURANCE, MANUAL.
+  reason      String
+  note        String?  @db.Text
+  terms       Json
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@unique([quotationId, version])
+  @@index([quotationId])
+  @@map("quotation_term_version")
+}
+
+model CargoQuotationInstallment {
+  id                 String   @id @default(cuid()) @map("_id")
+  cargoQuotationId   String
+  installmentNo      Int
+  percentage         Decimal? @db.Decimal(5, 2)
+  dueAfterDays       Int?
+  amount             Decimal? @db.Decimal(15, 2)
+  currency           String?
+  dueDate            DateTime?
+  paymentStatus      String   @default("UNPAID")
+  paidAt             DateTime?
+  sortOrder          Int      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  cargoQuotation CargoQuotation @relation(fields: [cargoQuotationId], references: [id])
+
+  @@unique([cargoQuotationId, installmentNo])
+  @@index([dueDate])
+  @@index([deletedAt])
+  @@map("cargo_quotation_installment")
 }
 
 model FileUpload {
@@ -1409,13 +1609,22 @@ model Vessel {
   builtYear      Int?
   grossTonnage   Decimal? @db.Decimal(15, 2)
   vesselClass    String?
+  classNotApplicable Boolean @default(false)
+  imoNumber      String?
+  flag           String?
+  tradingArea    String?
+  portOfRegistry String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  policies VesselPolicy[]
+  policies   VesselPolicy[]
+  pniVessels PniVessel[]
+  documents  VesselDocument[]
+  surveys    VesselSurvey[]
 
+  @@index([imoNumber])
   @@index([normalizedName])
   @@index([deletedAt])
   @@map("vessel")
@@ -1452,4 +1661,34 @@ model VesselPolicy {
   @@index([periodEnd])
   @@index([deletedAt])
   @@map("vessel_policy")
+}
+
+model VesselDocument {
+  id           String    @id @default(cuid()) @map("_id")
+  vesselId     String
+  category     String    @default("OTHER")
+  title        String?
+  fileName     String
+  fileUrl      String
+  mimeType     String?
+  fileSize     Int?
+  documentDate DateTime?
+  validFrom    DateTime?
+  validUntil   DateTime?
+  status       String    @default("AVAILABLE")
+  note         String?   @db.Text
+  uploadedById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  vessel Vessel @relation(fields: [vesselId], references: [id])
+  surveyReports VesselSurvey[]
+
+  @@index([vesselId])
+  @@index([category])
+  @@index([validUntil])
+  @@index([deletedAt])
+  @@map("vessel_document")
 }
