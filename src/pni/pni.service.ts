@@ -29,17 +29,29 @@ export class PniService {
     });
   }
 
-  async getTemplate(clubCode: string) {
+  async getTemplate(clubCode: string, coverType?: 'FULL' | 'LIMITED') {
     const club = await this.prisma.club.findFirst({
       where: { code: clubCode, deletedAt: null },
       select: { id: true },
     });
     if (!club) throw new BadRequestException('Unknown P&I club');
 
-    return this.prisma.qsTemplate.findMany({
-      where: { clubId: club.id, deletedAt: null },
+    const templates = await this.prisma.qsTemplate.findMany({
+      where: {
+        clubId: club.id,
+        deletedAt: null,
+        // Templates without a cover type are generic and fit both covers.
+        ...(coverType && { OR: [{ coverType }, { coverType: null }] }),
+      },
       orderBy: { updatedAt: 'desc' },
     });
+    if (!coverType) return templates;
+
+    // Stable sort keeps the updatedAt order inside each group.
+    return [...templates].sort(
+      (a, b) =>
+        Number(b.coverType === coverType) - Number(a.coverType === coverType),
+    );
   }
 
   async list() {
@@ -169,7 +181,7 @@ export class PniService {
         await tx.pniQuotation.update({
           where: { id: existing.id },
           data: {
-            ...this.pniData(dto.pni),
+            ...this.pniData(dto.pni, existing.vesselScope),
             ...(dto.pni.clubCode !== undefined &&
               (await this.resolveClub(tx, dto.pni.clubCode))),
           },
@@ -947,8 +959,38 @@ export class PniService {
     }
   }
 
-  private pniData(input: any) {
+  private pniData(input: any, currentScope?: string | null) {
+    const scope =
+      input.vesselScope !== undefined ? input.vesselScope : currentScope;
+    if (
+      input.declaredVesselCount !== undefined &&
+      input.declaredVesselCount !== null &&
+      scope !== 'FLEET'
+    ) {
+      throw new BadRequestException(
+        'declaredVesselCount is only allowed when vesselScope is FLEET',
+      );
+    }
+    // Leaving FLEET (or clearing the scope) drops the stale vessel count.
+    const clearCount =
+      input.declaredVesselCount === undefined &&
+      input.vesselScope !== undefined &&
+      input.vesselScope !== 'FLEET';
+
     return {
+      ...(input.referenceDate !== undefined && {
+        referenceDate: this.date(input.referenceDate),
+      }),
+      ...(input.vesselScope !== undefined && {
+        vesselScope: input.vesselScope,
+      }),
+      ...((input.declaredVesselCount !== undefined || clearCount) && {
+        declaredVesselCount: clearCount ? null : input.declaredVesselCount,
+      }),
+      ...(input.coverType !== undefined && { coverType: input.coverType }),
+      ...(input.premiumType !== undefined && {
+        premiumType: input.premiumType,
+      }),
       ...(input.referenceNumber !== undefined && {
         referenceNumber: input.referenceNumber,
       }),
@@ -1003,6 +1045,7 @@ export class PniService {
       ...(input.templateVersion !== undefined && {
         templateVersion: input.templateVersion,
       }),
+      ...(input.voyageType !== undefined && { voyageType: input.voyageType }),
     };
   }
 

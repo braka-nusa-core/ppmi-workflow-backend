@@ -26,6 +26,7 @@ const quotationFieldsSchema = z.object({
   deductible: amountSchema.optional(),
   brokerage: amountSchema.optional(),
   templateVersion: z.string().optional(),
+  voyageType: z.enum(['UNDER_VOYAGE', 'SINGLE_VOYAGE']).nullable().optional(),
 });
 
 const vesselSchema = z
@@ -146,6 +147,13 @@ const coverRestrictionSchema = z.object({
 const pniFieldsSchema = z.object({
   clubCode: identifierSchema,
   referenceNumber: z.string().optional(),
+  // Our Reference = referenceDate + referenceNumber, both typed by hand.
+  referenceDate: z.string().nullable().optional(),
+  vesselScope: z.enum(['SINGLE', 'FLEET']).nullable().optional(),
+  // Number of vessels typed by the user; only meaningful for FLEET.
+  declaredVesselCount: z.number().int().min(1).nullable().optional(),
+  coverType: z.enum(['FULL', 'LIMITED']).nullable().optional(),
+  premiumType: z.enum(['MUTUAL', 'FIX']).nullable().optional(),
   validityDays: z.number().int().positive().optional(),
   assuredDomicile: z.string().optional(),
   broker: z.string().optional(),
@@ -179,6 +187,10 @@ const removeSchema = z.object({
   requiredDocumentIds: z.array(identifierSchema).optional(),
   organizationRoleIds: z.array(identifierSchema).optional(),
   coverRestrictionIds: z.array(identifierSchema).optional(),
+});
+
+export const templateQuerySchema = z.object({
+  coverType: z.enum(['FULL', 'LIMITED']).optional(),
 });
 
 export const createPniQuotationSchema = z

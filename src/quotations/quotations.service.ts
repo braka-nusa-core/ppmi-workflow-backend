@@ -216,6 +216,7 @@ export class QuotationsService {
           status: 'DRAFT',
           createdById: actor.id,
           templateVersion: dto.templateVersion,
+          voyageType: dto.voyageType,
         },
       });
 
@@ -304,6 +305,9 @@ export class QuotationsService {
           }),
           ...(dto.templateVersion !== undefined && {
             templateVersion: dto.templateVersion,
+          }),
+          ...(dto.voyageType !== undefined && {
+            voyageType: dto.voyageType,
           }),
           ...(existing.status === 'REVISION' &&
             Object.keys(dto).length > 0 && {

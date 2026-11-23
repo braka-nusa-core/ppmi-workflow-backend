@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
   UsePipes,
@@ -15,6 +16,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -27,6 +29,7 @@ import {
   CreatePniQuotationDto,
   UpdatePniQuotationDto,
   createPniQuotationSchema,
+  templateQuerySchema,
   updatePniQuotationSchema,
 } from './pni.validation';
 
@@ -50,8 +53,12 @@ export class PniController {
   @RequirePermission('quotation', 'read')
   @ApiOperation({ summary: 'Get templates for a P&I club' })
   @ApiParam({ name: 'clubCode', type: String })
-  getTemplate(@Param('clubCode') clubCode: string) {
-    return this.pniService.getTemplate(clubCode);
+  @ApiQuery({ name: 'coverType', required: false, enum: ['FULL', 'LIMITED'] })
+  getTemplate(@Param('clubCode') clubCode: string, @Query() query: unknown) {
+    return this.pniService.getTemplate(
+      clubCode,
+      templateQuerySchema.parse(query).coverType,
+    );
   }
 
   @Get('quotations')

@@ -7,7 +7,7 @@ Module P&I mengelola detail Quotation Slip P&I sebagai extension one-to-one dari
 | Method | Endpoint | Permission | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/pni/clubs` | `quotation:read` | Daftar klub P&I yang aktif. |
-| `GET` | `/pni/clubs/:clubCode/template` | `quotation:read` | Template P&I untuk klub. |
+| `GET` | `/pni/clubs/:clubCode/template` | `quotation:read` | Template P&I untuk klub. Query opsional `coverType` (`FULL` atau `LIMITED`). |
 | `GET` | `/pni/quotations` | `quotation:read` | List quotation aktif yang memiliki detail P&I. |
 | `POST` | `/pni/quotations` | `quotation:create` | Membuat root quotation dan detail P&I dalam satu transaction. |
 | `GET` | `/pni/quotations/:quotationId` | `quotation:read` | Detail P&I lengkap. |
@@ -95,6 +95,30 @@ Vessel P&I dapat dihubungkan ke master kapal lewat `vesselId` (lihat [Vessels](m
 | `coverRestrictions` | Cover restricted to pada format MSIG. |
 
 `insuranceBlocks` mendukung inheritance dengan `inheritsFromBlockRef`. Hal ini digunakan untuk War P&I yang mewarisi field main P&I. Nilai `premium: 0` valid untuk block War P&I.
+
+## Input QSheet (meeting 18 November 2026)
+
+Field berikut ada di objek `pni` pada `POST` dan `PATCH /pni/quotations`, dan ikut dikembalikan oleh `GET /pni/quotations/:quotationId`. Pada `PATCH`, semuanya boleh `null` untuk mengosongkan nilai.
+
+| Field | Type | Keterangan |
+| --- | --- | --- |
+| `referenceDate` | `string (tanggal) \| null` | Tanggal "Our Reference". Our Reference = `referenceDate` + `referenceNumber`, keduanya diisi manual. |
+| `vesselScope` | `SINGLE \| FLEET \| null` | Satu kapal atau armada. |
+| `declaredVesselCount` | `number \| null` | Jumlah kapal yang diketik user, minimal `1`. Hanya untuk `FLEET`. |
+| `coverType` | `FULL \| LIMITED \| null` | Full Cover atau Limited Cover. Menentukan Conditions dan Survey Warranty yang dipakai. |
+| `premiumType` | `MUTUAL \| FIX \| null` | Jenis premi. |
+
+Aturan:
+
+- `declaredVesselCount` hanya boleh dikirim bila `vesselScope` adalah `FLEET` (pada `PATCH`, nilai tersimpan ikut dihitung bila `vesselScope` tidak dikirim). Selain itu respons `400`.
+- Mengubah `vesselScope` menjadi `SINGLE` (atau `null`) mengosongkan `declaredVesselCount` menjadi `null`.
+- `quotation.voyageType` (`UNDER_VOYAGE` atau `SINGLE_VOYAGE`, boleh `null` pada `PATCH`) juga diterima di objek `quotation`. Single Voyage berarti kapal didatangkan satu kali, misalnya dari China.
+
+### Template menurut cover type
+
+Template dikelompokkan per klub dan per cover type (`QsTemplate.coverType`). `GET /pni/clubs/:clubCode/template?coverType=FULL` mengembalikan template klub dengan `coverType` sama atau `null` (generik), template yang cocok persis lebih dulu. Tanpa `coverType`, semua template klub dikembalikan seperti sebelumnya. Nilai selain `FULL` dan `LIMITED` ditolak dengan `400`.
+
+Opsi dropdown QSheet (misalnya Security) diambil dari [QSheet Options](module-qs-options.md).
 
 ## Scope Vessel
 

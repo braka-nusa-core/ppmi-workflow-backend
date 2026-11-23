@@ -9,6 +9,8 @@ const inlineClientSchema = z.object({
   contactPerson: z.string().optional(),
 });
 
+const voyageTypeSchema = z.enum(['UNDER_VOYAGE', 'SINGLE_VOYAGE']);
+
 export const createQuotationSchema = z
   .object({
     clientId: z.string().min(1).optional(),
@@ -34,6 +36,7 @@ export const createQuotationSchema = z
     insuranceLabelValue: z.string().optional(),
     confirmedAcceptedBy: z.string().optional(),
     templateVersion: z.string().optional(),
+    voyageType: voyageTypeSchema.optional(),
   })
   .refine((data) => data.clientId || data.client, {
     message: 'Either clientId or client object is required',
@@ -65,6 +68,7 @@ export const updateQuotationSchema = z.object({
   insuranceLabelValue: z.string().optional(),
   confirmedAcceptedBy: z.string().optional(),
   templateVersion: z.string().optional(),
+  voyageType: voyageTypeSchema.nullable().optional(),
 });
 
 export const actionNoteSchema = z.object({

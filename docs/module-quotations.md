@@ -190,6 +190,17 @@ Setiap kali terms perlu dibandingkan (misalnya sebelum dan sesudah negosiasi ata
 
 Pencocokan dilakukan lewat id term yang sama, lalu lewat referensi katalog (`termsConditionId` + `section`) untuk term yang dihapus lalu ditambahkan kembali.
 
+## Voyage Type
+
+`voyageType` pada `POST /quotations` (opsional) dan `PATCH /quotations/:id` (opsional, boleh `null` untuk mengosongkan) menandai kategori voyage untuk quotation H&M dan P&I.
+
+| Nilai | Arti |
+| --- | --- |
+| `UNDER_VOYAGE` | Kapal sudah berada di bawah voyage berjalan. |
+| `SINGLE_VOYAGE` | Kapal didatangkan satu kali, misalnya dari China. |
+
+Nilai lain ditolak dengan `400`. Field ini ikut tampil di response quotation.
+
 ## Status dan Data Rules
 
 - `DRAFT` dan `REVISION` adalah satu-satunya status yang editable.
