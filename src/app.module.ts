@@ -16,6 +16,9 @@ import { UsersModule } from './users/users.module';
 import { PniModule } from './pni/pni.module';
 import { HmModule } from './hm/hm.module';
 import { CargoModule } from './cargo/cargo.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { MeetingsModule } from './meetings/meetings.module';
 
 @Global()
 @Module({
@@ -39,6 +42,9 @@ import { CargoModule } from './cargo/cargo.module';
     PniModule,
     HmModule,
     CargoModule,
+    NotificationsModule,
+    AssignmentsModule,
+    MeetingsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, StorageService],

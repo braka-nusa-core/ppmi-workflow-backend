@@ -11,6 +11,12 @@
       }
     }
   ],
+  "crons": [
+    {
+      "path": "/notifications/reminders/run",
+      "schedule": "0 1 * * *"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",

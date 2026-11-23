@@ -20,3 +20,9 @@
 - [Insurance Types](module-insurance-types.md)
 - [Organizations and Permissions](module-organizations.md)
 - [Users](module-users.md)
+
+## Operations
+
+- [Notifications and Reminders](module-notifications.md)
+- [Assignments (PIC)](module-assignments.md)
+- [Meetings and Follow-ups](module-meetings.md)
