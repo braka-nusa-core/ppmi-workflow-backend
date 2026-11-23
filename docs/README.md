@@ -8,6 +8,7 @@
 - [H&M Module](module-hm.md)
 - [Cargo Module](module-cargo.md)
 - [QSheet Options](module-qs-options.md)
+- [QS Templates](module-qs-templates.md)
 
 ## Policy to Shipment
 

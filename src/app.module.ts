@@ -27,6 +27,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ShipmentsModule } from './shipments/shipments.module';
 import { QsOptionsModule } from './qs-options/qs-options.module';
+import { QsTemplatesModule } from './qs-templates/qs-templates.module';
 
 @Global()
 @Module({
@@ -61,6 +62,7 @@ import { QsOptionsModule } from './qs-options/qs-options.module';
     PaymentsModule,
     ShipmentsModule,
     QsOptionsModule,
+    QsTemplatesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, StorageService],
