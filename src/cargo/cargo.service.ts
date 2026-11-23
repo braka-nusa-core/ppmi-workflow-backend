@@ -56,6 +56,7 @@ export class CargoService {
       const detail = await tx.cargoQuotation.create({
         data: { quotationId, ...this.data(dto) },
       });
+      await this.syncInstallments(tx, detail.id, dto.installments);
       await this.syncAssignments(
         tx,
         quotationId,
@@ -94,6 +95,7 @@ export class CargoService {
         where: { id: detail.id },
         data: this.data(dto),
       });
+      await this.syncInstallments(tx, detail.id, dto.installments);
       await this.syncAssignments(
         tx,
         quotationId,
@@ -119,6 +121,10 @@ export class CargoService {
 
   private detailInclude() {
     return {
+      installments: {
+        where: { deletedAt: null },
+        orderBy: { sortOrder: 'asc' as const },
+      },
       quotation: {
         include: {
           client: true,
@@ -164,6 +170,63 @@ export class CargoService {
     });
     if (!quotation)
       throw new BadRequestException('Quotation insurance type must be CARGO');
+  }
+
+  private async syncInstallments(
+    tx: any,
+    cargoQuotationId: string,
+    installments: CreateCargoQuotationDto['installments'] | undefined,
+  ) {
+    if (installments === undefined) return;
+    const numbers = installments.map(
+      (installment) => installment.installmentNo,
+    );
+    if (new Set(numbers).size !== numbers.length) {
+      throw new BadRequestException('Cargo installment numbers must be unique');
+    }
+
+    await tx.cargoQuotationInstallment.updateMany({
+      where: {
+        cargoQuotationId,
+        deletedAt: null,
+        ...(numbers.length > 0 ? { installmentNo: { notIn: numbers } } : {}),
+      },
+      data: { deletedAt: new Date() },
+    });
+
+    for (const [index, installment] of installments.entries()) {
+      const paymentStatus = installment.paymentStatus ?? 'UNPAID';
+      // A paid instalment always has a payment date; anything else has none.
+      const paidAt =
+        paymentStatus === 'PAID'
+          ? (this.toDate(installment.paidAt) ?? new Date())
+          : (this.toDate(installment.paidAt) ?? null);
+      const values = {
+        percentage: installment.percentage,
+        dueAfterDays: installment.dueAfterDays,
+        amount: installment.amount,
+        currency: installment.currency,
+        dueDate: this.toDate(installment.dueDate),
+        paymentStatus,
+        paidAt,
+        sortOrder: installment.sortOrder ?? index,
+      };
+
+      await tx.cargoQuotationInstallment.upsert({
+        where: {
+          cargoQuotationId_installmentNo: {
+            cargoQuotationId,
+            installmentNo: installment.installmentNo,
+          },
+        },
+        create: {
+          cargoQuotationId,
+          installmentNo: installment.installmentNo,
+          ...values,
+        },
+        update: { ...values, deletedAt: null },
+      });
+    }
   }
 
   private async syncAssignments(

@@ -46,6 +46,34 @@ Aturan:
 - `adjusterIds` dan `surveyorIds`, bila dikirim, mengganti assignment secara eksplisit.
 - Adjuster dan surveyor harus merupakan master data aktif.
 
+## Installment Cargo
+
+`installments` bersifat opsional. Jika dikirim, daftar ini menggantikan installment yang ada: nomor yang tidak ikut dikirim di-soft delete, dan nomor yang sama diperbarui. Jika tidak dikirim, installment tidak berubah. Strukturnya sama dengan installment H&M, ditambah pelacakan pembayaran.
+
+```json
+{
+  "installments": [
+    {
+      "installmentNo": 1,
+      "percentage": 50,
+      "amount": 5000,
+      "currency": "USD",
+      "dueDate": "2026-11-30",
+      "paymentStatus": "UNPAID"
+    }
+  ]
+}
+```
+
+| Field | Keterangan |
+| --- | --- |
+| `installmentNo` | Wajib, bilangan bulat positif, unik per quotation. |
+| `percentage`, `dueAfterDays`, `amount`, `currency`, `dueDate` | Opsional, sama seperti H&M. |
+| `paymentStatus` | `UNPAID` (default), `PARTIALLY_PAID`, atau `PAID`. |
+| `paidAt` | Tanggal bayar. Jika status `PAID` dan `paidAt` tidak dikirim, diisi waktu sekarang. |
+
+Installment yang jatuh tempo dan belum `PAID` ikut dalam reminder (lihat [Notifications](module-notifications.md)). Respons `GET /cargo/quotations/:quotationId` kini memuat `installments`.
+
 ## Template UI-Only
 
 Template Cargo dikembalikan untuk dipakai frontend. Server tidak otomatis menambahkan base clause atau additional clause ke quotation.
