@@ -1,73 +1,124 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# PPMI Workflow Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend untuk alur kerja asuransi laut PT Pandi Proteksi Marine Indonesia (PPMI). Sistem ini mengelola Quotation Slip (QS) untuk P&I, H&M, dan Cargo, mulai dari pembuatan oleh tim Teknik, approval Supervisor Teknik, pengiriman ke perusahaan asuransi, sampai keputusan insurer. Selain itu ada master data kapal beserta dokumen dan surveynya, PIC, meeting, dan reminder jatuh tempo.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Alur bisnis lengkap ada di `markdown/flow-v2.md` dan kontrak teknis QS di [docs/flow-quotation.md](docs/flow-quotation.md). Dokumentasi per modul ada di [docs/](docs/README.md).
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- NestJS 10 dengan TypeScript
+- Prisma 7 dan PostgreSQL (lewat `@prisma/adapter-pg`). Client Prisma dibuat ke `src/generated/prisma`.
+- Validasi dengan Zod (`nestjs-zod`), dokumentasi API dengan Swagger di `/docs`
+- JWT untuk login, bcrypt untuk password
+- Penyimpanan file di S3 (atau yang kompatibel)
+- Vitest untuk test
+- Deploy ke Vercel (serverless). Ada juga `Dockerfile` berbasis Node 20.
 
-## Installation
+## Menjalankan di lokal
+
+Prasyarat: Node.js 20, PostgreSQL, dan bucket S3 (hanya diperlukan untuk upload dokumen dan lampiran).
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Running the app
+`postinstall` menjalankan `prisma generate`. Salin `.env.example` menjadi `.env` lalu isi:
+
+| Variable                                                     | Keterangan                                                                                                            |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                               | Koneksi PostgreSQL.                                                                                                   |
+| `JWT_SECRET`                                                 | Kunci tanda tangan token login (berlaku 6 jam).                                                                       |
+| `PORT`                                                       | Port server. Default 3000.                                                                                            |
+| `MODE`                                                       | `production` mengubah pesan di `GET /`.                                                                               |
+| `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET` | Storage untuk dokumen kapal dan lampiran quotation. `S3_REGION` ada di contoh env tetapi tidak dipakai kode saat ini. |
+| `CRON_SECRET`                                                | Rahasia untuk job reminder. Tanpa ini endpoint reminder menolak semua request.                                        |
+| `REMINDER_DAYS_BEFORE`                                       | Berapa hari sebelum jatuh tempo reminder muncul (default 7). Bisa diubah per jenis dengan `REMINDER_DAYS_<JENIS>`.    |
+| `TEST_DATABASE_URL`                                          | Database khusus test integrasi. Lihat bagian Test.                                                                    |
+
+Siapkan database, lalu isi data awal:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npx prisma migrate deploy
+bun prisma/seed.ts
 ```
+
+Seed membuat unit organisasi (Teknik, Cargo, P&I, H&M, Supervisor Teknik, Finance), permission, dan user contoh. Seed bisa dijalankan berulang, tetapi **setiap kali dijalankan ia mengatur ulang password user contoh ke `password123`**. Jangan menjalankannya ke database produksi.
+
+Jalankan server:
+
+```bash
+npm run dev
+```
+
+Swagger ada di `http://localhost:3000/docs`. Login lewat `POST /auth/login`, lalu pakai `accessToken` sebagai Bearer token.
+
+## User contoh dari seed
+
+Semua memakai password `password123`.
+
+| Email                        | Peran                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `admin@ppmi.com`             | SUPERADMIN, melewati semua pemeriksaan permission                       |
+| `user@ppmi.com`              | Teknik, departemen Cargo                                                |
+| `pi.user1@ppmi.com`          | Teknik, departemen P&I                                                  |
+| `hm.user1@ppmi.com`          | Teknik, departemen H&M                                                  |
+| `supervisor.teknik@ppmi.com` | Supervisor Teknik (satu-satunya selain SUPERADMIN yang bisa approve QS) |
+| `finance.user1@ppmi.com`     | Finance                                                                 |
+
+Mencoba alur QS dari awal:
+
+1. Login sebagai `pi.user1@ppmi.com`, buat quotation, lalu `POST /quotations/:id/submit`.
+2. Login sebagai `supervisor.teknik@ppmi.com`, lalu `POST /quotations/:id/approve`.
+3. Login lagi sebagai `pi.user1@ppmi.com`, lalu `POST /quotations/:id/send-to-insurance`. Ini membutuhkan satu perusahaan asuransi di database, dan seed belum membuatnya.
+
+## Modul
+
+| Kelompok       | Modul                                                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Master data    | users, organizations, clients, clubs, insurance-types, vessels (beserta dokumen, foto, survey, dan checklist dokumen), vessel-policies |
+| Quotation slip | quotations (workflow, objek, coverage, terms, warranties, lampiran, versi terms), pni, hm, cargo                                       |
+| Operasional    | assignments (PIC), meetings dan follow-ups, notifications dan reminder                                                                 |
+
+Rincian endpoint dan aturan tiap modul ada di [docs/](docs/README.md). Koleksi Postman ada di `PPMI-Workflow-API.postman_collection.json`.
+
+Tabel untuk `Policy`, invoice, pembayaran, dan shipment sudah ada di schema, tetapi belum ada modulnya. Status quotation `POLICY_ISSUED` belum bisa dicapai karena belum ada kode yang menerbitkan policy.
+
+## Konvensi
+
+- **Soft delete.** Data dihapus dengan mengisi `deletedAt`. Setiap query harus menyaring `deletedAt: null`.
+- **Audit.** Perubahan penting ditulis ke tabel `Log` dengan `referenceType` dan `referenceId`.
+- **Permission.** Setiap endpoint memakai `@RequirePermission('resource', 'action')`. Permission dibuat lewat `prisma/seed.ts` dan diberikan ke unit organisasi. Permission unit induk berlaku juga untuk unit anak.
+- **Controller.** `@UseGuards(AuthGuard, PermissionGuard)`, validasi body dengan `ZodValidationPipe`, logika di service.
+- **Response.** Dibungkus `{ success, message?, data? }`. Primary key dikembalikan sebagai `_id`. Lihat [docs/api-response.md](docs/api-response.md).
+- **Snapshot.** Quotation menyimpan salinan data kapal sendiri. Mengubah master kapal tidak mengubah quotation yang sudah ada.
+- **Nilai yang belum disepakati** (kategori dokumen, status survey, trading area) dibuat sebagai teks bebas, dan aturan sementara ditandai provisional di kode.
+- **Commit.** Format `type(scope): ringkasan` dengan butir `- ...` di badan, misalnya `feat(vessel): add master fields, documents, and surveys`.
 
 ## Test
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm test               # test unit (memakai mock, tidak butuh database)
+npm run test:int       # test integrasi, butuh database khusus test
+npm run test:e2e       # konfigurasi e2e terpisah
 ```
 
-## Support
+Test integrasi (`test/integration`) membuat data sungguhan dan tidak membersihkannya. Karena itu ia dijaga: dilewati bila `TEST_DATABASE_URL` tidak diisi, menolak berjalan bila nilainya sama dengan `DATABASE_URL`, dan menolak database yang namanya tidak mengandung kata `test`. Siapkan database kosong, terapkan migration ke sana, lalu:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+TEST_DATABASE_URL="postgresql://user:pass@host:5432/ppmi_test" npm run test:int
+```
 
-## Stay in touch
+## Deploy
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Vercel.** `vercel.json` mengarahkan semua request ke `src/main.ts` dan memuat cron harian `0 1 * * *` ke `/notifications/reminders/run`. Isi `CRON_SECRET` di environment project agar Vercel mengirim header yang benar.
+- **Migration.** Jalankan `npx prisma migrate deploy` terhadap database tujuan sebelum aplikasi baru dipakai.
+- **Docker.** `Dockerfile` membangun image Node 20 dengan `npm ci`.
 
-## License
+## Yang masih terbuka
 
-Nest is [MIT licensed](LICENSE).
+Daftar pekerjaan, pertanyaan untuk PPMI, dan rencana yang kami rekomendasikan ada di folder `markdown/`:
+
+- `plan.md`: pekerjaan yang tersisa
+- `pertanyaan-ketua.md`: pertanyaan yang perlu dijawab PPMI
+- `recommend-plan-23-11-2026.md`: rencana untuk topik yang menunggu keputusan
+- `audit-23-11-2026.md`: kondisi backend per tanggal tersebut

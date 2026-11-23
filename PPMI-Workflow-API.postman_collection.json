@@ -12,7 +12,8 @@
     {
       "key": "accessToken",
       "value": ""
-    }
+    },
+    { "key": "cronSecret", "value": "" }
   ],
   "item": [
     {
@@ -859,7 +860,7 @@
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"BUANA HARBOUR 3201\",\n  \"vesselType\": \"HARBOUR TUG\",\n  \"builtYear\": 2018,\n  \"grossTonnage\": 354,\n  \"vesselClass\": \"BKI\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"BUANA HARBOUR 3201\",\n  \"vesselType\": \"HARBOUR TUG\",\n  \"builtYear\": 2018,\n  \"grossTonnage\": 354,\n  \"vesselClass\": \"BKI\",\n  \"imoNumber\": \"9876543\",\n  \"flag\": \"Indonesia\",\n  \"tradingArea\": \"Indonesia\",\n  \"portOfRegistry\": \"Jakarta\"\n}" },
             "url": { "raw": "{{baseUrl}}/vessels", "host": ["{{baseUrl}}"], "path": ["vessels"] }
           }
         },
@@ -2682,6 +2683,903 @@
               "path": ["cargo", "quotations", ":quotationId"],
               "variable": [{ "key": "quotationId", "value": "" }]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vessel Documents",
+      "item": [
+        {
+          "name": "List Vessel Documents",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/documents?category=",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "documents"],
+              "variable": [{ "key": "vesselId", "value": "" }],
+              "query": [{ "key": "category", "value": "", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Get Vessel Document Checklist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/documents/checklist",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "documents", "checklist"],
+              "variable": [{ "key": "vesselId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Upload Vessel Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "documents"],
+              "variable": [{ "key": "vesselId", "value": "" }]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                {
+                  "key": "category",
+                  "value": "PHOTO",
+                  "type": "text",
+                  "description": "Free text, e.g. PHOTO, SURAT_LAUT. Default OTHER."
+                },
+                { "key": "title", "value": "", "type": "text", "disabled": true },
+                {
+                  "key": "documentDate",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "validFrom",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "validUntil",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                { "key": "status", "value": "", "type": "text", "disabled": true },
+                { "key": "note", "value": "", "type": "text", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Vessel Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/documents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "documents", ":id"],
+              "variable": [
+                { "key": "vesselId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\",\n  \"validUntil\": \"2027-12-31\",\n  \"note\": \"Renewed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Vessel Document",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/documents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "documents", ":id"],
+              "variable": [
+                { "key": "vesselId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vessel Document Requirements",
+      "item": [
+        {
+          "name": "List Required Document Categories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessel-document-requirements",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessel-document-requirements"]
+            }
+          }
+        },
+        {
+          "name": "Create Required Document Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/vessel-document-requirements",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessel-document-requirements"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"SURAT_LAUT\",\n  \"label\": \"Surat Laut\",\n  \"vesselType\": \"TUG BOAT\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Required Document Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/vessel-document-requirements/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessel-document-requirements", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"label\": \"Surat Laut\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Required Document Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessel-document-requirements/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessel-document-requirements", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vessel Surveys",
+      "item": [
+        {
+          "name": "List Vessel Surveys",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/surveys?status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "surveys"],
+              "variable": [{ "key": "vesselId", "value": "" }],
+              "query": [{ "key": "status", "value": "", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Get Vessel Survey",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/surveys/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "surveys", ":id"],
+              "variable": [
+                { "key": "vesselId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Vessel Survey",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/surveys",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "surveys"],
+              "variable": [{ "key": "vesselId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyorId\": \"\",\n  \"surveyType\": \"Condition survey\",\n  \"status\": \"nominated\",\n  \"nominatedAt\": \"2026-11-01\",\n  \"surveyDate\": \"2026-11-10\",\n  \"reportDate\": \"2026-11-12\",\n  \"validUntil\": \"2027-11-10\",\n  \"note\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Vessel Survey",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/surveys/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "surveys", ":id"],
+              "variable": [
+                { "key": "vesselId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"done\",\n  \"reportDocumentId\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Vessel Survey",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vessels/:vesselId/surveys/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["vessels", ":vesselId", "surveys", ":id"],
+              "variable": [
+                { "key": "vesselId", "value": "" },
+                { "key": "id", "value": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quotation Term Versions",
+      "item": [
+        {
+          "name": "List Term Versions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/term-versions",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "term-versions"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Compare Term Versions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/term-versions/compare?from=1&to=current",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "term-versions", "compare"],
+              "variable": [{ "key": "quotationId", "value": "" }],
+              "query": [
+                { "key": "from", "value": "1" },
+                { "key": "to", "value": "current" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Term Version",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/term-versions/:version",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "term-versions", ":version"],
+              "variable": [
+                { "key": "quotationId", "value": "" },
+                { "key": "version", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Terms As New Version",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:quotationId/term-versions",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotations", ":quotationId", "term-versions"],
+              "variable": [{ "key": "quotationId", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Before negotiation\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assignments (PIC)",
+      "item": [
+        {
+          "name": "List Assignments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignments?entityType=VESSEL&entityId=&includeEnded=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments"],
+              "query": [
+                { "key": "entityType", "value": "VESSEL" },
+                { "key": "entityId", "value": "", "disabled": true },
+                { "key": "includeEnded", "value": "false" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Assignment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Internal Assignment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/assignments",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityType\": \"VESSEL\",\n  \"entityId\": \"\",\n  \"category\": \"INTERNAL\",\n  \"userId\": \"\",\n  \"role\": \"Underwriter\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create External Assignment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/assignments",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityType\": \"CLIENT\",\n  \"entityId\": \"\",\n  \"category\": \"EXTERNAL\",\n  \"name\": \"Budi\",\n  \"phone\": \"0812\",\n  \"organizationName\": \"PT Example\",\n  \"role\": \"Finance contact\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Assignment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/assignments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"Lead underwriter\",\n  \"note\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "End Assignment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["assignments", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "description": "Sets endDate. The record stays in the history."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Meetings",
+      "item": [
+        {
+          "name": "List Meetings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/meetings?entityType=&entityId=&from=&to=",
+              "host": ["{{baseUrl}}"],
+              "path": ["meetings"],
+              "query": [
+                { "key": "entityType", "value": "", "disabled": true },
+                { "key": "entityId", "value": "", "disabled": true },
+                { "key": "from", "value": "", "disabled": true },
+                { "key": "to", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Meeting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/meetings/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["meetings", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Meeting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/meetings",
+              "host": ["{{baseUrl}}"],
+              "path": ["meetings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Review renewal\",\n  \"meetingDate\": \"2026-11-17\",\n  \"participants\": \"Sari\\nBudi\",\n  \"agenda\": \"Renewal H&M\",\n  \"outcome\": \"\",\n  \"entityType\": \"VESSEL\",\n  \"entityId\": \"\",\n  \"followUps\": [\n    {\n      \"title\": \"Send survey report\",\n      \"assigneeId\": \"\",\n      \"dueDate\": \"2026-11-24\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Meeting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/meetings/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["meetings", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"Client asked for a new offer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Meeting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/meetings/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["meetings", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Follow-ups",
+      "item": [
+        {
+          "name": "List Follow-ups",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/follow-ups?assigneeId=&status=OPEN&dueBefore=",
+              "host": ["{{baseUrl}}"],
+              "path": ["follow-ups"],
+              "query": [
+                { "key": "assigneeId", "value": "", "disabled": true },
+                { "key": "status", "value": "OPEN" },
+                { "key": "dueBefore", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Follow-up",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/follow-ups/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["follow-ups", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Create Follow-up",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/follow-ups",
+              "host": ["{{baseUrl}}"],
+              "path": ["follow-ups"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Call the surveyor\",\n  \"meetingId\": \"\",\n  \"assigneeId\": \"\",\n  \"dueDate\": \"2026-11-30\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Follow-up",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/follow-ups/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["follow-ups", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"DONE\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Follow-up",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/follow-ups/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["follow-ups", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List My Notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?unread=true&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "unread", "value": "true" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Count Unread Notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:id/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":id", "read"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{accessToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Run Reminder Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{cronSecret}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/reminders/run",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "reminders", "run"]
+            },
+            "description": "Scheduler only. Sends Authorization: Bearer <CRON_SECRET>. Safe to run repeatedly: reminders are never duplicated."
           }
         }
       ]
