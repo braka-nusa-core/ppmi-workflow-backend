@@ -9,6 +9,7 @@ import { ReplacePlacementDto } from './policies.validation';
 import {
   Actor,
   assertTechnicalUnitOwnership,
+  lockQuotation,
   summarizePlacement,
 } from './policy.shared';
 
@@ -75,6 +76,12 @@ export class PlacementService {
     }
 
     await this.prisma.$transaction(async (tx) => {
+      if (!(await lockQuotation(tx, quotationId, PLACEMENT_STATUSES))) {
+        throw new BadRequestException(
+          'Quotation changed concurrently; retry the request',
+        );
+      }
+
       const policy = await tx.policy.findFirst({
         where: { quotationId, deletedAt: null },
         select: { id: true, status: true },

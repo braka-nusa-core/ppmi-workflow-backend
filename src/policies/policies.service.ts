@@ -16,6 +16,7 @@ import {
 import {
   Actor,
   assertTechnicalUnitOwnership,
+  lockQuotation,
   summarizePlacement,
 } from './policy.shared';
 
@@ -295,6 +296,12 @@ export class PoliciesService {
     );
 
     return this.prisma.$transaction(async (tx) => {
+      // Same lock as a placement change, so the shares checked here are the
+      // ones that end up attached to the completed policy.
+      if (!(await lockQuotation(tx, policy.quotationId))) {
+        throw new BadRequestException('Quotation not found');
+      }
+
       const participants = await tx.policyParticipant.findMany({
         where: { quotationId: policy.quotationId, deletedAt: null },
         select: { role: true, share: true },

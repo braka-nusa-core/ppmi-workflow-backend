@@ -89,7 +89,7 @@ describe('PlacementService', () => {
   let service: PlacementService;
 
   const prismaMock = {
-    quotation: { findFirst: vi.fn() },
+    quotation: { findFirst: vi.fn(), updateMany: vi.fn() },
     policy: { findFirst: vi.fn() },
     policyParticipant: {
       findMany: vi.fn(),
@@ -122,6 +122,7 @@ describe('PlacementService', () => {
     service = module.get(PlacementService);
     vi.resetAllMocks();
     prismaMock.$transaction.mockImplementation(async (cb) => cb(prismaMock));
+    prismaMock.quotation.updateMany.mockResolvedValue({ count: 1 });
     prismaMock.quotation.findFirst.mockResolvedValue(quotation);
     prismaMock.insuranceCompany.findMany.mockResolvedValue([
       { id: 'a' },
@@ -161,6 +162,23 @@ describe('PlacementService', () => {
   });
 
   describe('replace', () => {
+    it('locks the quotation and refuses when its status changed meanwhile', async () => {
+      prismaMock.quotation.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.replace('q-1', dto, actor)).rejects.toThrow(
+        'Quotation changed concurrently',
+      );
+      expect(prismaMock.quotation.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'q-1',
+          deletedAt: null,
+          status: { in: ['INSURANCE_APPROVED', 'POLICY_ISSUED'] },
+        },
+        data: { updatedAt: expect.any(Date) },
+      });
+      expect(prismaMock.policyParticipant.createMany).not.toHaveBeenCalled();
+    });
+
     it('rejects a quotation that is not insurance-approved', async () => {
       prismaMock.quotation.findFirst.mockResolvedValue({
         ...quotation,

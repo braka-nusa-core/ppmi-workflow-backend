@@ -95,6 +95,7 @@ describe('PoliciesService', () => {
     service = module.get(PoliciesService);
     vi.resetAllMocks();
     prismaMock.$transaction.mockImplementation(async (cb) => cb(prismaMock));
+    prismaMock.quotation.updateMany.mockResolvedValue({ count: 1 });
   });
 
   describe('issue', () => {
@@ -264,6 +265,16 @@ describe('PoliciesService', () => {
       await expect(service.completePlacement('p-1', actor)).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+    it('takes the quotation lock before reading the shares', async () => {
+      prismaMock.policy.findFirst.mockResolvedValue(policy);
+      prismaMock.quotation.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.completePlacement('p-1', actor)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(prismaMock.policyParticipant.findMany).not.toHaveBeenCalled();
     });
 
     it('rejects an incomplete placement', async () => {

@@ -49,3 +49,25 @@ export function summarizePlacement(
     isComplete: leaders === 1 && totalHundredths === PLACEMENT_TOTAL_HUNDREDTHS,
   };
 }
+
+/**
+ * Takes the row lock on the quotation for the rest of the transaction, so a
+ * placement change and a placement completion on the same quotation run one
+ * after the other instead of interleaving. Returns false when the quotation is
+ * gone or no longer in one of `statuses`.
+ */
+export async function lockQuotation(
+  tx: { quotation: { updateMany: (args: any) => Promise<{ count: number }> } },
+  quotationId: string,
+  statuses?: string[],
+) {
+  const result = await tx.quotation.updateMany({
+    where: {
+      id: quotationId,
+      deletedAt: null,
+      ...(statuses && { status: { in: statuses } }),
+    },
+    data: { updatedAt: new Date() },
+  });
+  return result.count === 1;
+}
