@@ -6,9 +6,19 @@ const currentYear = new Date().getFullYear();
 export const createVesselSchema = z.object({
   name: z.string().min(1),
   vesselType: z.string().min(1).optional(),
-  builtYear: z.number().int().min(1800).max(currentYear + 1).optional(),
+  builtYear: z
+    .number()
+    .int()
+    .min(1800)
+    .max(currentYear + 1)
+    .optional(),
   grossTonnage: z.number().nonnegative().optional(),
   vesselClass: z.string().min(1).optional(),
+  classNotApplicable: z.boolean().optional(),
+  imoNumber: z.string().trim().min(1).optional(),
+  flag: z.string().trim().min(1).optional(),
+  tradingArea: z.string().trim().min(1).optional(),
+  portOfRegistry: z.string().trim().min(1).optional(),
 });
 
 export const updateVesselSchema = z.object({
@@ -23,6 +33,11 @@ export const updateVesselSchema = z.object({
     .optional(),
   grossTonnage: z.number().nonnegative().nullable().optional(),
   vesselClass: z.string().min(1).nullable().optional(),
+  classNotApplicable: z.boolean().optional(),
+  imoNumber: z.string().trim().min(1).nullable().optional(),
+  flag: z.string().trim().min(1).nullable().optional(),
+  tradingArea: z.string().trim().min(1).nullable().optional(),
+  portOfRegistry: z.string().trim().min(1).nullable().optional(),
 });
 
 export const listVesselsQuerySchema = z.object({

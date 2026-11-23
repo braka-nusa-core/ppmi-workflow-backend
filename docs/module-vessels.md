@@ -25,8 +25,13 @@ Pemilik kapal per periode disimpan di `VesselPolicy.clientId`. Kapal tidak punya
 | `builtYear` | `number \| null` | Tahun bangun. |
 | `grossTonnage` | `number \| null` | GRT. |
 | `vesselClass` | `string \| null` | Klas, misalnya `BKI`. |
+| `classNotApplicable` | `boolean` | `true` bila klas tidak berlaku. Default `false`. |
+| `imoNumber` | `string \| null` | Nomor IMO. Belum dipakai untuk identitas kapal. |
+| `flag` | `string \| null` | Bendera. |
+| `tradingArea` | `string \| null` | Area operasi kapal, teks bebas. Berbeda dengan `tradingArea` pada insurance block P&I, yaitu area yang dijamin pada quotation. |
+| `portOfRegistry` | `string \| null` | Pelabuhan pendaftaran. |
 
-**Identitas kapal:** dihitung dari `normalizedName`, `builtYear`, dan `grossTonnage`. Dua kapal dengan kombinasi yang sama dianggap satu kapal. Field ini dihitung di server dan tidak perlu dikirim.
+**Identitas kapal:** dihitung dari `normalizedName`, `builtYear`, dan `grossTonnage`. Dua kapal dengan kombinasi yang sama dianggap satu kapal. Field ini dihitung di server dan tidak perlu dikirim. Field lain (IMO, flag, trading area, dan seterusnya) tidak memengaruhi identitas.
 
 ### 1.2 Endpoint
 
@@ -67,7 +72,11 @@ Response:
   "vesselType": "HARBOUR TUG",
   "builtYear": 2018,
   "grossTonnage": 354,
-  "vesselClass": "BKI"
+  "vesselClass": "BKI",
+  "imoNumber": "9876543",
+  "flag": "Indonesia",
+  "tradingArea": "Indonesia",
+  "portOfRegistry": "Jakarta"
 }
 ```
 
@@ -76,6 +85,86 @@ Response:
 - Kapal dengan nama, tahun bangun, dan GRT yang sama sudah ada: `400 Bad Request`.
 - Mengubah nama, tahun bangun, atau GRT menghitung ulang identitas. Kalau hasilnya sudah dipakai kapal lain, `400 Bad Request`.
 - Kapal yang masih punya polis aktif tidak bisa dihapus: `400 Bad Request`.
+
+### 1.4 Dokumen dan foto kapal
+
+Dokumen dan foto disimpan per kapal. Foto adalah dokumen dengan kategori `PHOTO`, dan satu kapal boleh punya banyak foto. File disimpan di storage S3 lewat `StorageService`. Lampiran quotation tidak berubah dan tetap terpisah.
+
+**Authentication:** Bearer token. Permission mengikuti resource `vessel`.
+
+| Method | Endpoint | Permission | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/vessels/:vesselId/documents` | `vessel:read` | Daftar dokumen, filter `category`. |
+| `POST` | `/vessels/:vesselId/documents` | `vessel:update` | Upload file (`multipart/form-data`). |
+| `PATCH` | `/vessels/:vesselId/documents/:id` | `vessel:update` | Ubah metadata. |
+| `DELETE` | `/vessels/:vesselId/documents/:id` | `vessel:update` | Soft delete. |
+
+**Data dokumen:**
+
+| Field | Type | Keterangan |
+| --- | --- | --- |
+| `_id` | `string` | ID dokumen. |
+| `vesselId` | `string` | Kapal pemilik dokumen. |
+| `category` | `string` | Teks bebas, disimpan huruf besar dengan spasi menjadi `_` (misalnya `SURAT_LAUT`, `PHOTO`). Default `OTHER`. |
+| `title` | `string \| null` | Judul. |
+| `fileName` | `string` | Nama file asli. |
+| `fileUrl` | `string` | URL file di storage. |
+| `mimeType` | `string \| null` | Tipe file. |
+| `fileSize` | `number \| null` | Ukuran dalam byte. |
+| `documentDate` | `string (ISO) \| null` | Tanggal dokumen. |
+| `validFrom` | `string (ISO) \| null` | Mulai berlaku. |
+| `validUntil` | `string (ISO) \| null` | Kedaluwarsa. |
+| `status` | `string` | Teks bebas, default `AVAILABLE`. |
+| `note` | `string \| null` | Catatan. |
+| `uploadedById` | `string \| null` | Pengunggah. |
+
+**Form `POST`:** field `file` wajib. Field lain (`category`, `title`, `documentDate`, `validFrom`, `validUntil`, `status`, `note`) opsional. Field kosong dianggap tidak dikirim.
+
+**Body `PATCH`:** JSON dengan field metadata di atas. Kirim `null` untuk mengosongkan `title`, tanggal, atau `note`.
+
+**Aturan:**
+- Kategori dan status berupa teks bebas karena daftar dokumen resmi belum final. Dokumen apa pun bisa diunggah.
+- File maksimal 50 MB. Tipe yang diterima: PDF, gambar, dan dokumen Office.
+- `validUntil` tidak boleh lebih awal dari `validFrom`: `400 Bad Request`.
+- Kapal tidak ditemukan atau sudah dihapus, atau dokumen bukan milik kapal itu: `404 Not Found`.
+- Upload, ubah, dan hapus dicatat di tabel `log` dengan `referenceType = VESSEL`.
+- Menghapus dokumen hanya soft delete. File di storage tidak dihapus.
+
+### 1.5 Survey kapal
+
+Survey dicatat per kapal. Perusahaan surveyor memakai master `Surveyor` yang sudah ada. Laporan survey adalah dokumen kapal (bagian 1.4) yang ditautkan lewat `reportDocumentId`.
+
+**Authentication:** Bearer token. Permission mengikuti resource `vessel`.
+
+| Method | Endpoint | Permission | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/vessels/:vesselId/surveys` | `vessel:read` | Daftar survey, filter `status`. |
+| `GET` | `/vessels/:vesselId/surveys/:id` | `vessel:read` | Detail survey. |
+| `POST` | `/vessels/:vesselId/surveys` | `vessel:update` | Buat survey (penunjukan atau rencana). |
+| `PATCH` | `/vessels/:vesselId/surveys/:id` | `vessel:update` | Ubah survey. |
+| `DELETE` | `/vessels/:vesselId/surveys/:id` | `vessel:update` | Soft delete. |
+
+```json
+{
+  "surveyorId": "surveyor-id",
+  "quotationId": "quotation-id",
+  "surveyType": "Condition survey",
+  "status": "nominated",
+  "nominatedAt": "2026-11-01",
+  "surveyDate": "2026-11-10",
+  "reportDate": "2026-11-12",
+  "validUntil": "2027-11-10",
+  "reportDocumentId": "vessel-document-id",
+  "note": "Survey untuk renewal H&M"
+}
+```
+
+**Aturan:**
+- Semua field opsional. `status` berupa teks bebas (huruf besar, spasi menjadi `_`), default `PLANNED`, karena daftar status resmi belum ada.
+- `surveyorId` dan `quotationId` harus masih aktif. `reportDocumentId` harus dokumen milik kapal yang sama: `400 Bad Request`.
+- `validUntil` tidak boleh lebih awal dari `surveyDate`: `400 Bad Request`.
+- Survey yang `validUntil`-nya mendekati jatuh tempo masuk reminder, kecuali berstatus `CANCELLED`.
+- Perubahan dicatat di `log` dengan `referenceType = VESSEL_SURVEY`.
 
 ---
 

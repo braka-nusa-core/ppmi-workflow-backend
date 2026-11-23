@@ -21,6 +21,11 @@ const vesselSelect = {
   builtYear: true,
   grossTonnage: true,
   vesselClass: true,
+  classNotApplicable: true,
+  imoNumber: true,
+  flag: true,
+  tradingArea: true,
+  portOfRegistry: true,
 } as const;
 
 @Injectable()
@@ -90,6 +95,11 @@ export class VesselsService {
           builtYear: dto.builtYear,
           grossTonnage: dto.grossTonnage,
           vesselClass: dto.vesselClass,
+          classNotApplicable: dto.classNotApplicable,
+          imoNumber: dto.imoNumber,
+          flag: dto.flag,
+          tradingArea: dto.tradingArea,
+          portOfRegistry: dto.portOfRegistry,
         },
         select: vesselSelect,
       });
@@ -152,6 +162,17 @@ export class VesselsService {
           }),
           ...(dto.vesselClass !== undefined && {
             vesselClass: dto.vesselClass,
+          }),
+          ...(dto.classNotApplicable !== undefined && {
+            classNotApplicable: dto.classNotApplicable,
+          }),
+          ...(dto.imoNumber !== undefined && { imoNumber: dto.imoNumber }),
+          ...(dto.flag !== undefined && { flag: dto.flag }),
+          ...(dto.tradingArea !== undefined && {
+            tradingArea: dto.tradingArea,
+          }),
+          ...(dto.portOfRegistry !== undefined && {
+            portOfRegistry: dto.portOfRegistry,
           }),
         },
         select: vesselSelect,

@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PrismaService } from '../common/services/prisma.service';
+import { vesselIdentityKey } from './vessel.util';
 import { VesselsService } from './vessels.service';
 
 describe('VesselsService', () => {
@@ -56,6 +57,53 @@ describe('VesselsService', () => {
         }),
         select: expect.any(Object),
       });
+    });
+  });
+
+  describe('master fields', () => {
+    it('stores IMO, flag, trading area, and port of registry on create', async () => {
+      prismaMock.vessel.findFirst.mockResolvedValue(null);
+      prismaMock.vessel.create.mockResolvedValue({ id: 'vessel-1' });
+
+      await service.create(
+        {
+          name: 'BUANA HARBOUR 3201',
+          builtYear: 2018,
+          grossTonnage: 354,
+          imoNumber: '9876543',
+          flag: 'Indonesia',
+          tradingArea: 'Indonesia',
+          portOfRegistry: 'Jakarta',
+        },
+        actor,
+      );
+
+      expect(prismaMock.vessel.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          imoNumber: '9876543',
+          flag: 'Indonesia',
+          tradingArea: 'Indonesia',
+          portOfRegistry: 'Jakarta',
+        }),
+        select: expect.any(Object),
+      });
+    });
+
+    it('does not change the identity key when only master fields change', async () => {
+      prismaMock.vessel.findFirst.mockResolvedValue({
+        name: 'BUANA HARBOUR 3201',
+        builtYear: 2018,
+        grossTonnage: '354.00',
+        identityKey: vesselIdentityKey('BUANA HARBOUR 3201', 2018, 354),
+      });
+      prismaMock.vessel.update.mockResolvedValue({ id: 'vessel-1', name: 'BUANA HARBOUR 3201' });
+
+      await service.update('vessel-1', { imoNumber: '9876543', flag: null }, actor);
+
+      const data = prismaMock.vessel.update.mock.calls[0][0].data;
+      expect(data.imoNumber).toBe('9876543');
+      expect(data.flag).toBeNull();
+      expect(prismaMock.vessel.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 
